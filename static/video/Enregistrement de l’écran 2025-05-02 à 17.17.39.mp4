@@ -1,0 +1,45 @@
+<div class="hero" class:fade-in={isVisible}>
+  <div class="code-bg" aria-hidden="true">
+    {#each displayedLines as line}
+      <div class="code-line">
+        {#each line as frag}
+          <span class={frag.type}>{frag.text}</span>
+        {/each}
+      </div>
+    {/each}
+  </div>
+  <video
+    class="hero-bg-video"
+    src="/videos/hero-bg.mp4"
+    autoplay
+    muted
+    loop
+    playsinline
+    aria-hidden="true"
+  ></video>
+  <h1>Développement</h1>
+  <div class="cta-buttons">
+    <a href="/developpement" class="button">Web</a>
+    <a href="#about-section" class="button">I</a>
+    <a href="/photographie" class="button">Photographie</a>
+  </div>
+</div>
+
+<style>
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg-video {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50vw;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.25;
+  pointer-events: none;
+}
+</style> 
