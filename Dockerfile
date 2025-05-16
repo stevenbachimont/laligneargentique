@@ -19,7 +19,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy built assets from build stage
-COPY --from=build /app/build ./build
+COPY --from=build /app/.svelte-kit/output ./build
 COPY --from=build /app/package*.json ./
 
 # Install production dependencies only
