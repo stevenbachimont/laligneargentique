@@ -29,4 +29,6 @@ RUN npm install --production
 EXPOSE 3000
 
 # Start the application
-CMD ["node", "build"] 
+ENV PORT=3000
+ENV HOST=0.0.0.0
+CMD ["node", "build/index.js"] 
