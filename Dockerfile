@@ -19,7 +19,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy built assets from build stage
-COPY --from=build /app/.svelte-kit/output ./build
+COPY --from=build /app/build ./build
 COPY --from=build /app/package*.json ./
 
 # Install production dependencies only
@@ -31,4 +31,4 @@ EXPOSE 3000
 # Start the application
 ENV PORT=3000
 ENV HOST=0.0.0.0
-CMD ["node", "build/index.js"] 
+CMD ["node", "build/server/index.js"] 
