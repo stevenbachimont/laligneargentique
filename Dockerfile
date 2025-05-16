@@ -1,34 +1,15 @@
-# Build stage
-FROM node:20-alpine as build
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Build the application
-RUN npm run build
-
-# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built assets from build stage
-COPY --from=build /app/.svelte-kit/output ./build
-COPY --from=build /app/package*.json ./
+COPY package*.json ./
+RUN npm install
 
-# Install production dependencies only
-RUN npm install --production
+COPY . .
+RUN npm run build
 
-# Expose the port the app runs on
 EXPOSE 3000
-
-# Start the application
 ENV PORT=3000
 ENV HOST=0.0.0.0
-CMD ["node", "build/server/index.js"] 
+
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"] 
