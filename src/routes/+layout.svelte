@@ -17,10 +17,10 @@
       <span class="hamburger" class:open={isMenuOpen}></span>
     </button>
     <nav class:open={isMenuOpen}>
-      <a href="/">Accueil</a>
-      <a href="/developpement">Développement Web</a>
-      <a href="/photographie">Photographie</a>
-      <a href="/contact">Contact</a>
+      <a href="/" on:click={() => isMenuOpen = false}>Accueil</a>
+      <a href="/developpement" on:click={() => isMenuOpen = false}>Développement Web</a>
+      <a href="/photographie" on:click={() => isMenuOpen = false}>Photographie</a>
+      <a href="/contact" on:click={() => isMenuOpen = false}>Contact</a>
     </nav>
   </header>
 
@@ -157,13 +157,16 @@
       position: fixed;
       top: 0;
       right: -100%;
-      width: 100%;
+      width: 100vw;
       height: 100vh;
-      background-color: rgba(0, 0, 0, 0.9);
+      background: #000 !important;
+      background-color: #000 !important;
       flex-direction: column;
       justify-content: center;
       transition: right 0.3s ease;
       padding: 2rem;
+      overflow-x: hidden;
+      box-sizing: border-box;
     }
 
     nav.open {
@@ -175,6 +178,10 @@
       padding: 1rem;
       width: 100%;
       text-align: center;
+    }
+
+    :global(body) {
+      overflow-x: hidden !important;
     }
   }
 </style> 

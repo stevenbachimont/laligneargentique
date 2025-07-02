@@ -128,6 +128,31 @@
     pointer-events: none;
     transition: opacity 0.5s cubic-bezier(.4,0,.2,1), filter 0.3s;
   }
+  @media (max-width: 600px) {
+    .hero-bg-video {
+      display: none !important;
+    }
+    .code-bg {
+      display: none !important;
+    }
+    .code-bg, .code-bg * {
+      display: none !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      pointer-events: none !important;
+      visibility: hidden !important;
+    }
+    .hero {
+      width: 100% !important;
+      overflow-x: hidden !important;
+    }
+    :global(body) {
+      width: 100% !important;
+      overflow-x: hidden !important;
+      margin: 0 !important;
+    }
+  }
   .code-bg {
     position: absolute;
     top: 0;
