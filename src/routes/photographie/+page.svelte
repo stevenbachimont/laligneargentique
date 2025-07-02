@@ -55,25 +55,7 @@
   let selectedSeries: PhotoSeries | null = null;
   let isModalOpen = false;
   let fullscreenPhoto: string | null = null;
-  let wordPositions: { [key: string]: { top: string; left: string } } = {};
-  let titlePosition = { top: '50%', left: '50%' };
-  let titleVisible = false;
-
-  function randInt(min: number, max: number): number {
-    return Math.floor(Math.random() * ((max + 1) - min)) + min;
-  }
-
-  function updateWordPositions() {
-    series.forEach(s => {
-      const newX = randInt(30, 70);
-      const newY = randInt(20, 80);
-      wordPositions[s.title] = {
-        top: `calc(${newY}% - 1ex)`,
-        left: `${newX}%`
-      };
-    });
-    wordPositions = { ...wordPositions };
-  }
+  let isVisible = false;
 
   function openModal(series: PhotoSeries) {
     selectedSeries = series;
@@ -94,58 +76,41 @@
   }
 
   onMount(() => {
-    // Animation initiale des mots
-    updateWordPositions();
-    
-    // Animation supplémentaire après 1 seconde
-    setTimeout(() => {
-      series.forEach(s => {
-        if (randInt(0, 25) < 7) return;
-        updateWordPositions();
-      });
-      
-      // Animation du titre
-      titlePosition = { top: '10%', left: '50%' };
-      titleVisible = true;
-    }, 1000);
+    setTimeout(() => { isVisible = true; }, 100);
   });
 </script>
 
 <div class="photography-page">
-  
-  
-  <div class="thoughts">
-    <p 
-      class="title" 
-      class:visible={titleVisible}
-      style="top: {titlePosition.top}; left: {titlePosition.left}"
-    >
-      Photographie
-    </p>
-    {#each series as s}
-      <p 
-        style="top: {wordPositions[s.title]?.top || '50%'}; left: {wordPositions[s.title]?.left || '50%'}"
-        on:click={() => openModal(s)}
-        role="button"
-        tabindex="0"
-        on:keydown={(e) => e.key === 'Enter' && openModal(s)}
-      >
-        {s.title}
-      </p>
-    {/each}
+  <div class="content">
+    <h1 class="page-title {isVisible ? 'fade-in-up' : ''}">Photographie</h1>
+    <div class="series-grid">
+      {#each series as s, i}
+        <div class="series-card {isVisible ? 'fade-in-up' : ''}"
+             style="animation-delay: {0.2 + i * 0.08}s"
+             on:click={() => openModal(s)}
+             role="button"
+             tabindex="0"
+             on:keydown={(e) => e.key === 'Enter' && openModal(s)}>
+          <div class="series-content">
+            <h2>{s.title}</h2>
+            <p>{s.description}</p>
+          </div>
+        </div>
+      {/each}
+    </div>
   </div>
 
   {#if isModalOpen && selectedSeries}
-    <div class="modal" on:click={closeModal}>
-      <div class="modal-content" on:click|stopPropagation>
+    <div class="modal" on:click={closeModal} role="dialog" aria-modal="true" aria-label="Modal de photos">
+      <div class="modal-content" on:click|stopPropagation on:keydown|stopPropagation>
         <div class="modal-header">
           <h2>{selectedSeries.title}</h2>
           <button class="close-button" on:click={closeModal}>×</button>
         </div>
-        <p>{selectedSeries.description}</p>
+        <p>{selectedSeries?.description}</p>
         <div class="photo-grid">
           {#each selectedSeries.photos as photo}
-            <button class="photo-item" on:click={() => openFullscreen(photo)}>
+            <button class="photo-item" on:click={() => openFullscreen(photo)} on:keydown={(e) => e.key === 'Enter' && openFullscreen(photo)}>
               <img src={photo} alt="{selectedSeries.title}" />
             </button>
           {/each}
@@ -155,69 +120,99 @@
   {/if}
 
   {#if fullscreenPhoto}
-    <div class="fullscreen-modal" on:click={closeFullscreen} tabindex="0" aria-modal="true" role="dialog" aria-label="Photo en plein écran">
-      <img src={fullscreenPhoto} alt="Photo en plein écran" class="fullscreen-img" />
+    <div class="fullscreen-modal" on:click={closeFullscreen} on:keydown={(e) => e.key === 'Escape' && closeFullscreen()} tabindex="0" aria-modal="true" role="dialog" aria-label="Photo en plein écran">
+      <img src={fullscreenPhoto} alt="" class="fullscreen-img" />
       <button class="close-fullscreen" on:click={closeFullscreen} aria-label="Fermer">×</button>
     </div>
   {/if}
 </div>
 
 <style>
+  :global(html), :global(body) {
+    overflow-x: hidden;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+  }
+
   .photography-page {
-    min-height: 100vh;
-    padding: 2rem;
+    height: 100%;
     position: relative;
+    background: #000;
+    overflow-x: hidden;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
 
-  .thoughts {
-    height: 100vh;
+  .content {
     width: 100vw;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: radial-gradient(#656565, #323232);
-    text-align: center;
-    z-index: 0;
-    pointer-events: none;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  .thoughts p {
-    pointer-events: auto;
-  }
-
-  p {
-    position: absolute;
-    margin: 0;
+  .page-title {
     font-size: 3rem;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    color: rgba(45,45,45,0.8);
-    filter: blur(4px);
-    transition: filter 1.5s ease, color 1.5s ease, top 5s ease, left 5s ease;
-    transform: translateX(-50%);
-    cursor: pointer;
+    color: #fff;
+    margin: 2rem 0 2rem 0;
+    text-align: center;
     font-weight: 300;
+    letter-spacing: 0.2em;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(40px);
   }
 
-  p.title {
-    font-size: 4rem;
-    color: rgba(220, 220, 220, 0.8);
-    filter: blur(4px);
-    cursor: default;
-    z-index: 1;
-    transition: filter 1.5s ease, color 1.5s ease, top 5s ease, left 5s ease;
-    font-weight: 700;
+  .series-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100vw;
+    max-width: 500px;
+    margin: 0 auto 2rem auto;
+    padding: 0 1vw;
+    box-sizing: border-box;
   }
 
-  p.title.visible {
-    filter: none;
-    color: rgba(220, 220, 220, 1);
+  .series-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 1.2rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    width: 100%;
+    box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(40px);
   }
 
-  p:hover {
-    filter: blur(0px);
-    color: rgba(220, 220, 220, 0.6);
+  .series-card:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .series-content h2 {
+    color: #fff;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .series-content p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    line-height: 1.5;
   }
 
   .modal {
@@ -242,8 +237,6 @@
     overflow-y: auto;
     position: relative;
   }
-
- 
 
   .modal-header h2 {
     color: rgba(220, 220, 220, 0.6);
@@ -325,9 +318,44 @@
     line-height: 1;
   }
 
-  @media (max-width: 768px) {
-    .photo-grid {
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  @media (max-width: 600px) {
+    .page-title {
+      font-size: 2rem;
+      margin: 1.2rem 0 1.2rem 0;
+    }
+    .series-grid {
+      padding: 0;
+      gap: 0.7rem;
+      justify-items: center;
+      width: 100%;
+      max-width: none;
+    }
+    .series-card {
+      padding: 0.8rem 0.5rem;
+      width: 80%;
+      margin: 0 auto;
+    }
+    .series-content h2 {
+      font-size: 1.1rem;
+    }
+    .series-content p {
+      font-size: 0.95rem;
+    }
+  }
+
+  .fade-in-up {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInUp 0.6s cubic-bezier(.4,0,.2,1) both;
+  }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 </style> 
