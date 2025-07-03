@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: stevenbachimont/monsite:latest
     container_name: monsite
     restart: unless-stopped
     ports:
@@ -16,4 +16,4 @@ services:
 
 networks:
   app-network:
-    driver: bridge 
+    driver: bridge
