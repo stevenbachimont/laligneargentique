@@ -35,5 +35,5 @@ jobs:
           port: 22
           script: |
             cd /root/monsite
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/monsite:latest
+            docker-compose pull
             docker-compose up -d --force-recreate 
