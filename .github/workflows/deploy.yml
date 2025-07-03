@@ -35,4 +35,4 @@ jobs:
           port: 22
           script: |
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/monsite:latest
-            docker compose up -d --force-recreate 
+            docker-compose up -d --force-recreate 
