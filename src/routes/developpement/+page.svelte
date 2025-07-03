@@ -168,7 +168,6 @@
     padding: 1.5rem;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.2);
   }
 
   .timeline-item:nth-child(odd) .timeline-content {
@@ -198,7 +197,6 @@
     background: rgba(135, 206, 235, 0.1);
     padding: 1rem;
     border-radius: 8px;
-    border-left: 3px solid var(--color-accent-1);
     display: flex;
     flex-direction: column;
     gap: 1rem;
