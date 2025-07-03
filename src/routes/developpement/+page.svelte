@@ -61,7 +61,7 @@
 </script>
 
 <div class="development-page">
-  <h1>Mon Parcours de Développement web</h1>
+  <h1>THE Parcours de Développement web</h1>
   
   <div class="timeline">
     {#each timelineItems as item (item.id)}
