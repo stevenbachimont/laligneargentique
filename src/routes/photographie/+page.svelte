@@ -6,6 +6,7 @@
     title: string;
     description: string;
     photos: string[];
+    thumbnail?: string; // Photo d'aperçu
   }
 
   let series: PhotoSeries[] = [
@@ -18,17 +19,27 @@
         "/photos/street/2.jpg",
         "/photos/street/3.jpg",
         "/photos/street/4.jpg",
-      ]
+      ],
+      thumbnail: "/photos/street/1.jpg"
     },
     {
       id: 2,
       title: "Portraits",
       description: "Portraits en noir et blanc",
       photos: [
-        "/photos/portraits/1.jpg",
-        "/photos/portraits/2.jpg",
-        "/photos/portraits/3.jpg"
-      ]
+        "/photos/portraits/Charlie.jpg",
+        "/photos/portraits/IMG_7790.jpg",
+        "/photos/portraits/IMG_7795.jpg",
+        "/photos/portraits/IMG_7802.jpg",
+        "/photos/portraits/IMG_7803.jpg",
+        "/photos/portraits/IMG_7826.jpg",
+        "/photos/portraits/IMG_8022-1.jpg",
+        "/photos/portraits/IMG_8025-1.jpg",
+        "/photos/portraits/IMG_8043.jpg",
+        "/photos/portraits/IMG_8055.jpg",
+        "/photos/portraits/IMG_8057.jpg",
+      ],
+      thumbnail: "/photos/portraits/IMG_7790.jpg"
     },
     {
       id: 3,
@@ -38,7 +49,8 @@
         "/photos/paysages/1.jpg",
         "/photos/paysages/2.jpg",
         "/photos/paysages/3.jpg"
-      ]
+      ],
+      thumbnail: "/photos/paysages/1.jpg"
     },
     {
       id: 4,
@@ -48,7 +60,8 @@
         "/photos/quotidien/1.jpg",
         "/photos/quotidien/2.jpg",
         "/photos/quotidien/3.jpg"
-      ]
+      ],
+      thumbnail: "/photos/quotidien/1.jpg"
     }
   ];
 
@@ -95,6 +108,11 @@
             <h2>{s.title}</h2>
             <p>{s.description}</p>
           </div>
+          {#if s.thumbnail}
+            <div class="series-thumbnail">
+              <img src={s.thumbnail} alt="Aperçu {s.title}" />
+            </div>
+          {/if}
         </div>
       {/each}
     </div>
@@ -194,12 +212,19 @@
     box-sizing: border-box;
     opacity: 0;
     transform: translateY(40px);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
 
   .series-card:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .series-content {
+    flex: 1;
   }
 
   .series-content h2 {
@@ -213,6 +238,26 @@
     color: rgba(255, 255, 255, 0.7);
     font-size: 1rem;
     line-height: 1.5;
+  }
+
+  .series-thumbnail {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .series-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .series-card:hover .series-thumbnail img {
+    transform: scale(1.1);
   }
 
   .modal {
@@ -340,6 +385,10 @@
     }
     .series-content p {
       font-size: 0.95rem;
+    }
+    .series-thumbnail {
+      width: 60px;
+      height: 60px;
     }
   }
 
