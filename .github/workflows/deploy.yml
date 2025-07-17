@@ -61,5 +61,9 @@ jobs:
           port: 22
           script: |
             cd /root/monsite
+            # Créer le fichier .env avec les variables d'environnement
+            echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" > .env
+            echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
+            echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
             docker-compose pull
             docker-compose up -d --force-recreate 
