@@ -111,7 +111,7 @@ input, textarea {
   border: none;
   font-size: 1rem;
   margin-bottom: 0.2rem;
-  background: rgba(255,255,255,0.1);
+  background: rgba(216, 209, 209, 0.709);
   color: #fff;
   outline: none;
 }
