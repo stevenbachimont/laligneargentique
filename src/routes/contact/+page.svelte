@@ -12,6 +12,10 @@
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
+  console.log('SERVICE_ID:', serviceId);
+  console.log('TEMPLATE_ID:', templateId);
+  console.log('PUBLIC_KEY:', publicKey);
+
   async function handleSubmit(e: Event) {
     e.preventDefault();
     try {
