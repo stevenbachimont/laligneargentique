@@ -62,7 +62,7 @@ jobs:
           script: |
             cd /root/monsite
             docker-compose pull
-            VITE_EMAILJS_SERVICE_ID="${{ secrets.EMAILJS_SERVICE_ID }}" \
-            VITE_EMAILJS_TEMPLATE_ID="${{ secrets.EMAILJS_TEMPLATE_ID }}" \
-            VITE_EMAILJS_PUBLIC_KEY="${{ secrets.EMAILJS_PUBLIC_KEY }}" \
+            echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" > .env
+            echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
+            echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
             docker-compose up -d --force-recreate
