@@ -52,6 +52,12 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/monsite:latest
 
+      - name: Vérifie la présence et le contenu du .env juste avant le build
+        run: |
+          echo "Contenu du .env :"
+          cat .env
+          ls -l .env
+
       - name: Déployer sur le VPS (pull + restart)
         uses: appleboy/ssh-action@v0.1.10
         with:
