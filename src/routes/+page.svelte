@@ -347,4 +347,15 @@
       max-width: 100%;
     }
   }
+  @media (max-width: 768px) {
+    .about-section {
+      padding: 1rem 0.5rem; /* Moins de padding latéral */
+    }
+    .about-text {
+      width: 90vw;
+      max-width: none;
+      margin: 0;
+      padding: 1rem 1.2rem;
+    }
+  }
 </style>
