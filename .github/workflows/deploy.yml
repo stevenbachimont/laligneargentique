@@ -59,4 +59,15 @@ jobs:
             cd /root/monsite
             # Le fichier .env existe déjà sur le VPS, pas besoin de le recréer
             docker-compose pull
-            docker-compose up -d --force-recreate 
+            docker-compose up -d --force-recreate
+            
+            # Nettoyer les images Docker inutilisées
+            echo "🧹 Nettoyage des images Docker inutilisées..."
+            docker image prune -f
+            docker system prune -f --volumes
+            
+            # Supprimer spécifiquement les anciennes images monsite (garder seulement la dernière)
+            echo "🗑️ Suppression des anciennes images monsite..."
+            docker images "stevenbachimont/monsite" --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | head -n -1 | awk '{print $2}' | xargs -r docker rmi -f || true
+            
+            echo "✅ Nettoyage terminé" 

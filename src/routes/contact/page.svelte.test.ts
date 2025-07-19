@@ -46,6 +46,6 @@ describe('/contact', () => {
     await fireEvent.input(screen.getByLabelText(/^Message$/i), { target: { value: 'Bonjour !' } });
     await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
     expect(emailjs.send).toHaveBeenCalled();
-    expect(await screen.findByText(/erreur lors de l’envoi du message/i)).toBeInTheDocument();
+    expect(await screen.findByText(/erreur lors de l'envoi du message\./i)).toBeInTheDocument();
   });
 }); 
