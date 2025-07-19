@@ -1,5 +1,4 @@
 <script lang="ts">
-  import emailjs from 'emailjs-com';
   let nom = '';
   let prenom = '';
   let email = '';
@@ -7,35 +6,36 @@
   let sent = false;
   let error = '';
 
-  // Récupération des variables d'environnement
-  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-  const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-  // Debug temporaire - à supprimer après
-  console.log('EmailJS Config:', { serviceId, templateId, publicKey });
-
   async function handleSubmit(e: Event) {
     e.preventDefault();
-    console.log('Tentative d\'envoi avec:', { serviceId, templateId, publicKey });
     try {
-      const result = await emailjs.send(
-        serviceId,
-        templateId,
-        {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           nom,
           prenom,
           email,
           message
-        },
-        publicKey
-      );
-      console.log('Email envoyé avec succès:', result);
-      sent = true;
-      error = '';
-      nom = prenom = email = message = '';
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Email envoyé avec succès:', data);
+        sent = true;
+        error = '';
+        nom = prenom = email = message = '';
+      } else {
+        console.error('Erreur API:', data.error);
+        error = data.error || 'Erreur lors de l\'envoi du message.';
+        sent = false;
+      }
     } catch (err) {
-      console.error('Erreur EmailJS:', err);
+      console.error('Erreur réseau:', err);
       error = 'Erreur lors de l\'envoi du message.';
       sent = false;
     }
