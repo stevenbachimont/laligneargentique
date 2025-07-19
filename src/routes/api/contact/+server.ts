@@ -15,21 +15,30 @@ export const POST: RequestHandler = async ({ request }) => {
       return json({ error: 'Le message doit contenir au moins 10 caractères' }, { status: 400 });
     }
 
-    // Envoi via EmailJS côté serveur
-    const emailjs = await import('emailjs-com');
-    
-    const result = await emailjs.default.send(
-      VITE_EMAILJS_SERVICE_ID,
-      VITE_EMAILJS_TEMPLATE_ID,
-      {
-        nom,
-        prenom,
-        email,
-        message
+    // Envoi via l'API EmailJS directement
+    const response = await fetch(`https://api.emailjs.com/api/v1.0/email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      VITE_EMAILJS_PUBLIC_KEY
-    );
+      body: JSON.stringify({
+        service_id: VITE_EMAILJS_SERVICE_ID,
+        template_id: VITE_EMAILJS_TEMPLATE_ID,
+        user_id: VITE_EMAILJS_PUBLIC_KEY,
+        template_params: {
+          nom,
+          prenom,
+          email,
+          message
+        }
+      })
+    });
 
+    if (!response.ok) {
+      throw new Error(`EmailJS API error: ${response.status}`);
+    }
+
+    const result = await response.json();
     return json({ success: true, result });
   } catch (error) {
     console.error('Erreur lors de l\'envoi:', error);
