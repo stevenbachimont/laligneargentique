@@ -39,26 +39,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Create .env file
-        run: |
-          echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" > .env
-          echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
-          echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/monsite:latest
-
-      - name: Vérifie la présence et le contenu du .env juste avant le build
-        run: |
-          echo "Contenu du .env :"
-          cat .env
-          ls -l .env
-
-      - name: Déployer sur le VPS (pull + restart)
+      - name: Déployer sur le VPS (build + restart)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -67,5 +48,13 @@ jobs:
           port: 22
           script: |
             cd /root/monsite
-            docker-compose pull
+            # Créer le fichier .env avec les variables d'environnement
+            echo "VITE_EMAILJS_SERVICE_ID=${{ secrets.EMAILJS_SERVICE_ID }}" > .env
+            echo "VITE_EMAILJS_TEMPLATE_ID=${{ secrets.EMAILJS_TEMPLATE_ID }}" >> .env
+            echo "VITE_EMAILJS_PUBLIC_KEY=${{ secrets.EMAILJS_PUBLIC_KEY }}" >> .env
+            # Build l'image Docker localement avec le .env
+            docker build -t stevenbachimont/monsite:latest .
+            # Pousser l'image vers DockerHub
+            docker push stevenbachimont/monsite:latest
+            # Redémarrer le conteneur
             docker-compose up -d --force-recreate
