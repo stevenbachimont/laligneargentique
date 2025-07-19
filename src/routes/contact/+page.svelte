@@ -12,10 +12,6 @@
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-  console.log('SERVICE_ID:', serviceId);
-  console.log('TEMPLATE_ID:', templateId);
-  console.log('PUBLIC_KEY:', publicKey);
-
   async function handleSubmit(e: Event) {
     e.preventDefault();
     try {
@@ -43,7 +39,7 @@
 <section class="contact-section">
   <h1>Contact</h1>
   <p>
-    N’hésitez pas à me contacter pour toute demande de collaboration, projet web, photographie, ou simplement pour échanger autour de mes passions. Je réponds rapidement à tous les messages !
+    N’hésitez pas à me contacter pour toute demande de collaboration, projet web, photographie, ou simplement pour échanger. Je réponds rapidement à tous les messages !
   </p>
   <form class="contact-form" on:submit|preventDefault={handleSubmit}>
     <div class="form-group">
