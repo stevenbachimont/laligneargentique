@@ -12,10 +12,14 @@
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
+  // Debug temporaire - à supprimer après
+  console.log('EmailJS Config:', { serviceId, templateId, publicKey });
+
   async function handleSubmit(e: Event) {
     e.preventDefault();
+    console.log('Tentative d\'envoi avec:', { serviceId, templateId, publicKey });
     try {
-      await emailjs.send(
+      const result = await emailjs.send(
         serviceId,
         templateId,
         {
@@ -26,11 +30,13 @@
         },
         publicKey
       );
+      console.log('Email envoyé avec succès:', result);
       sent = true;
       error = '';
       nom = prenom = email = message = '';
     } catch (err) {
-      error = 'Erreur lors de l’envoi du message.';
+      console.error('Erreur EmailJS:', err);
+      error = 'Erreur lors de l\'envoi du message.';
       sent = false;
     }
   }
