@@ -2,13 +2,9 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Page from './+page.svelte';
 
-// Mock EmailJS
-vi.mock('emailjs-com', () => ({
-  default: {
-    send: vi.fn()
-  }
-}));
-import emailjs from 'emailjs-com';
+// Mock fetch
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
 
 describe('/contact', () => {
   beforeEach(() => {
@@ -26,26 +22,45 @@ describe('/contact', () => {
   });
 
   it('permet de saisir et soumettre le formulaire (succès)', async () => {
-    (emailjs.send as any).mockResolvedValueOnce({ status: 200 });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true })
+    });
+
     render(Page);
     await fireEvent.input(screen.getByLabelText(/^Prénom$/i), { target: { value: 'Jean' } });
     await fireEvent.input(screen.getByLabelText(/^Nom$/i), { target: { value: 'Dupont' } });
     await fireEvent.input(screen.getByLabelText(/^Email$/i), { target: { value: 'jean@exemple.com' } });
     await fireEvent.input(screen.getByLabelText(/^Message$/i), { target: { value: 'Bonjour !' } });
     await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
-    expect(emailjs.send).toHaveBeenCalled();
+    
+    expect(mockFetch).toHaveBeenCalledWith('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom: 'Dupont',
+        prenom: 'Jean',
+        email: 'jean@exemple.com',
+        message: 'Bonjour !'
+      })
+    });
     expect(await screen.findByText(/message envoyé/i)).toBeInTheDocument();
   });
 
   it('affiche un message d\'erreur si l\'envoi échoue', async () => {
-    (emailjs.send as any).mockRejectedValueOnce(new Error('fail'));
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: 'Erreur lors de l\'envoi du message.' })
+    });
+
     render(Page);
     await fireEvent.input(screen.getByLabelText(/^Prénom$/i), { target: { value: 'Jean' } });
     await fireEvent.input(screen.getByLabelText(/^Nom$/i), { target: { value: 'Dupont' } });
     await fireEvent.input(screen.getByLabelText(/^Email$/i), { target: { value: 'jean@exemple.com' } });
     await fireEvent.input(screen.getByLabelText(/^Message$/i), { target: { value: 'Bonjour !' } });
     await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
-    expect(emailjs.send).toHaveBeenCalled();
+    
+    expect(mockFetch).toHaveBeenCalled();
     expect(await screen.findByText(/erreur lors de l'envoi du message\./i)).toBeInTheDocument();
   });
 }); 
