@@ -1,0 +1,383 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+
+  interface Tool {
+    name: string;
+    description: string;
+    url: string;
+    category: 'photographie' | 'musique' | 'autre';
+    technologies: string[];
+    status: 'actif' | 'en développement' | 'archivé';
+  }
+
+  let tools: Tool[] = [
+    {
+      name: "Générateur de métadonnées photo",
+      description: "Outil pour générer automatiquement les métadonnées EXIF pour les photos argentiques numérisées",
+      url: "https://photo-metadata.stevenbachimont.com",
+      category: "photographie",
+      technologies: ["React", "TypeScript", "ExifTool"],
+      status: "actif"
+    },
+    {
+      name: "Calculateur de développement",
+      description: "Calculateur de temps de développement pour différentes pellicules et révélateurs",
+      url: "https://dev-calculator.stevenbachimont.com",
+      category: "photographie",
+      technologies: ["Vue.js", "JavaScript"],
+      status: "actif"
+    },
+    {
+      name: "Gestionnaire de pellicules",
+      description: "Application pour suivre l'inventaire des pellicules et planifier les développements",
+      url: "https://film-manager.stevenbachimont.com",
+      category: "photographie",
+      technologies: ["SvelteKit", "SQLite"],
+      status: "en développement"
+    },
+    {
+      name: "Séquenceur musical",
+      description: "Séquenceur en ligne pour créer des patterns rythmiques et mélodiques",
+      url: "https://sequencer.stevenbachimont.com",
+      category: "musique",
+      technologies: ["Web Audio API", "Canvas API", "JavaScript"],
+      status: "actif"
+    },
+    {
+      name: "Convertisseur de formats audio",
+      description: "Outil pour convertir entre différents formats audio et ajuster les paramètres",
+      url: "https://audio-converter.stevenbachimont.com",
+      category: "musique",
+      technologies: ["Web Audio API", "FFmpeg.wasm"],
+      status: "en développement"
+    },
+    {
+      name: "Générateur de partitions",
+      description: "Générateur de partitions simples à partir de notes MIDI",
+      url: "https://score-generator.stevenbachimont.com",
+      category: "musique",
+      technologies: ["VexFlow", "JavaScript"],
+      status: "archivé"
+    },
+    {
+      name: "Gestionnaire de tâches",
+      description: "Application simple de gestion de tâches avec synchronisation cloud",
+      url: "https://task-manager.stevenbachimont.com",
+      category: "autre",
+      technologies: ["SvelteKit", "PocketBase"],
+      status: "actif"
+    },
+    {
+      name: "Convertisseur de devises",
+      description: "Outil de conversion de devises avec taux en temps réel",
+      url: "https://currency-converter.stevenbachimont.com",
+      category: "autre",
+      technologies: ["React", "API Exchange Rate"],
+      status: "actif"
+    }
+  ];
+
+  let isVisible = false;
+
+  onMount(() => {
+    setTimeout(() => { isVisible = true; }, 100);
+  });
+
+  function getToolsByCategory(category: string) {
+    return tools.filter(tool => tool.category === category);
+  }
+
+  function getStatusColor(status: string) {
+    switch (status) {
+      case 'actif': return '#00ff00';
+      case 'en développement': return '#ffd700';
+      case 'archivé': return '#ff6b6b';
+      default: return '#888';
+    }
+  }
+
+  function getStatusText(status: string) {
+    switch (status) {
+      case 'actif': return 'Actif';
+      case 'en développement': return 'En développement';
+      case 'archivé': return 'Archivé';
+      default: return status;
+    }
+  }
+</script>
+
+<div class="tools-page">
+  <div class="content">
+    <h1 class="page-title {isVisible ? 'fade-in-up' : ''}">Outils web</h1>
+    <p class="page-description {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.1s">
+      Applications web utiles que j'ai développées, classées par thématique.
+    </p>
+
+    <!-- Outils Photographie -->
+    <section class="tools-category {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.2s">
+      <div class="category-header">
+        <h2>📷 Photographie</h2>
+        <p>Outils spécialisés pour la photographie argentique et numérique</p>
+      </div>
+      <div class="tools-grid">
+        {#each getToolsByCategory('photographie') as tool}
+          <div class="tool-card">
+            <div class="tool-header">
+              <h3>{tool.name}</h3>
+              <div class="status-badge" style="background-color: {getStatusColor(tool.status)}">
+                {getStatusText(tool.status)}
+              </div>
+            </div>
+            <p class="tool-description">{tool.description}</p>
+            <div class="tool-technologies">
+              {#each tool.technologies as tech}
+                <span class="tech-tag">{tech}</span>
+              {/each}
+            </div>
+            <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+              Visiter l'outil →
+            </a>
+          </div>
+        {/each}
+      </div>
+    </section>
+
+    <!-- Outils Musique -->
+    <section class="tools-category {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.3s">
+      <div class="category-header">
+        <h2>🎵 Musique</h2>
+        <p>Applications pour la création et l'édition musicale</p>
+      </div>
+      <div class="tools-grid">
+        {#each getToolsByCategory('musique') as tool}
+          <div class="tool-card">
+            <div class="tool-header">
+              <h3>{tool.name}</h3>
+              <div class="status-badge" style="background-color: {getStatusColor(tool.status)}">
+                {getStatusText(tool.status)}
+              </div>
+            </div>
+            <p class="tool-description">{tool.description}</p>
+            <div class="tool-technologies">
+              {#each tool.technologies as tech}
+                <span class="tech-tag">{tech}</span>
+              {/each}
+            </div>
+            <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+              Visiter l'outil →
+            </a>
+          </div>
+        {/each}
+      </div>
+    </section>
+
+    <!-- Outils Autres -->
+    <section class="tools-category {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
+      <div class="category-header">
+        <h2>🛠️ Autres</h2>
+        <p>Outils utilitaires pour la productivité et les conversions</p>
+      </div>
+      <div class="tools-grid">
+        {#each getToolsByCategory('autre') as tool}
+          <div class="tool-card">
+            <div class="tool-header">
+              <h3>{tool.name}</h3>
+              <div class="status-badge" style="background-color: {getStatusColor(tool.status)}">
+                {getStatusText(tool.status)}
+              </div>
+            </div>
+            <p class="tool-description">{tool.description}</p>
+            <div class="tool-technologies">
+              {#each tool.technologies as tech}
+                <span class="tech-tag">{tech}</span>
+              {/each}
+            </div>
+            <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
+              Visiter l'outil →
+            </a>
+          </div>
+        {/each}
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+  .tools-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .content {
+    width: 100%;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, var(--color-text), var(--color-accent-1));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .page-description {
+    text-align: center;
+    margin-bottom: 4rem;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.8);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .tools-category {
+    margin-bottom: 4rem;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .category-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .category-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-accent-1);
+  }
+
+  .category-header p {
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tool-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.3s ease, background 0.3s ease;
+  }
+
+  .tool-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+  }
+
+  .tool-header h3 {
+    font-size: 1.3rem;
+    color: #fff;
+    margin: 0;
+    flex: 1;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #000;
+    flex-shrink: 0;
+  }
+
+  .tool-description {
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .tool-technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tech-tag {
+    background: rgba(255, 215, 0, 0.2);
+    color: var(--color-accent-2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+  }
+
+  .tool-link {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+
+  .tool-link:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  /* Animations */
+  .fade-in-up {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .tool-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .category-header h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style> 

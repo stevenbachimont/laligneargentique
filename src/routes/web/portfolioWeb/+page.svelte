@@ -60,8 +60,12 @@
   });
 </script>
 
-<div class="development-page">
-  <h1>Mon parcours de développement web</h1>
+<div class="portfolio-page">
+  <h1>Portfolio de développement web</h1>
+  <p class="portfolio-intro">
+    Découvrez mon parcours de développement web à travers une timeline chronologique 
+    de mes projets et réalisations.
+  </p>
   
   <div class="timeline">
     {#each timelineItems as item (item.id)}
@@ -119,7 +123,7 @@
 </div>
 
 <style>
-  .development-page {
+  .portfolio-page {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -127,12 +131,22 @@
 
   h1 {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 1rem;
     font-size: 2.5rem;
     background: linear-gradient(45deg, var(--color-text), var(--color-accent-1));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .portfolio-intro {
+    text-align: center;
+    margin-bottom: 4rem;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.8);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .timeline {

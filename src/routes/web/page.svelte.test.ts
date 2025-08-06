@@ -6,7 +6,7 @@ import Page from './+page.svelte';
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-describe('/developpement', () => {
+describe('/web', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
