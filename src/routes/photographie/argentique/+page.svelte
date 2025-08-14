@@ -1,19 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  // Variables pour le formulaire
-  let argentiqueForm = {
-    nom: '',
-    prenom: '',
-    email: '',
-    telephone: '',
-    dateSouhaitee: '',
-    nombrePersonnes: 1,
-    message: ''
-  };
-  let argentiqueSent = false;
-  let argentiqueError = '';
-
   // Balades programmées
   let baladesProgrammees = [
     {
@@ -50,50 +37,15 @@
 
   let isVisible = false;
 
-  async function handleArgentiqueSubmit(e: Event) {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/argentique', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(argentiqueForm)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        argentiqueSent = true;
-        argentiqueError = '';
-        argentiqueForm = {
-          nom: '',
-          prenom: '',
-          email: '',
-          telephone: '',
-          dateSouhaitee: '',
-          nombrePersonnes: 1,
-          message: ''
-        };
-      } else {
-        argentiqueError = data.error || 'Erreur lors de l\'envoi de la demande.';
-        argentiqueSent = false;
-      }
-    } catch (err) {
-      argentiqueError = 'Erreur lors de l\'envoi de la demande.';
-      argentiqueSent = false;
-    }
+  // Fonction pour rediriger vers la page de réservation
+  function reserverBalade(balade: any) {
+    // Encoder les données de la balade pour l'URL
+    const baladeData = encodeURIComponent(JSON.stringify(balade));
+    // Rediriger vers la page de réservation avec les données
+    window.open(`/photographie/argentique/reservation?id=${balade.id}&data=${baladeData}`, '_blank');
   }
 
-  function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
+
 
   onMount(() => {
     setTimeout(() => { isVisible = true; }, 100);
@@ -169,7 +121,7 @@
               </div>
               <p class="balade-description">{balade.description}</p>
               <div class="balade-actions">
-                <button class="btn-reserver" on:click={() => document.getElementById('reservation-form')?.scrollIntoView({ behavior: 'smooth' })}>
+                <button class="btn-reserver" on:click={() => reserverBalade(balade)}>
                   Réserver
                 </button>
                 <span class="inscription-info">Inscriptions ouvertes</span>
@@ -180,108 +132,7 @@
       </div>
     </section>
 
-    <!-- Section Formulaire de Réservation -->
-    <section id="reservation-form" class="reservation-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
-      <div class="container">
-        <h2>Réserver votre balade</h2>
-        <p class="section-subtitle">Remplissez le formulaire ci-dessous pour réserver votre place</p>
-        
-        {#if argentiqueSent}
-          <div class="success-container">
-            <div class="success-message">
-              <h3>✅ Demande envoyée avec succès !</h3>
-              <p>Je vous recontacterai dans les plus brefs délais pour confirmer votre réservation et vous donner tous les détails pratiques.</p>
-              <p><strong>Merci de votre intérêt pour La ligne Argentique !</strong></p>
-            </div>
-          </div>
-        {:else}
-          <form on:submit={handleArgentiqueSubmit} class="reservation-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="prenom">Prénom *</label>
-                <input 
-                  type="text" 
-                  id="prenom" 
-                  bind:value={argentiqueForm.prenom} 
-                  required 
-                  placeholder="Votre prénom"
-                />
-              </div>
-              <div class="form-group">
-                <label for="nom">Nom *</label>
-                <input 
-                  type="text" 
-                  id="nom" 
-                  bind:value={argentiqueForm.nom} 
-                  required 
-                  placeholder="Votre nom"
-                />
-              </div>
-              <div class="form-group">
-                <label for="email">Email *</label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  bind:value={argentiqueForm.email} 
-                  required 
-                  placeholder="votre.email@exemple.com"
-                />
-              </div>
-              <div class="form-group">
-                <label for="telephone">Téléphone</label>
-                <input 
-                  type="tel" 
-                  id="telephone" 
-                  bind:value={argentiqueForm.telephone} 
-                  placeholder="06 12 34 56 78"
-                />
-              </div>
-              <div class="form-group">
-                <label for="dateSouhaitee">Date souhaitée *</label>
-                <input 
-                  type="date" 
-                  id="dateSouhaitee" 
-                  bind:value={argentiqueForm.dateSouhaitee} 
-                  required 
-                />
-              </div>
-              <div class="form-group">
-                <label for="nombrePersonnes">Nombre de personnes *</label>
-                <select id="nombrePersonnes" bind:value={argentiqueForm.nombrePersonnes} required>
-                  <option value="1">1 personne</option>
-                  <option value="2">2 personnes</option>
-                  <option value="3">3 personnes</option>
-                  <option value="4">4 personnes</option>
-                  <option value="5">5 personnes</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="form-group full-width">
-              <label for="message">Message (préférences, questions...)</label>
-              <textarea 
-                id="message" 
-                bind:value={argentiqueForm.message} 
-                rows="4"
-                placeholder="Décrivez vos attentes, vos préférences de lieux, ou posez vos questions..."
-              ></textarea>
-            </div>
-            
-            {#if argentiqueError}
-              <div class="error-message">
-                {argentiqueError}
-              </div>
-            {/if}
-            
-            <div class="form-actions">
-              <button type="submit" class="btn-submit">
-                Envoyer ma demande de réservation
-              </button>
-            </div>
-          </form>
-        {/if}
-      </div>
-    </section>
+
 
     <!-- Section Informations Pratiques -->
     <section class="infos-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.8s">
