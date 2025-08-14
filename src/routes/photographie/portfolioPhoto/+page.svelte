@@ -38,7 +38,7 @@
         "/photos/portraits/IMG_8043.jpg",
         "/photos/portraits/IMG_8055.jpg",
         "/photos/portraits/IMG_8057.jpg",
-        "/photos/portraits/IMG_8192.jpg",
+        
       ],
       thumbnail: "/photos/portraits/IMG_7790.jpg"
     },
@@ -69,28 +69,101 @@
   let selectedSeries: PhotoSeries | null = null;
   let isModalOpen = false;
   let fullscreenPhoto: string | null = null;
+  let currentPhotoIndex = 0;
   let isVisible = false;
+  let fullscreenModalElement: HTMLElement;
 
   function openModal(series: PhotoSeries) {
     selectedSeries = series;
     isModalOpen = true;
+    currentPhotoIndex = 0;
   }
 
   function closeModal() {
     isModalOpen = false;
     selectedSeries = null;
+    currentPhotoIndex = 0;
   }
 
-  function openFullscreen(photo: string) {
+  function openFullscreen(photo: string, index: number) {
     fullscreenPhoto = photo;
+    currentPhotoIndex = index;
+    // Focus automatique sur le modal plein écran pour capturer les événements clavier
+    setTimeout(() => {
+      if (fullscreenModalElement) {
+        fullscreenModalElement.focus();
+      }
+    }, 100);
   }
 
   function closeFullscreen() {
     fullscreenPhoto = null;
+    currentPhotoIndex = 0;
+  }
+
+  function nextPhoto() {
+    if (selectedSeries && currentPhotoIndex < selectedSeries.photos.length - 1) {
+      currentPhotoIndex++;
+      // Mettre à jour l'image plein écran si on est en mode plein écran
+      if (fullscreenPhoto && selectedSeries) {
+        fullscreenPhoto = selectedSeries.photos[currentPhotoIndex];
+      }
+    }
+  }
+
+  function previousPhoto() {
+    if (currentPhotoIndex > 0) {
+      currentPhotoIndex--;
+      // Mettre à jour l'image plein écran si on est en mode plein écran
+      if (fullscreenPhoto && selectedSeries) {
+        fullscreenPhoto = selectedSeries.photos[currentPhotoIndex];
+      }
+    }
+  }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (isModalOpen && selectedSeries) {
+      switch (event.key) {
+        case 'ArrowRight':
+          event.preventDefault();
+          nextPhoto();
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          previousPhoto();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          closeModal();
+          break;
+      }
+    }
+    if (fullscreenPhoto && selectedSeries) {
+      switch (event.key) {
+        case 'ArrowRight':
+          event.preventDefault();
+          nextPhoto();
+          fullscreenPhoto = selectedSeries.photos[currentPhotoIndex];
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          previousPhoto();
+          fullscreenPhoto = selectedSeries.photos[currentPhotoIndex];
+          break;
+        case 'Escape':
+          event.preventDefault();
+          closeFullscreen();
+          break;
+      }
+    }
   }
 
   onMount(() => {
     setTimeout(() => { isVisible = true; }, 100);
+    document.addEventListener('keydown', handleKeydown);
+    return () => {
+      document.removeEventListener('keydown', handleKeydown);
+    };
   });
 </script>
 
@@ -127,21 +200,79 @@
           <button class="close-button" on:click={closeModal}>×</button>
         </div>
         <p>{selectedSeries?.description}</p>
-        <div class="photo-grid">
-          {#each selectedSeries.photos as photo}
-            <button class="photo-item" on:click={() => openFullscreen(photo)} on:keydown={(e) => e.key === 'Enter' && openFullscreen(photo)}>
-              <img src={photo} alt="{selectedSeries.title}" />
-            </button>
-          {/each}
+        
+        <!-- Carrousel principal -->
+        <div class="carousel-container">
+          <button class="carousel-nav prev" on:click={previousPhoto} disabled={currentPhotoIndex === 0}>
+            ‹
+          </button>
+          
+          <div class="carousel-main">
+            <img 
+              src={selectedSeries.photos[currentPhotoIndex]} 
+              alt="{selectedSeries.title} - Image {currentPhotoIndex + 1}"
+              class="carousel-image"
+              on:click={() => selectedSeries && openFullscreen(selectedSeries.photos[currentPhotoIndex], currentPhotoIndex)}
+              role="button"
+              tabindex="0"
+              on:keydown={(e) => e.key === 'Enter' && selectedSeries && openFullscreen(selectedSeries.photos[currentPhotoIndex], currentPhotoIndex)}
+            />
+            <div class="carousel-counter">
+              {currentPhotoIndex + 1} / {selectedSeries.photos.length}
+            </div>
+          </div>
+          
+          <button class="carousel-nav next" on:click={nextPhoto} disabled={currentPhotoIndex === selectedSeries.photos.length - 1}>
+            ›
+          </button>
         </div>
+
+
+
+        <!-- Vignettes -->
+        <div class="thumbnails-container">
+          <div class="thumbnails-grid">
+            {#each selectedSeries.photos as photo, index}
+              <button 
+                class="thumbnail-item {index === currentPhotoIndex ? 'active' : ''}"
+                on:click={() => currentPhotoIndex = index}
+                on:keydown={(e) => e.key === 'Enter' && (currentPhotoIndex = index)}
+              >
+                <img src={photo} alt="Vignette {index + 1}" />
+              </button>
+            {/each}
+          </div>
+        </div>
+
+
       </div>
     </div>
   {/if}
 
   {#if fullscreenPhoto}
-    <div class="fullscreen-modal" on:click={closeFullscreen} on:keydown={(e) => e.key === 'Escape' && closeFullscreen()} tabindex="0" aria-modal="true" role="dialog" aria-label="Photo en plein écran">
-      <img src={fullscreenPhoto} alt="" class="fullscreen-img" />
-      <button class="close-fullscreen" on:click={closeFullscreen} aria-label="Fermer">×</button>
+    <div class="fullscreen-modal" on:click={closeFullscreen} tabindex="0" aria-modal="true" role="dialog" aria-label="Photo en plein écran" bind:this={fullscreenModalElement}>
+      <div class="fullscreen-carousel" on:click|stopPropagation>
+        <button class="carousel-nav prev fullscreen-nav" on:click|stopPropagation={() => previousPhoto()} disabled={currentPhotoIndex === 0}>
+          ‹
+        </button>
+        
+        <div class="fullscreen-main">
+          <img 
+            src={fullscreenPhoto} 
+            alt="{selectedSeries?.title} - Image {currentPhotoIndex + 1}" 
+            class="fullscreen-img"
+          />
+          <div class="fullscreen-counter">
+            {currentPhotoIndex + 1} / {selectedSeries?.photos.length}
+          </div>
+        </div>
+        
+        <button class="carousel-nav next fullscreen-nav" on:click|stopPropagation={() => nextPhoto()} disabled={currentPhotoIndex === (selectedSeries?.photos.length || 0) - 1}>
+          ›
+        </button>
+      </div>
+      
+              <button class="close-fullscreen" on:click|stopPropagation={closeFullscreen} aria-label="Fermer">×</button>
     </div>
   {/if}
 </div>
@@ -291,31 +422,115 @@
     margin: 0;
   }
 
-  .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* Carrousel styles */
+  .carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
     gap: 1rem;
-    margin-top: 1rem;
+    margin: 2rem 0;
   }
 
-  .photo-item {
-    aspect-ratio: 1;
-    overflow: hidden;
+  .carousel-main {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .carousel-image {
+    max-width: 100%;
+    max-height: 60vh;
     border-radius: 8px;
-    border: none;
-    background-color: var(--color-bg);
-  }
-
-  .photo-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
     transition: transform 0.3s ease;
   }
 
-  .photo-item:hover img {
+  .carousel-image:hover {
+    transform: scale(1.02);
+  }
+
+  .carousel-nav {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carousel-nav:hover:not(:disabled) {
+    color: #ff69b4;
     transform: scale(1.1);
   }
+
+  .carousel-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .carousel-counter {
+    position: absolute;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+
+
+  /* Vignettes */
+  .thumbnails-container {
+    margin: 2rem 0;
+  }
+
+  .thumbnails-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .thumbnail-item {
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: none;
+    padding: 0;
+  }
+
+  .thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumbnail-item:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+  }
+
+  .thumbnail-item.active {
+    border-color: #ffd700;
+    transform: scale(1.1);
+  }
+
+
 
   .close-button {
     position: absolute;
@@ -329,6 +544,7 @@
     padding: 0;
   }
 
+  /* Plein écran */
   .fullscreen-modal {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -341,13 +557,61 @@
     animation: fadeIn 0.2s;
   }
 
+  .fullscreen-carousel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 95vw;
+  }
+
+  .fullscreen-main {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .fullscreen-img {
-    max-width: 90vw;
+    max-width: 100%;
     max-height: 90vh;
     border-radius: 10px;
     box-shadow: 0 0 40px 10px #000a;
     background: var(--color-bg);
     cursor: auto;
+  }
+
+  .fullscreen-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2100;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fullscreen-nav:hover:not(:disabled) {
+    color: #ff69b4;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .fullscreen-nav.prev {
+    left: 2rem;
+  }
+
+  .fullscreen-nav.next {
+    right: 2rem;
   }
 
   .close-fullscreen {
@@ -362,6 +626,18 @@
     z-index: 2100;
     padding: 0;
     line-height: 1;
+  }
+
+  .fullscreen-counter {
+    position: absolute;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 1rem;
   }
 
   @media (max-width: 600px) {
@@ -390,6 +666,34 @@
     .series-thumbnail {
       width: 60px;
       height: 60px;
+    }
+    
+    .carousel-nav {
+      width: 40px;
+      height: 40px;
+      font-size: 1.5rem;
+    }
+    
+    .thumbnails-grid {
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    }
+    
+    .fullscreen-carousel {
+      gap: 1rem;
+    }
+    
+    .fullscreen-nav {
+      font-size: 2rem;
+      width: 60px;
+      height: 60px;
+    }
+    
+    .fullscreen-nav.prev {
+      left: 1rem;
+    }
+    
+    .fullscreen-nav.next {
+      right: 1rem;
     }
   }
 
