@@ -1,67 +1,50 @@
 import { render, screen } from '@testing-library/svelte';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Page from './+page.svelte';
 
-// Mock de fetch global
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
-
 describe('/web', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('affiche le titre principal', () => {
     render(Page);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/développement web/i);
   });
 
-  it('récupère les projets depuis l\'API', async () => {
-    // Mock des données de test
-    const mockProjects = [
-      {
-        id: 1,
-        title: "Projet Test",
-        description: "Description du projet test",
-        date: "2024",
-        projects: [
-          {
-            title: "Sous-projet",
-            description: "Description du sous-projet",
-            technologies: ["React", "TypeScript"]
-          }
-        ]
-      }
-    ];
-
-    // Mock de la réponse fetch
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockProjects
-    });
-
+  it('affiche les deux blocs principaux', () => {
     render(Page);
-
-    // Attendre que l'API soit appelée
-    await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://api.stevenbachimont.com/api/projects');
-    });
+    // Vérifier que les deux blocs principaux sont présents
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    const titles = headings.map(h => h.textContent);
+    
+    expect(titles).toContain('Portfolio Web');
+    expect(titles).toContain('Outils Web');
   });
 
-  it('gère les erreurs d\'API', async () => {
-    // Mock d'une erreur fetch
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
-
-    // Spy sur console.error pour vérifier qu'il est appelé
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
+  it('affiche les liens vers les pages dédiées', () => {
     render(Page);
+    
+    // Vérifier le lien vers le portfolio web
+    const portfolioLink = screen.getByRole('link', { name: /voir le portfolio complet/i });
+    expect(portfolioLink).toHaveAttribute('href', '/web/portfolioWeb');
+    
+    // Vérifier le lien vers les outils
+    const toolsLink = screen.getByRole('link', { name: /voir tous les outils/i });
+    expect(toolsLink).toHaveAttribute('href', '/web/outils');
+  });
 
-    // Attendre que l'erreur soit gérée
-    await vi.waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith('Error fetching projects:', expect.any(Error));
-    });
+  it('affiche les fonctionnalités du portfolio', () => {
+    render(Page);
+    
+    // Vérifier que les fonctionnalités du portfolio sont mentionnées
+    expect(screen.getByText(/projets chronologiques/i)).toBeInTheDocument();
+    expect(screen.getByText(/technologies utilisées/i)).toBeInTheDocument();
+    expect(screen.getByText(/statuts de progression/i)).toBeInTheDocument();
+  });
 
-    consoleSpy.mockRestore();
+  it('affiche les catégories d\'outils', () => {
+    render(Page);
+    
+    // Vérifier que les catégories d'outils sont mentionnées dans les descriptions
+    expect(screen.getByText(/outils pour l'argentique/i)).toBeInTheDocument();
+    expect(screen.getByText(/création et édition/i)).toBeInTheDocument();
+    expect(screen.getByText(/productivité et utilitaires/i)).toBeInTheDocument();
   });
 }); 
