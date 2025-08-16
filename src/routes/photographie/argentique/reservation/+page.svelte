@@ -1374,25 +1374,48 @@
     }
 
     .header h1 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+      padding: 0 1rem;
+    }
+
+    .btn-retour {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
     }
 
     .container {
       padding: 0 1rem;
     }
 
-    .consignes-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .form-grid {
-      grid-template-columns: 1fr;
-    }
-
     .balade-header {
       flex-direction: column;
+      gap: 1.2rem;
       text-align: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .balade-date {
+      order: -1;
+      margin-bottom: 0.5rem;
+    }
+
+    .balade-info h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .balade-info p {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .balade-description {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      padding: 0 1rem 1.5rem 1rem;
     }
 
     .balade-status {
@@ -1400,17 +1423,162 @@
       margin-top: 1rem;
     }
 
+    .consignes-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .consignes-card,
+    .materiel-card {
+      padding: 1.5rem;
+    }
+
+    .consigne-item,
+    .materiel-item {
+      padding: 0.8rem;
+      gap: 0.6rem;
+    }
+
+    .consigne-text,
+    .materiel-text {
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+    }
+
+    .form-group label {
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 0.9rem;
+      font-size: 0.95rem;
+      border-radius: 8px;
+    }
+
+    .btn-submit {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .success-message,
+    .error-container {
+      padding: 1.5rem;
+      margin: 1rem;
+      border-radius: 12px;
+    }
+
     .plan-content {
       flex-direction: column;
+      gap: 1.5rem;
     }
 
     .map-container {
       width: 100%;
-      min-height: 300px;
+      min-height: 350px;
+      padding: 1.5rem;
     }
 
     .parcours-details {
       width: 100%;
+      padding: 1.5rem;
+    }
+
+    .parcours-summary {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1.2rem;
+    }
+
+    .summary-item {
+      justify-content: space-between;
+      padding: 0.8rem 0;
+    }
+
+    .route-step {
+      margin-bottom: 1.2rem;
+    }
+
+    .step-info {
+      padding: 0.8rem;
+      margin-left: 0.8rem;
+    }
+
+    .step-info h4 {
+      font-size: 1rem;
+    }
+
+    .step-info p {
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .map-legend {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn-map {
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Mobile très petit */
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 0.8rem;
+    }
+
+    .header h1 {
+      font-size: 1.4rem;
+      padding: 0 0.5rem;
+    }
+
+    .balade-card {
+      margin: 0 0.5rem;
+    }
+
+    .balade-header {
+      padding: 1.2rem 0.8rem;
+    }
+
+    .balade-info h2 {
+      font-size: 1.2rem;
+    }
+
+    .consignes-card,
+    .materiel-card {
+      padding: 1.2rem;
+    }
+
+    .map-container,
+    .parcours-details {
+      padding: 1.2rem;
+    }
+
+    .step-marker {
+      width: 2rem;
+      height: 2rem;
+      left: -1.5rem;
+    }
+
+    .step-marker .marker-number {
+      font-size: 0.9rem;
+    }
+
+    .map-route {
+      padding-left: 1.5rem;
     }
   }
 </style>

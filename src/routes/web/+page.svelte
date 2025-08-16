@@ -311,37 +311,165 @@
   /* Responsive */
   @media (max-width: 768px) {
     .page-title {
-      font-size: 2rem;
-      margin: 1.2rem 0 1.2rem 0;
+      font-size: 2.2rem;
+      margin: 1.5rem 0 1.5rem 0;
+      line-height: 1.2;
+      padding: 0 1rem;
     }
     
     .two-blocks-container {
       grid-template-columns: 1fr;
+      gap: 2rem;
+      padding: 0 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .block {
+      padding: 2rem;
+      min-height: auto;
+      border-radius: 14px;
+    }
+    
+    .block-content h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.2rem;
+      line-height: 1.3;
+    }
+    
+    .block-description {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      margin-bottom: 2.5rem;
+    }
+    
+    .portfolio-preview,
+    .tools-preview {
+      margin-bottom: 2.5rem;
+    }
+    
+    .feature-item,
+    .category-preview {
+      padding: 1rem;
+      gap: 1.2rem;
+      border-radius: 10px;
+    }
+    
+    .feature-icon,
+    .category-icon {
+      font-size: 1.4rem;
+    }
+
+    .feature-text,
+    .category-info h4 {
+      font-size: 1.05rem;
+    }
+
+    .category-info p {
+      font-size: 0.95rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+      padding: 1.2rem 2.5rem;
+      font-size: 1.05rem;
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .page-title {
+      font-size: 1.8rem;
+      margin: 1.2rem 0 1.2rem 0;
+      padding: 0 0.8rem;
+    }
+    
+    .two-blocks-container {
       gap: 1.5rem;
       padding: 0 1rem;
     }
     
     .block {
       padding: 1.5rem;
-      min-height: auto;
+      margin: 0 0.5rem;
     }
     
     .block-content h2 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
     }
     
     .block-description {
       font-size: 1rem;
+      margin-bottom: 2rem;
     }
     
     .feature-item,
     .category-preview {
       padding: 0.8rem;
+      gap: 1rem;
+    }
+    
+    .feature-icon,
+    .category-icon {
+      font-size: 1.3rem;
+    }
+
+    .btn-primary, .btn-secondary {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+  }
+
+  /* Mobile très petit */
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.6rem;
+      padding: 0 0.6rem;
+    }
+    
+    .two-blocks-container {
+      padding: 0 0.8rem;
+      gap: 1.2rem;
+    }
+    
+    .block {
+      padding: 1.2rem;
+      margin: 0 0.3rem;
+      border-radius: 12px;
+    }
+    
+    .block-content h2 {
+      font-size: 1.4rem;
+    }
+    
+    .block-description {
+      font-size: 0.95rem;
+      margin-bottom: 1.8rem;
+    }
+    
+    .feature-item,
+    .category-preview {
+      padding: 0.7rem;
+      gap: 0.8rem;
     }
     
     .feature-icon,
     .category-icon {
       font-size: 1.2rem;
+    }
+
+    .feature-text,
+    .category-info h4 {
+      font-size: 1rem;
+    }
+
+    .category-info p {
+      font-size: 0.9rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+      padding: 0.9rem 1.8rem;
+      font-size: 0.95rem;
     }
   }
 </style> 

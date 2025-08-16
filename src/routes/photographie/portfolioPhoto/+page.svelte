@@ -324,11 +324,11 @@
   .series-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.2rem;
     width: 100vw;
     max-width: 500px;
     margin: 0 auto 2rem auto;
-    padding: 0 1vw;
+    padding: 0 1.5rem;
     box-sizing: border-box;
   }
 
@@ -346,7 +346,8 @@
     transform: translateY(40px);
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
+    min-height: 80px;
   }
 
   .series-card:hover {
@@ -357,6 +358,8 @@
 
   .series-content {
     flex: 1;
+    min-width: 0;
+    padding-right: 0.5rem;
   }
 
   .series-content h2 {
@@ -364,21 +367,24 @@
     font-size: 1.3rem;
     margin-bottom: 0.5rem;
     font-weight: 500;
+    line-height: 1.2;
   }
 
   .series-content p {
     color: rgba(255, 255, 255, 0.7);
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.4;
+    margin: 0;
   }
 
   .series-thumbnail {
     flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+    width: 65px;
+    height: 65px;
     border-radius: 8px;
     overflow: hidden;
     border: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
   }
 
   .series-thumbnail img {
@@ -640,60 +646,248 @@
     font-size: 1rem;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     .page-title {
-      font-size: 2rem;
-      margin: 1.2rem 0 1.2rem 0;
+      font-size: 2.2rem;
+      margin: 1.5rem 0 1.5rem 0;
+      padding: 0 1rem;
+      line-height: 1.2;
     }
+
     .series-grid {
-      padding: 0;
-      gap: 0.7rem;
+      padding: 0 1rem;
+      gap: 1rem;
       justify-items: center;
       width: 100%;
       max-width: none;
     }
+
     .series-card {
-      padding: 0.8rem 0.5rem;
-      width: 80%;
+      padding: 1rem 0.8rem;
+      width: 100%;
       margin: 0 auto;
+      border-radius: 10px;
     }
+
+    .series-content h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .series-content p {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .series-thumbnail {
+      width: 55px;
+      height: 55px;
+      border-radius: 6px;
+    }
+
+    .modal-content {
+      width: 95%;
+      max-height: 90vh;
+      padding: 1.5rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .carousel-main {
+      margin-bottom: 1.5rem;
+    }
+
+    .carousel-image {
+      max-height: 60vh;
+      border-radius: 8px;
+    }
+
+    .carousel-nav {
+      width: 45px;
+      height: 45px;
+      font-size: 1.8rem;
+    }
+
+    .thumbnails-grid {
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .thumbnail {
+      width: 70px;
+      height: 70px;
+      border-radius: 6px;
+    }
+
+    .carousel-counter {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .page-title {
+      font-size: 1.8rem;
+      margin: 1.2rem 0 1.2rem 0;
+      padding: 0 0.8rem;
+    }
+
+    .series-grid {
+      padding: 0 0.8rem;
+      gap: 0.8rem;
+    }
+
+    .series-card {
+      padding: 0.8rem 0.6rem;
+      border-radius: 8px;
+    }
+
     .series-content h2 {
       font-size: 1.1rem;
     }
+
     .series-content p {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
+
     .series-thumbnail {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
+      border-radius: 5px;
     }
-    
+
+    .modal-content {
+      width: 98%;
+      padding: 1.2rem;
+      max-height: 95vh;
+    }
+
+    .modal-header h2 {
+      font-size: 1.3rem;
+    }
+
+    .carousel-image {
+      max-height: 50vh;
+    }
+
     .carousel-nav {
       width: 40px;
       height: 40px;
       font-size: 1.5rem;
     }
-    
+
     .thumbnails-grid {
       grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      gap: 0.6rem;
     }
-    
-    .fullscreen-carousel {
-      gap: 1rem;
-    }
-    
-    .fullscreen-nav {
-      font-size: 2rem;
+
+    .thumbnail {
       width: 60px;
       height: 60px;
+      border-radius: 5px;
     }
-    
+
+    .fullscreen-carousel {
+      gap: 0.8rem;
+    }
+
+    .fullscreen-nav {
+      font-size: 1.8rem;
+      width: 55px;
+      height: 55px;
+    }
+
     .fullscreen-nav.prev {
-      left: 1rem;
+      left: 0.8rem;
     }
-    
+
     .fullscreen-nav.next {
-      right: 1rem;
+      right: 0.8rem;
+    }
+
+    .close-fullscreen {
+      top: 1.5rem;
+      right: 1.5rem;
+      font-size: 2.5rem;
+    }
+
+    .fullscreen-counter {
+      bottom: -1.5rem;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Mobile très petit */
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.6rem;
+      padding: 0 0.6rem;
+    }
+
+    .series-grid {
+      padding: 0 0.6rem;
+      gap: 0.6rem;
+    }
+
+    .series-card {
+      padding: 0.7rem 0.5rem;
+    }
+
+    .series-content h2 {
+      font-size: 1rem;
+    }
+
+    .series-content p {
+      font-size: 0.85rem;
+    }
+
+    .series-thumbnail {
+      width: 45px;
+      height: 45px;
+      border-radius: 4px;
+    }
+
+    .modal-content {
+      padding: 1rem;
+    }
+
+    .carousel-image {
+      max-height: 45vh;
+    }
+
+    .carousel-nav {
+      width: 35px;
+      height: 35px;
+      font-size: 1.3rem;
+    }
+
+    .thumbnails-grid {
+      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .thumbnail {
+      width: 55px;
+      height: 55px;
+    }
+
+    .fullscreen-nav {
+      width: 50px;
+      height: 50px;
+      font-size: 1.6rem;
+    }
+
+    .fullscreen-nav.prev {
+      left: 0.6rem;
+    }
+
+    .fullscreen-nav.next {
+      right: 0.6rem;
     }
   }
 
