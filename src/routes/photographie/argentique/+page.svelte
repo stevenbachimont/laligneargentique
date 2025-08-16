@@ -615,29 +615,90 @@
 
   /* Responsive */
   @media (max-width: 768px) {
+    .hero-section {
+      padding: 3rem 1rem;
+      min-height: 60vh;
+    }
+
     .hero-section h1 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
     }
 
     .hero-subtitle {
-      font-size: 1.1rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 100%;
+      padding: 0 1rem;
     }
 
     .container {
       padding: 0 1rem;
     }
 
-    .form-grid {
+    .content {
+      padding: 2rem 0;
+    }
+
+    .presentation-section h2,
+    .balades-section h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .presentation-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      padding: 0 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      padding: 0 1rem;
+    }
+
+    .features-grid,
+    .infos-grid {
       grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      padding: 1.5rem;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.2rem;
     }
 
     .balades-grid {
       grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .balade-card {
+      padding: 1.5rem;
     }
 
     .balade-header {
       flex-direction: column;
       text-align: center;
+      gap: 1rem;
+    }
+
+    .balade-info h2 {
+      font-size: 1.3rem;
+    }
+
+    .balade-description {
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
     .balade-status {
@@ -645,9 +706,53 @@
       margin-top: 1rem;
     }
 
-    .features-grid,
-    .infos-grid {
-      grid-template-columns: 1fr;
+    .btn-reserver {
+      width: 100%;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+  }
+
+  /* Mobile très petit */
+  @media (max-width: 480px) {
+    .hero-section {
+      padding: 2rem 0.8rem;
+      min-height: 50vh;
+    }
+
+    .hero-section h1 {
+      font-size: 1.8rem;
+      padding: 0 0.5rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.95rem;
+      padding: 0 0.8rem;
+    }
+
+    .container {
+      padding: 0 0.8rem;
+    }
+
+    .presentation-section h2,
+    .balades-section h2 {
+      font-size: 1.8rem;
+      padding: 0 0.5rem;
+    }
+
+    .presentation-text {
+      font-size: 1rem;
+      padding: 0 0.8rem;
+    }
+
+    .balade-card {
+      margin: 0 0.5rem;
+      padding: 1.2rem;
+    }
+
+    .feature-card {
+      padding: 1.2rem;
+      margin: 0 0.5rem;
     }
   }
 </style> 

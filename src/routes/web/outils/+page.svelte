@@ -362,22 +362,191 @@
 
   /* Responsive */
   @media (max-width: 768px) {
+    .tools-page {
+      padding: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .page-description {
+      font-size: 1rem;
+      margin-bottom: 3rem;
+      padding: 0 1rem;
+      line-height: 1.5;
+    }
+
+    .tools-category {
+      margin-bottom: 3rem;
+    }
+
+    .category-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .category-header h2 {
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .category-header p {
+      font-size: 0.95rem;
+      padding: 0 1rem;
+    }
+
     .tools-grid {
       grid-template-columns: 1fr;
+      gap: 1.2rem;
     }
-    
+
+    .tool-card {
+      padding: 1.3rem;
+    }
+
     .tool-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.5rem;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
     }
-    
+
+    .tool-header h3 {
+      font-size: 1.2rem;
+      line-height: 1.3;
+    }
+
+    .tool-description {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1.2rem;
+    }
+
+    .tool-technologies {
+      gap: 0.4rem;
+      margin-bottom: 1.3rem;
+    }
+
+    .tech-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+    }
+
+    .tool-link {
+      width: 100%;
+      text-align: center;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .tools-page {
+      padding: 1rem;
+    }
+
     .page-title {
-      font-size: 2rem;
+      font-size: 1.8rem;
+      margin-bottom: 1.2rem;
+      padding: 0 0.8rem;
     }
-    
+
+    .page-description {
+      font-size: 0.95rem;
+      margin-bottom: 2.5rem;
+      padding: 0 0.8rem;
+    }
+
+    .tools-category {
+      margin-bottom: 2.5rem;
+    }
+
     .category-header h2 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+      padding: 0 0.8rem;
+    }
+
+    .category-header p {
+      font-size: 0.9rem;
+      padding: 0 0.8rem;
+    }
+
+    .tools-grid {
+      gap: 1rem;
+    }
+
+    .tool-card {
+      padding: 1.2rem;
+      margin: 0 0.5rem;
+    }
+
+    .tool-header h3 {
+      font-size: 1.1rem;
+    }
+
+    .tool-description {
+      font-size: 0.9rem;
+    }
+
+    .tool-link {
+      padding: 0.7rem 1.2rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Mobile très petit */
+  @media (max-width: 480px) {
+    .tools-page {
+      padding: 0.8rem;
+    }
+
+    .page-title {
+      font-size: 1.6rem;
+      padding: 0 0.6rem;
+    }
+
+    .page-description {
+      font-size: 0.9rem;
+      padding: 0 0.6rem;
+    }
+
+    .category-header h2 {
+      font-size: 1.4rem;
+      padding: 0 0.6rem;
+    }
+
+    .category-header p {
+      font-size: 0.85rem;
+      padding: 0 0.6rem;
+    }
+
+    .tool-card {
+      padding: 1rem;
+      margin: 0 0.3rem;
+    }
+
+    .tool-header h3 {
+      font-size: 1rem;
+    }
+
+    .tool-description {
+      font-size: 0.85rem;
+    }
+
+    .tool-technologies {
+      gap: 0.3rem;
+    }
+
+    .tech-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .tool-link {
+      padding: 0.6rem 1rem;
+      font-size: 0.8rem;
     }
   }
 </style> 
