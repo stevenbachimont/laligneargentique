@@ -23,15 +23,12 @@ describe('/photographie/portfolioPhoto', () => {
     
     // Cliquer sur la série Street
     const streetCard = screen.getByText('Street').closest('.series-card');
-    expect(streetCard).not.toBeNull();
-    if (streetCard) {
-      await fireEvent.click(streetCard);
-      
-      // Vérifier que le modal s'ouvre en cherchant des éléments spécifiques au modal
-      expect(screen.getByRole('button', { name: /‹/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /›/ })).toBeInTheDocument();
-      expect(screen.getByText(/1 \/ 4/)).toBeInTheDocument();
-    }
+    await fireEvent.click(streetCard);
+    
+    // Vérifier que le modal s'ouvre en cherchant des éléments spécifiques au modal
+    expect(screen.getByRole('button', { name: /‹/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /›/ })).toBeInTheDocument();
+    expect(screen.getByText(/1 \/ 4/)).toBeInTheDocument();
   });
 
   it('affiche les boutons de navigation du carrousel', async () => {
@@ -39,14 +36,11 @@ describe('/photographie/portfolioPhoto', () => {
     
     // Ouvrir le modal
     const streetCard = screen.getByText('Street').closest('.series-card');
-    expect(streetCard).not.toBeNull();
-    if (streetCard) {
-      await fireEvent.click(streetCard);
-      
-      // Vérifier que les boutons de navigation sont présents
-      expect(screen.getByRole('button', { name: /‹/ })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /›/ })).toBeInTheDocument();
-    }
+    await fireEvent.click(streetCard);
+    
+    // Vérifier que les boutons de navigation sont présents
+    expect(screen.getByRole('button', { name: /‹/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /›/ })).toBeInTheDocument();
   });
 
   it('affiche le compteur d\'images', async () => {
@@ -54,12 +48,9 @@ describe('/photographie/portfolioPhoto', () => {
     
     // Ouvrir le modal
     const streetCard = screen.getByText('Street').closest('.series-card');
-    expect(streetCard).not.toBeNull();
-    if (streetCard) {
-      await fireEvent.click(streetCard);
-      
-      // Vérifier que le compteur est présent
-      expect(screen.getByText(/1 \/ 4/)).toBeInTheDocument();
-    }
+    await fireEvent.click(streetCard);
+    
+    // Vérifier que le compteur est présent
+    expect(screen.getByText(/1 \/ 4/)).toBeInTheDocument();
   });
 });

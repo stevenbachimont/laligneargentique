@@ -236,16 +236,6 @@
     return url;
   }
 
-  // Fonction pour obtenir l'URL de la carte selon la balade (ancienne version - à supprimer)
-  function getMapUrl(balade: any) {
-    const mapUrls = {
-      1: 'https://www.google.com/maps/search/Quartier+du+Bouffay,+Nantes',
-      2: 'https://www.google.com/maps/search/Île+de+Nantes',
-      3: 'https://www.google.com/maps/search/Jardin+des+Plantes,+Nantes'
-    };
-    return mapUrls[balade.id as keyof typeof mapUrls];
-  }
-
   // Fonction pour obtenir les étapes du parcours
   function getParcoursSteps(balade: any) {
     const parcours = {
@@ -469,6 +459,41 @@
         </div>
       </section>
 
+      <!-- Section Consignes et Matériel -->
+      <section class="consignes-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.2s">
+        <div class="container">
+          <h2>📋 Consignes et Matériel</h2>
+          <div class="consignes-grid">
+            <div class="consignes-card">
+              <h3>📸 Consignes de sécurité</h3>
+              <div class="consignes-content">
+                {#if balade?.consignes}
+                  {#each balade.consignes as consigne}
+                    <div class="consigne-item">
+                      <span class="consigne-icon">⚠️</span>
+                      <span class="consigne-text">{consigne}</span>
+                    </div>
+                  {/each}
+                {/if}
+              </div>
+            </div>
+            <div class="materiel-card">
+              <h3>🎒 Matériel fourni</h3>
+              <div class="materiel-content">
+                {#if balade?.materiel}
+                  {#each balade.materiel as item}
+                    <div class="materiel-item">
+                      <span class="materiel-icon">📱</span>
+                      <span class="materiel-text">{item}</span>
+                    </div>
+                  {/each}
+                {/if}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Section Plan et Parcours -->
       <section class="plan-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.3s">
         <div class="container">
@@ -551,30 +576,6 @@
                   <li>Prendre le temps de composer vos photos</li>
                 </ul>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section Consignes et Matériel -->
-      <section class="consignes-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
-        <div class="container">
-          <div class="consignes-grid">
-            <div class="consignes-card">
-              <h3>📋 Consignes importantes</h3>
-              <ul>
-                {#each balade.consignes as consigne}
-                  <li>{consigne}</li>
-                {/each}
-              </ul>
-            </div>
-            <div class="materiel-card">
-              <h3>📸 Matériel fourni</h3>
-              <ul>
-                {#each balade.materiel as materiel}
-                  <li>{materiel}</li>
-                {/each}
-              </ul>
             </div>
           </div>
         </div>
@@ -837,6 +838,59 @@
     font-size: 1.1rem;
   }
 
+  .consignes-section {
+    margin-bottom: 3rem;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .consignes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .consignes-card, .materiel-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .consignes-card h3, .materiel-card h3 {
+    color: #ffd700;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .consignes-content, .materiel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .consigne-item, .materiel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .consigne-icon, .materiel-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .consigne-text, .materiel-text {
+    color: rgba(255,255,255,0.9);
+    line-height: 1.5;
+    font-size: 0.95rem;
+  }
+
   .plan-section {
     margin-bottom: 3rem;
     opacity: 0;
@@ -1017,6 +1071,7 @@
     font-weight: 600;
     font-size: 0.95rem;
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    width: 100%;
   }
 
   .btn-map:hover {
@@ -1042,69 +1097,6 @@
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
     color: #ffd700;
-  }
-
-  .parcours-steps {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 2rem;
-  }
-
-  .parcours-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding-left: 1.5rem;
-    position: relative;
-  }
-
-  .parcours-step:before {
-    content: "•";
-    color: #ffd700;
-    position: absolute;
-    left: 0;
-    font-weight: bold;
-  }
-
-  .step-number {
-    background: #ffd700;
-    color: #000;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 1.2rem;
-    min-width: 30px;
-    text-align: center;
-  }
-
-  .step-content h4 {
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
-    color: #ffd700;
-  }
-
-  .step-content p {
-    color: rgba(255,255,255,0.9);
-    line-height: 1.6;
-    margin-bottom: 0.8rem;
-  }
-
-  .step-info {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.7);
-  }
-
-  .step-duration, .step-distance {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .step-duration .step-icon, .step-distance .step-icon {
-    font-size: 0.8rem;
   }
 
   .parcours-summary {
@@ -1170,52 +1162,6 @@
     font-size: 1.1rem;
     font-weight: bold;
     color: #ffd700;
-  }
-
-  .consignes-section {
-    margin-bottom: 3rem;
-    opacity: 0;
-    transform: translateY(40px);
-  }
-
-  .consignes-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  .consignes-card, .materiel-card {
-    background: rgba(255,255,255,0.05);
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .consignes-card h3, .materiel-card h3 {
-    color: #ffd700;
-    margin-bottom: 1.5rem;
-    font-size: 1.3rem;
-  }
-
-  .consignes-card ul, .materiel-card ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .consignes-card li, .materiel-card li {
-    color: rgba(255,255,255,0.9);
-    line-height: 1.6;
-    margin-bottom: 0.8rem;
-    padding-left: 1.5rem;
-    position: relative;
-  }
-
-  .consignes-card li:before, .materiel-card li:before {
-    content: "•";
-    color: #ffd700;
-    position: absolute;
-    left: 0;
-    font-weight: bold;
   }
 
   .reservation-section {
@@ -1435,21 +1381,9 @@
       padding: 0 1rem;
     }
 
-    .plan-content {
-      flex-direction: column;
-    }
-
-    .map-container {
-      width: 100%;
-      min-height: 300px;
-    }
-
-    .parcours-details {
-      width: 100%;
-    }
-
     .consignes-grid {
       grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
 
     .form-grid {
@@ -1464,6 +1398,19 @@
     .balade-status {
       text-align: center;
       margin-top: 1rem;
+    }
+
+    .plan-content {
+      flex-direction: column;
+    }
+
+    .map-container {
+      width: 100%;
+      min-height: 300px;
+    }
+
+    .parcours-details {
+      width: 100%;
     }
   }
 </style>
