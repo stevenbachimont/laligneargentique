@@ -37,8 +37,7 @@
         "/photos/portraits/IMG_8025-1.jpg",
         "/photos/portraits/IMG_8043.jpg",
         "/photos/portraits/IMG_8055.jpg",
-        "/photos/portraits/IMG_8057.jpg",
-        
+        "/photos/portraits/IMG_8057.jpg"
       ],
       thumbnail: "/photos/portraits/IMG_7790.jpg"
     },
