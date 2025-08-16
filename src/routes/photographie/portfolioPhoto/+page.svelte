@@ -194,7 +194,7 @@
 
   {#if isModalOpen && selectedSeries}
     <div class="modal" on:click={closeModal} role="dialog" aria-modal="true" aria-label="Modal de photos">
-      <div class="modal-content" on:click|stopPropagation on:keydown|stopPropagation>
+      <div class="modal-content" on:click|stopPropagation on:keydown|stopPropagation role="document">
         <div class="modal-header">
           <h2>{selectedSeries.title}</h2>
           <button class="close-button" on:click={closeModal}>×</button>

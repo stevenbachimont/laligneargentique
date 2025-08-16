@@ -1,6 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY } from '$env/static/private';
+// Variables d'environnement EmailJS avec valeurs par défaut
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'default_service_id';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'default_template_id';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'default_public_key';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -22,9 +25,9 @@ export const POST: RequestHandler = async ({ request }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        service_id: VITE_EMAILJS_SERVICE_ID,
-        template_id: VITE_EMAILJS_TEMPLATE_ID,
-        user_id: VITE_EMAILJS_PUBLIC_KEY,
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
         template_params: {
           nom,
           prenom,

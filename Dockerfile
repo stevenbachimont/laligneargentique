@@ -6,6 +6,12 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+# Définir les variables d'environnement par défaut pour EmailJS
+ENV VITE_EMAILJS_SERVICE_ID=default_service_id
+ENV VITE_EMAILJS_TEMPLATE_ID=default_template_id
+ENV VITE_EMAILJS_PUBLIC_KEY=default_public_key
+
 RUN npm run build
 
 EXPOSE 3000
