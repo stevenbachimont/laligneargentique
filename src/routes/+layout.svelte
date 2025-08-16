@@ -17,9 +17,9 @@
       <span class="hamburger" class:open={isMenuOpen}></span>
     </button>
     <nav class:open={isMenuOpen}>
-      <a href="/" on:click={() => isMenuOpen = false}>Accueil</a>
-      <a href="/developpement" on:click={() => isMenuOpen = false}>Développement Web</a>
+      <a href="/web" on:click={() => isMenuOpen = false}>Web</a>
       <a href="/photographie" on:click={() => isMenuOpen = false}>Photographie</a>
+      <a href="/#about-section" on:click={() => isMenuOpen = false}>A propos</a>
       <a href="/contact" on:click={() => isMenuOpen = false}>Contact</a>
     </nav>
   </header>
@@ -132,8 +132,17 @@
   nav {
     display: flex;
     gap: 2rem;
+    margin-right: 2rem;
     justify-content: center;
     align-items: center;
+  }
+
+  nav a:hover {
+    transition: all 0.5s ease;
+    background: var(--color-accent-2);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   main {

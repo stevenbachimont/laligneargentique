@@ -76,7 +76,7 @@
   <h1>Développement</h1>
   <div class="cta-buttons">
     <a
-      href="/developpement"
+      href="/web"
       class="button"
       on:mouseenter={() => { showVideo = false; webHover = true; }}
       on:mouseleave={() => { showVideo = true; webHover = false; }}

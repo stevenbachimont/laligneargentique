@@ -8,15 +8,25 @@ describe('/photographie', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/photographie/i);
   });
 
-  it('affiche les catégories', () => {
+  it('affiche les deux blocs principaux', () => {
     render(Page);
-    // Utiliser getAllByRole pour les titres h2 et vérifier leur contenu
+    // Vérifier que les deux blocs principaux sont présents
     const headings = screen.getAllByRole('heading', { level: 2 });
     const titles = headings.map(h => h.textContent);
     
-    expect(titles).toContain('Street');
-    expect(titles).toContain('Portraits');
-    expect(titles).toContain('Paysages');
-    expect(titles).toContain('Quotidien');
+    expect(titles).toContain('Portfolio Photo');
+    expect(titles).toContain('La ligne Argentique');
+  });
+
+  it('affiche les liens vers les pages dédiées', () => {
+    render(Page);
+    
+    // Vérifier le lien vers le portfolio photo
+    const portfolioLink = screen.getByRole('link', { name: /voir le portfolio complet/i });
+    expect(portfolioLink).toHaveAttribute('href', '/photographie/portfolioPhoto');
+    
+    // Vérifier le lien vers les balades argentiques
+    const argentiqueLink = screen.getByRole('link', { name: /voir toutes les balades/i });
+    expect(argentiqueLink).toHaveAttribute('href', '/photographie/argentique');
   });
 }); 

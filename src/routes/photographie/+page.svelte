@@ -1,92 +1,27 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  interface PhotoSeries {
-    id: number;
-    title: string;
-    description: string;
-    photos: string[];
-    thumbnail?: string; // Photo d'aperçu
-  }
-
-  let series: PhotoSeries[] = [
+  // Balades programmées pour l'aperçu
+  let baladesApercu = [
     {
       id: 1,
-      title: "Street",
-      description: "Captures de moments urbains",
-      photos: [
-        "/photos/street/1.jpg",
-        "/photos/street/2.jpg",
-        "/photos/street/3.jpg",
-        "/photos/street/4.jpg",
-      ],
-      thumbnail: "/photos/street/1.jpg"
+      date: '2024-02-15',
+      heure: '14:00',
+      lieu: 'Quartier du Bouffay',
+      theme: 'Architecture médiévale',
+      placesDisponibles: 3
     },
     {
       id: 2,
-      title: "Portraits",
-      description: "Portraits en noir et blanc",
-      photos: [
-        "/photos/portraits/Charlie.jpg",
-        "/photos/portraits/IMG_7790.jpg",
-        "/photos/portraits/IMG_7795.jpg",
-        "/photos/portraits/IMG_7802.jpg",
-        "/photos/portraits/IMG_7803.jpg",
-        "/photos/portraits/IMG_7826.jpg",
-        "/photos/portraits/IMG_8022-1.jpg",
-        "/photos/portraits/IMG_8025-1.jpg",
-        "/photos/portraits/IMG_8043.jpg",
-        "/photos/portraits/IMG_8055.jpg",
-        "/photos/portraits/IMG_8057.jpg",
-      ],
-      thumbnail: "/photos/portraits/IMG_7790.jpg"
-    },
-    {
-      id: 3,
-      title: "Paysages",
-      description: "Vues panoramiques",
-      photos: [
-        "/photos/paysages/1.jpg",
-        "/photos/paysages/2.jpg",
-        "/photos/paysages/3.jpg"
-      ],
-      thumbnail: "/photos/paysages/1.jpg"
-    },
-    {
-      id: 4,
-      title: "Quotidien",
-      description: "Vues quotidiennes",
-      photos: [
-        "/photos/quotidien/1.jpg",
-        "/photos/quotidien/2.jpg",
-        "/photos/quotidien/3.jpg"
-      ],
-      thumbnail: "/photos/quotidien/1.jpg"
+      date: '2024-02-22',
+      heure: '10:00',
+      lieu: 'Île de Nantes',
+      theme: 'Street Art & Contemporain',
+      placesDisponibles: 2
     }
   ];
 
-  let selectedSeries: PhotoSeries | null = null;
-  let isModalOpen = false;
-  let fullscreenPhoto: string | null = null;
   let isVisible = false;
-
-  function openModal(series: PhotoSeries) {
-    selectedSeries = series;
-    isModalOpen = true;
-  }
-
-  function closeModal() {
-    isModalOpen = false;
-    selectedSeries = null;
-  }
-
-  function openFullscreen(photo: string) {
-    fullscreenPhoto = photo;
-  }
-
-  function closeFullscreen() {
-    fullscreenPhoto = null;
-  }
 
   onMount(() => {
     setTimeout(() => { isVisible = true; }, 100);
@@ -96,53 +31,77 @@
 <div class="photography-page">
   <div class="content">
     <h1 class="page-title {isVisible ? 'fade-in-up' : ''}">Photographie</h1>
-    <div class="series-grid">
-      {#each series as s, i}
-        <div class="series-card {isVisible ? 'fade-in-up' : ''}"
-             style="animation-delay: {0.2 + i * 0.08}s"
-             on:click={() => openModal(s)}
-             role="button"
-             tabindex="0"
-             on:keydown={(e) => e.key === 'Enter' && openModal(s)}>
-          <div class="series-content">
-            <h2>{s.title}</h2>
-            <p>{s.description}</p>
-          </div>
-          {#if s.thumbnail}
-            <div class="series-thumbnail">
-              <img src={s.thumbnail} alt="Aperçu {s.title}" />
+    
+    <div class="two-blocks-container {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.2s">
+      <!-- Bloc gauche : Portfolio Photo -->
+      <div class="block portfolio-block">
+        <div class="block-content">
+          <h2>Portfolio Photo</h2>
+          <p class="block-description">
+            Découvrez mes séries photographiques : Street, Portraits, Paysages et Quotidien. 
+            Chaque série raconte une histoire à travers l'objectif.
+          </p>
+          <div class="portfolio-preview">
+            <div class="preview-images">
+              <div class="preview-image">
+                <img src="/photos/street/1.jpg" alt="Street" />
+                <span class="image-label">Street</span>
+              </div>
+              <div class="preview-image">
+                <img src="/photos/portraits/IMG_7790.jpg" alt="Portraits" />
+                <span class="image-label">Portraits</span>
+              </div>
+              <div class="preview-image">
+                <img src="/photos/paysages/1.jpg" alt="Paysages" />
+                <span class="image-label">Paysages</span>
+              </div>
             </div>
-          {/if}
+          </div>
+          <a href="/photographie/portfolioPhoto" class="btn-primary">
+            Voir le portfolio complet
+          </a>
         </div>
-      {/each}
-    </div>
-  </div>
+      </div>
 
-  {#if isModalOpen && selectedSeries}
-    <div class="modal" on:click={closeModal} role="dialog" aria-modal="true" aria-label="Modal de photos">
-      <div class="modal-content" on:click|stopPropagation on:keydown|stopPropagation>
-        <div class="modal-header">
-          <h2>{selectedSeries.title}</h2>
-          <button class="close-button" on:click={closeModal}>×</button>
-        </div>
-        <p>{selectedSeries?.description}</p>
-        <div class="photo-grid">
-          {#each selectedSeries.photos as photo}
-            <button class="photo-item" on:click={() => openFullscreen(photo)} on:keydown={(e) => e.key === 'Enter' && openFullscreen(photo)}>
-              <img src={photo} alt="{selectedSeries.title}" />
-            </button>
-          {/each}
+      <!-- Bloc droit : La ligne Argentique -->
+      <div class="block argentique-block">
+        <div class="block-content">
+          <h2>La ligne Argentique</h2>
+          <p class="block-description">
+            Découvrez Nantes à travers l'objectif d'un appareil photo argentique. 
+            Balades photographiques guidées dans les rues de la ville.
+          </p>
+          
+          <!-- Aperçu des balades programmées -->
+          <div class="balades-preview">
+            <h3>Prochaines balades</h3>
+            <div class="balades-preview-grid">
+              {#each baladesApercu as balade}
+                <div class="balade-preview-card">
+                  <div class="balade-preview-date">
+                    <span class="date-day">{new Date(balade.date).getDate()}</span>
+                    <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                  </div>
+                  <div class="balade-preview-info">
+                    <h4>{balade.theme}</h4>
+                    <p>📍 {balade.lieu} • 🕐 {balade.heure}</p>
+                    <span class="places-dispo">{balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''} disponible{balade.placesDisponibles > 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+
+          <div class="argentique-actions">
+            <a href="/photographie/argentique" class="btn-secondary">
+              Voir toutes les balades
+            </a>
+            <span class="inscription-note">📝 Inscriptions ouvertes • 45€ par personne</span>
+          </div>
         </div>
       </div>
     </div>
-  {/if}
-
-  {#if fullscreenPhoto}
-    <div class="fullscreen-modal" on:click={closeFullscreen} on:keydown={(e) => e.key === 'Escape' && closeFullscreen()} tabindex="0" aria-modal="true" role="dialog" aria-label="Photo en plein écran">
-      <img src={fullscreenPhoto} alt="" class="fullscreen-img" />
-      <button class="close-fullscreen" on:click={closeFullscreen} aria-label="Fermer">×</button>
-    </div>
-  {/if}
+  </div>
 </div>
 
 <style>
@@ -189,214 +148,241 @@
     transform: translateY(40px);
   }
 
-  .series-grid {
+  .two-blocks-container {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    width: 100vw;
-    max-width: 500px;
-    margin: 0 auto 2rem auto;
-    padding: 0 1vw;
-    box-sizing: border-box;
-  }
-
-  .series-card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    padding: 1.2rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
     width: 100%;
-    box-sizing: border-box;
+    max-width: 1200px;
+    padding: 0 2rem;
+    margin: 0 auto;
     opacity: 0;
     transform: translateY(40px);
+  }
+
+  .block {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    min-height: 500px;
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
   }
 
-  .series-card:hover {
-    background: rgba(255, 255, 255, 0.2);
+  .block:hover {
+    background: rgba(255, 255, 255, 0.1);
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
   }
 
-  .series-content {
+  .portfolio-block {
+    border-left: 4px solid #ffd700;
+  }
+
+  .argentique-block {
+    border-left: 4px solid #ff6b6b;
+  }
+
+  .block-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
-  .series-content h2 {
+  .block-content h2 {
     color: #fff;
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
+    font-size: 2rem;
+    margin-bottom: 1rem;
     font-weight: 500;
   }
 
-  .series-content p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem;
-    line-height: 1.5;
+  .block-description {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
   }
 
-  .series-thumbnail {
-    flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+  /* Styles pour le bloc Portfolio */
+  .portfolio-preview {
+    margin-bottom: 2rem;
+  }
+
+  .preview-images {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .preview-image {
+    position: relative;
+    aspect-ratio: 1;
     border-radius: 8px;
     overflow: hidden;
     border: 2px solid rgba(255, 255, 255, 0.2);
   }
 
-  .series-thumbnail img {
+  .preview-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
   }
 
-  .series-card:hover .series-thumbnail img {
+  .preview-image:hover img {
     transform: scale(1.1);
   }
 
-  .modal {
-    position: fixed;
-    top: 0;
+  .image-label {
+    position: absolute;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  /* Styles pour le bloc Argentique */
+  .balades-preview {
+    margin-bottom: 2rem;
+  }
+
+  .balades-preview h3 {
+    color: #ffd700;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .balades-preview-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .balade-preview-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .modal-content {
-    background: var(--color-bg);
-    padding: 2rem;
-    border-radius: 10px;
-    max-width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-  }
-
-  .modal-header h2 {
-    color: rgba(220, 220, 220, 0.6);
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 0;
-  }
-
-  .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .photo-item {
-    aspect-ratio: 1;
-    overflow: hidden;
-    border-radius: 8px;
-    border: none;
-    background-color: var(--color-bg);
-  }
-
-  .photo-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
     transition: transform 0.3s ease;
   }
 
-  .photo-item:hover img {
-    transform: scale(1.1);
+  .balade-preview-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.1);
   }
 
-  .close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: rgba(220, 220, 220, 0.6);
-    font-size: 2rem;
-    cursor: pointer;
-    padding: 0;
+  .balade-preview-date {
+    background: #ffd700;
+    color: #000;
+    padding: 0.5rem;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 50px;
+    flex-shrink: 0;
   }
 
-  .fullscreen-modal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.97);
-    z-index: 2000;
+  .date-day {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .date-month {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+  }
+
+  .balade-preview-info {
+    flex: 1;
+    text-align: left;
+  }
+
+  .balade-preview-info h4 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .balade-preview-info p {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .places-dispo {
+    color: #00ff00;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  /* Boutons */
+  .btn-primary, .btn-secondary {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin-top: auto;
+  }
+
+  .btn-primary {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  }
+
+  .argentique-actions {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    cursor: zoom-out;
-    animation: fadeIn 0.2s;
+    gap: 1rem;
+    margin-top: auto;
   }
 
-  .fullscreen-img {
-    max-width: 90vw;
-    max-height: 90vh;
-    border-radius: 10px;
-    box-shadow: 0 0 40px 10px #000a;
-    background: var(--color-bg);
-    cursor: auto;
+  .inscription-note {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
   }
 
-  .close-fullscreen {
-    position: fixed;
-    top: 2rem;
-    right: 2rem;
-    background: none;
-    border: none;
-    color: rgba(220, 220, 220, 0.6);
-    font-size: 3rem;
-    cursor: pointer;
-    z-index: 2100;
-    padding: 0;
-    line-height: 1;
-  }
-
-  @media (max-width: 600px) {
-    .page-title {
-      font-size: 2rem;
-      margin: 1.2rem 0 1.2rem 0;
-    }
-    .series-grid {
-      padding: 0;
-      gap: 0.7rem;
-      justify-items: center;
-      width: 100%;
-      max-width: none;
-    }
-    .series-card {
-      padding: 0.8rem 0.5rem;
-      width: 80%;
-      margin: 0 auto;
-    }
-    .series-content h2 {
-      font-size: 1.1rem;
-    }
-    .series-content p {
-      font-size: 0.95rem;
-    }
-    .series-thumbnail {
-      width: 60px;
-      height: 60px;
-    }
-  }
-
+  /* Animations */
   .fade-in-up {
     opacity: 1;
     transform: translateY(0);
     animation: fadeInUp 0.6s cubic-bezier(.4,0,.2,1) both;
   }
+  
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -405,6 +391,50 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 2rem;
+      margin: 1.2rem 0 1.2rem 0;
+    }
+    
+    .two-blocks-container {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 0 1rem;
+    }
+    
+    .block {
+      padding: 1.5rem;
+      min-height: auto;
+    }
+    
+    .block-content h2 {
+      font-size: 1.5rem;
+    }
+    
+    .block-description {
+      font-size: 1rem;
+    }
+    
+    .preview-images {
+      grid-template-columns: 1fr;
+    }
+    
+    .balades-preview-grid {
+      gap: 0.8rem;
+    }
+    
+    .balade-preview-card {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .balade-preview-info {
+      text-align: center;
     }
   }
 </style> 
