@@ -1,6 +1,6 @@
-# sv
+# MonSite - Portfolio Photographique et Web
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Site web portfolio présentant des travaux photographiques et de développement web, avec un système de réservation pour des balades photo argentique.
 
 ## Creating a project
 
@@ -35,4 +35,29 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Configuration EmailJS
+
+Pour que le formulaire de contact fonctionne, vous devez configurer les variables d'environnement EmailJS :
+
+1. Créez un fichier `.env` à la racine du projet
+2. Ajoutez vos clés EmailJS :
+
+```bash
+VITE_EMAILJS_SERVICE_ID=votre_service_id
+VITE_EMAILJS_TEMPLATE_ID=votre_template_id
+VITE_EMAILJS_PUBLIC_KEY=votre_public_key
+```
+
+## Déploiement Docker
+
+Le projet inclut une configuration Docker complète :
+
+```bash
+# Build de l'image
+docker build -t monsite .
+
+# Lancement avec docker-compose
+docker-compose up -d
+```
+
+> **Note** : Les variables d'environnement EmailJS peuvent être surchargées via docker-compose ou définies dans le Dockerfile.
