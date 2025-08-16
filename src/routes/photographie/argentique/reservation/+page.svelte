@@ -179,8 +179,6 @@
 
   // Fonction pour créer l'URL Google Maps avec le parcours complet
   function createGoogleMapsRoute(balade: any) {
-    const steps = getParcoursSteps(balade);
-    if (steps.length === 0) return null;
 
     // Coordonnées des points d'intérêt pour chaque balade
     const coordinates = {
