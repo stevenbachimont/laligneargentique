@@ -5,46 +5,53 @@ import Page from './+page.svelte';
 describe('/web', () => {
   it('affiche le titre principal', () => {
     render(Page);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/développement web/i);
+    expect(screen.getByRole('heading', { name: 'Développement web' })).toBeInTheDocument();
+  });
+
+  it('affiche la description de la page', () => {
+    render(Page);
+    expect(screen.getByText(/Découvrez mes projets de développement web organisés en deux sections/)).toBeInTheDocument();
   });
 
   it('affiche les deux blocs principaux', () => {
     render(Page);
-    // Vérifier que les deux blocs principaux sont présents
-    const headings = screen.getAllByRole('heading', { level: 2 });
-    const titles = headings.map(h => h.textContent);
-    
-    expect(titles).toContain('Portfolio Web');
-    expect(titles).toContain('Outils Web');
+    expect(screen.getByRole('heading', { name: 'Portfolio Web' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Outils Web' })).toBeInTheDocument();
   });
 
-  it('affiche les liens vers les pages dédiées', () => {
+  it('affiche les descriptions des blocs', () => {
     render(Page);
-    
-    // Vérifier le lien vers le portfolio web
-    const portfolioLink = screen.getByRole('link', { name: /voir le portfolio complet/i });
-    expect(portfolioLink).toHaveAttribute('href', '/web/portfolioWeb');
-    
-    // Vérifier le lien vers les outils
-    const toolsLink = screen.getByRole('link', { name: /voir tous les outils/i });
-    expect(toolsLink).toHaveAttribute('href', '/web/outils');
+    expect(screen.getByText(/Mon parcours de développement web à travers une timeline chronologique/)).toBeInTheDocument();
+    expect(screen.getByText(/Applications web utiles que j'ai développées, classées par thématique/)).toBeInTheDocument();
   });
 
-  it('affiche les fonctionnalités du portfolio', () => {
+  it('affiche les aperçus des blocs', () => {
     render(Page);
-    
-    // Vérifier que les fonctionnalités du portfolio sont mentionnées
-    expect(screen.getByText(/projets chronologiques/i)).toBeInTheDocument();
-    expect(screen.getByText(/technologies utilisées/i)).toBeInTheDocument();
-    expect(screen.getByText(/statuts de progression/i)).toBeInTheDocument();
+    // Vérifier les icônes et textes séparément
+    expect(screen.getByText('📊')).toBeInTheDocument();
+    expect(screen.getByText('Projets chronologiques')).toBeInTheDocument();
+    expect(screen.getByText('⚡')).toBeInTheDocument();
+    expect(screen.getByText('Technologies utilisées')).toBeInTheDocument();
+    expect(screen.getByText('📷')).toBeInTheDocument();
+    expect(screen.getByText('Photographie')).toBeInTheDocument();
+    expect(screen.getByText('🎵')).toBeInTheDocument();
+    expect(screen.getByText('Musique')).toBeInTheDocument();
   });
 
-  it('affiche les catégories d\'outils', () => {
+  it('affiche les appels à l\'action', () => {
     render(Page);
+    expect(screen.getByText('Cliquez pour voir le portfolio')).toBeInTheDocument();
+    expect(screen.getByText('Cliquez pour voir les outils')).toBeInTheDocument();
+  });
+
+  it('rend les blocs cliquables', () => {
+    render(Page);
+    const portfolioBlock = screen.getByRole('button', { name: /Portfolio Web/ });
+    const toolsBlock = screen.getByRole('button', { name: /Outils Web/ });
     
-    // Vérifier que les catégories d'outils sont mentionnées dans les descriptions
-    expect(screen.getByText(/outils pour l'argentique/i)).toBeInTheDocument();
-    expect(screen.getByText(/création et édition/i)).toBeInTheDocument();
-    expect(screen.getByText(/productivité et utilitaires/i)).toBeInTheDocument();
+    expect(portfolioBlock).toBeInTheDocument();
+    expect(toolsBlock).toBeInTheDocument();
+    expect(portfolioBlock).toHaveAttribute('tabindex', '0');
+    expect(toolsBlock).toHaveAttribute('tabindex', '0');
   });
 }); 

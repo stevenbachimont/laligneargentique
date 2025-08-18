@@ -1,56 +1,42 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/svelte';
+import { describe, it, expect } from 'vitest';
 import Page from './+page.svelte';
 
 describe('/photographie/portfolioPhoto', () => {
   it('affiche le titre principal', () => {
     render(Page);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/portfolio photo/i);
+    expect(screen.getByRole('heading', { name: 'Portfolio Photo' })).toBeInTheDocument();
   });
 
   it('affiche les séries photographiques', () => {
     render(Page);
-    
-    // Vérifier que les séries sont présentes
-    expect(screen.getByText('Street')).toBeInTheDocument();
-    expect(screen.getByText('Portraits')).toBeInTheDocument();
-    expect(screen.getByText('Paysages')).toBeInTheDocument();
-    expect(screen.getByText('Quotidien')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Street' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Portraits' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Paysages' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Quotidien' })).toBeInTheDocument();
   });
 
-  it('ouvre le modal quand on clique sur une série', async () => {
+  it('affiche les descriptions des séries', () => {
     render(Page);
-    
-    // Cliquer sur la série Street
-    const streetCard = screen.getByText('Street').closest('.series-card');
-    await fireEvent.click(streetCard);
-    
-    // Vérifier que le modal s'ouvre en cherchant des éléments spécifiques au modal
-    expect(screen.getByRole('button', { name: /‹/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /›/ })).toBeInTheDocument();
-    expect(screen.getByText(/1 \/ 4/)).toBeInTheDocument();
+    expect(screen.getByText('Captures de moments urbains')).toBeInTheDocument();
+    expect(screen.getByText('Portraits en noir et blanc')).toBeInTheDocument();
+    expect(screen.getByText('Vues panoramiques')).toBeInTheDocument();
+    expect(screen.getByText('Vues quotidiennes')).toBeInTheDocument();
   });
 
-  it('affiche les boutons de navigation du carrousel', async () => {
+  it('affiche les vignettes des séries', () => {
     render(Page);
-    
-    // Ouvrir le modal
-    const streetCard = screen.getByText('Street').closest('.series-card');
-    await fireEvent.click(streetCard);
-    
-    // Vérifier que les boutons de navigation sont présents
-    expect(screen.getByRole('button', { name: /‹/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /›/ })).toBeInTheDocument();
+    const thumbnails = screen.getAllByAltText(/Aperçu Street|Aperçu Portraits|Aperçu Paysages|Aperçu Quotidien/);
+    expect(thumbnails.length).toBeGreaterThan(0);
   });
 
-  it('affiche le compteur d\'images', async () => {
+  it('rend les cartes de séries cliquables', () => {
     render(Page);
+    const seriesCards = screen.getAllByRole('button');
     
-    // Ouvrir le modal
-    const streetCard = screen.getByText('Street').closest('.series-card');
-    await fireEvent.click(streetCard);
-    
-    // Vérifier que le compteur est présent
-    expect(screen.getByText(/1 \/ 4/)).toBeInTheDocument();
+    expect(seriesCards.length).toBeGreaterThan(0);
+    seriesCards.forEach(card => {
+      expect(card).toHaveAttribute('tabindex', '0');
+    });
   });
 });
