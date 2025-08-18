@@ -278,35 +278,20 @@
 </div>
 
 <style>
-  :global(html), :global(body) {
-    overflow-x: hidden;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-  }
-
   .portfolio-photo-page {
-    height: 100%;
-    position: relative;
+    min-height: 100vh;
     background: #000;
-    overflow-x: hidden;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
 
   .content {
-    width: 100vw;
-    min-height: 100vh;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 0;
-    box-sizing: border-box;
   }
 
   .page-title {
@@ -325,10 +310,9 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.2rem;
-    width: 100vw;
+    width: 100%;
     max-width: 500px;
     margin: 0 auto 2rem auto;
-    padding: 0 1.5rem;
     box-sizing: border-box;
   }
 
@@ -398,6 +382,7 @@
     transform: scale(1.1);
   }
 
+  /* Modal styles */
   .modal {
     position: fixed;
     top: 0;
@@ -409,16 +394,25 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
   }
 
   .modal-content {
     background: var(--color-bg);
     padding: 2rem;
     border-radius: 10px;
+    width: 100%;
     max-width: 90%;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
+    box-sizing: border-box;
+  }
+
+  .modal-header {
+    position: relative;
+    margin-bottom: 1rem;
   }
 
   .modal-header h2 {
@@ -435,6 +429,7 @@
     align-items: center;
     gap: 1rem;
     margin: 2rem 0;
+    width: 100%;
   }
 
   .carousel-main {
@@ -470,6 +465,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   .carousel-nav:hover:not(:disabled) {
@@ -494,11 +490,10 @@
     font-size: 0.9rem;
   }
 
-
-
   /* Vignettes */
   .thumbnails-container {
     margin: 2rem 0;
+    width: 100%;
   }
 
   .thumbnails-grid {
@@ -507,6 +502,7 @@
     gap: 0.5rem;
     max-width: 600px;
     margin: 0 auto;
+    width: 100%;
   }
 
   .thumbnail-item {
@@ -518,6 +514,8 @@
     transition: all 0.3s ease;
     background: none;
     padding: 0;
+    width: 100%;
+    height: auto;
   }
 
   .thumbnail-item img {
@@ -535,8 +533,6 @@
     border-color: #ffd700;
     transform: scale(1.1);
   }
-
-
 
   .close-button {
     position: absolute;
@@ -561,6 +557,8 @@
     justify-content: center;
     cursor: zoom-out;
     animation: fadeIn 0.2s;
+    padding: 1rem;
+    box-sizing: border-box;
   }
 
   .fullscreen-carousel {
@@ -605,6 +603,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   .fullscreen-nav:hover:not(:disabled) {
@@ -646,26 +645,35 @@
     font-size: 1rem;
   }
 
+  /* Responsive Desktop */
+  @media (max-width: 1200px) {
+    .portfolio-photo-page {
+      padding: 1.5rem;
+    }
+    
+    .series-grid {
+      max-width: 450px;
+    }
+  }
+
   @media (max-width: 768px) {
+    .portfolio-photo-page {
+      padding: 1rem;
+    }
+
     .page-title {
       font-size: 2.2rem;
       margin: 1.5rem 0 1.5rem 0;
-      padding: 0 1rem;
       line-height: 1.2;
     }
 
     .series-grid {
-      padding: 0 1rem;
       gap: 1rem;
-      justify-items: center;
-      width: 100%;
-      max-width: none;
+      max-width: 100%;
     }
 
     .series-card {
       padding: 1rem 0.8rem;
-      width: 100%;
-      margin: 0 auto;
       border-radius: 10px;
     }
 
@@ -717,12 +725,6 @@
       margin-top: 1rem;
     }
 
-    .thumbnail {
-      width: 70px;
-      height: 70px;
-      border-radius: 6px;
-    }
-
     .carousel-counter {
       font-size: 0.9rem;
       padding: 0.4rem 0.8rem;
@@ -730,14 +732,16 @@
   }
 
   @media (max-width: 600px) {
+    .portfolio-photo-page {
+      padding: 0.8rem;
+    }
+
     .page-title {
       font-size: 1.8rem;
       margin: 1.2rem 0 1.2rem 0;
-      padding: 0 0.8rem;
     }
 
     .series-grid {
-      padding: 0 0.8rem;
       gap: 0.8rem;
     }
 
@@ -785,12 +789,6 @@
       gap: 0.6rem;
     }
 
-    .thumbnail {
-      width: 60px;
-      height: 60px;
-      border-radius: 5px;
-    }
-
     .fullscreen-carousel {
       gap: 0.8rem;
     }
@@ -824,13 +822,15 @@
 
   /* Mobile très petit */
   @media (max-width: 480px) {
+    .portfolio-photo-page {
+      padding: 0.6rem;
+    }
+
     .page-title {
       font-size: 1.6rem;
-      padding: 0 0.6rem;
     }
 
     .series-grid {
-      padding: 0 0.6rem;
       gap: 0.6rem;
     }
 
@@ -871,11 +871,6 @@
       gap: 0.5rem;
     }
 
-    .thumbnail {
-      width: 55px;
-      height: 55px;
-    }
-
     .fullscreen-nav {
       width: 50px;
       height: 50px;
@@ -891,11 +886,79 @@
     }
   }
 
+  /* Mobile ultra petit */
+  @media (max-width: 360px) {
+    .portfolio-photo-page {
+      padding: 0.5rem;
+    }
+
+    .page-title {
+      font-size: 1.4rem;
+      margin: 1rem 0 1rem 0;
+    }
+
+    .series-grid {
+      gap: 0.5rem;
+    }
+
+    .series-card {
+      padding: 0.6rem 0.4rem;
+      min-height: 70px;
+    }
+
+    .series-content h2 {
+      font-size: 0.95rem;
+    }
+
+    .series-content p {
+      font-size: 0.8rem;
+    }
+
+    .series-thumbnail {
+      width: 40px;
+      height: 40px;
+    }
+
+    .modal-content {
+      padding: 0.8rem;
+    }
+
+    .carousel-image {
+      max-height: 40vh;
+    }
+
+    .carousel-nav {
+      width: 30px;
+      height: 30px;
+      font-size: 1.1rem;
+    }
+
+    .thumbnails-grid {
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      gap: 0.4rem;
+    }
+
+    .fullscreen-nav {
+      width: 45px;
+      height: 45px;
+      font-size: 1.4rem;
+    }
+
+    .fullscreen-nav.prev {
+      left: 0.5rem;
+    }
+
+    .fullscreen-nav.next {
+      right: 0.5rem;
+    }
+  }
+
   .fade-in-up {
     opacity: 1;
     transform: translateY(0);
     animation: fadeInUp 0.6s cubic-bezier(.4,0,.2,1) both;
   }
+
   @keyframes fadeInUp {
     from {
       opacity: 0;

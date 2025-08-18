@@ -104,6 +104,10 @@
       default: return status;
     }
   }
+
+  function openTool(url: string) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 </script>
 
 <div class="tools-page">
@@ -121,7 +125,11 @@
       </div>
       <div class="tools-grid">
         {#each getToolsByCategory('photographie') as tool}
-          <div class="tool-card">
+          <div class="tool-card" 
+               on:click={() => openTool(tool.url)} 
+               role="button" 
+               tabindex="0" 
+               on:keydown={(e) => e.key === 'Enter' && openTool(tool.url)}>
             <div class="tool-header">
               <h3>{tool.name}</h3>
               <div class="status-badge" style="background-color: {getStatusColor(tool.status)}">
@@ -134,9 +142,10 @@
                 <span class="tech-tag">{tech}</span>
               {/each}
             </div>
-            <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
-              Visiter l'outil →
-            </a>
+            <div class="tool-cta">
+              <span class="cta-text">Cliquez pour visiter l'outil</span>
+              <span class="cta-arrow">→</span>
+            </div>
           </div>
         {/each}
       </div>
@@ -150,7 +159,11 @@
       </div>
       <div class="tools-grid">
         {#each getToolsByCategory('musique') as tool}
-          <div class="tool-card">
+          <div class="tool-card" 
+               on:click={() => openTool(tool.url)} 
+               role="button" 
+               tabindex="0" 
+               on:keydown={(e) => e.key === 'Enter' && openTool(tool.url)}>
             <div class="tool-header">
               <h3>{tool.name}</h3>
               <div class="status-badge" style="background-color: {getStatusColor(tool.status)}">
@@ -163,9 +176,10 @@
                 <span class="tech-tag">{tech}</span>
               {/each}
             </div>
-            <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
-              Visiter l'outil →
-            </a>
+            <div class="tool-cta">
+              <span class="cta-text">Cliquez pour visiter l'outil</span>
+              <span class="cta-arrow">→</span>
+            </div>
           </div>
         {/each}
       </div>
@@ -179,7 +193,11 @@
       </div>
       <div class="tools-grid">
         {#each getToolsByCategory('autre') as tool}
-          <div class="tool-card">
+          <div class="tool-card" 
+               on:click={() => openTool(tool.url)} 
+               role="button" 
+               tabindex="0" 
+               on:keydown={(e) => e.key === 'Enter' && openTool(tool.url)}>
             <div class="tool-header">
               <h3>{tool.name}</h3>
               <div class="status-badge" style="background-color: {getStatusColor(tool.status)}">
@@ -192,9 +210,10 @@
                 <span class="tech-tag">{tech}</span>
               {/each}
             </div>
-            <a href={tool.url} target="_blank" rel="noopener noreferrer" class="tool-link">
-              Visiter l'outil →
-            </a>
+            <div class="tool-cta">
+              <span class="cta-text">Cliquez pour visiter l'outil</span>
+              <span class="cta-arrow">→</span>
+            </div>
           </div>
         {/each}
       </div>
@@ -207,6 +226,7 @@
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    box-sizing: border-box;
   }
 
   .content {
@@ -263,6 +283,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
+    width: 100%;
   }
 
   .tool-card {
@@ -270,13 +291,24 @@
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px;
     padding: 1.5rem;
-    transition: transform 0.3s ease, background 0.3s ease;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
 
   .tool-card:hover {
     transform: translateY(-5px);
     background: rgba(255,255,255,0.1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .tool-card:focus {
+    outline: 2px solid var(--color-accent-1);
+    outline-offset: 2px;
   }
 
   .tool-header {
@@ -292,6 +324,7 @@
     color: #fff;
     margin: 0;
     flex: 1;
+    line-height: 1.3;
   }
 
   .status-badge {
@@ -324,22 +357,32 @@
     font-size: 0.8rem;
   }
 
-  .tool-link {
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.9);
-    text-decoration: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+  .tool-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: rgba(255,255,255,0.7);
     font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.3s ease;
-    display: inline-block;
   }
 
-  .tool-link:hover {
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    transform: translateY(-2px);
+  .cta-text {
+    opacity: 0.8;
+  }
+
+  .cta-arrow {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .tool-card:hover .cta-arrow {
+    transform: translateX(5px);
+    color: var(--color-accent-1);
+  }
+
+  .tool-card:hover .cta-text {
+    color: rgba(255,255,255,0.9);
   }
 
   /* Animations */
@@ -360,7 +403,18 @@
     }
   }
 
-  /* Responsive */
+  /* Responsive Desktop */
+  @media (max-width: 1200px) {
+    .tools-page {
+      padding: 1.5rem;
+    }
+    
+    .tools-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.3rem;
+    }
+  }
+
   @media (max-width: 768px) {
     .tools-page {
       padding: 1.5rem;
@@ -434,11 +488,8 @@
       padding: 0.2rem 0.6rem;
     }
 
-    .tool-link {
-      width: 100%;
-      text-align: center;
-      padding: 0.8rem 1.5rem;
-      font-size: 0.9rem;
+    .tool-cta {
+      font-size: 0.85rem;
     }
   }
 
@@ -490,9 +541,8 @@
       font-size: 0.9rem;
     }
 
-    .tool-link {
-      padding: 0.7rem 1.2rem;
-      font-size: 0.85rem;
+    .tool-cta {
+      font-size: 0.8rem;
     }
   }
 
@@ -544,9 +594,131 @@
       padding: 0.15rem 0.5rem;
     }
 
-    .tool-link {
-      padding: 0.6rem 1rem;
+    .tool-cta {
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Mobile ultra petit */
+  @media (max-width: 360px) {
+    .tools-page {
+      padding: 0.6rem;
+    }
+
+    .page-title {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      padding: 0 0.5rem;
+    }
+
+    .page-description {
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+      padding: 0 0.5rem;
+    }
+
+    .tools-category {
+      margin-bottom: 2rem;
+    }
+
+    .category-header {
+      margin-bottom: 1.2rem;
+    }
+
+    .category-header h2 {
+      font-size: 1.3rem;
+      padding: 0 0.5rem;
+    }
+
+    .category-header p {
       font-size: 0.8rem;
+      padding: 0 0.5rem;
+    }
+
+    .tools-grid {
+      gap: 0.8rem;
+    }
+
+    .tool-card {
+      padding: 0.8rem;
+      margin: 0 0.2rem;
+    }
+
+    .tool-header {
+      margin-bottom: 1rem;
+      gap: 0.6rem;
+    }
+
+    .tool-header h3 {
+      font-size: 0.95rem;
+    }
+
+    .tool-description {
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .tool-technologies {
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .tech-tag {
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+    }
+
+    .tool-cta {
+      font-size: 0.7rem;
+    }
+  }
+
+  /* Mobile ultra ultra petit */
+  @media (max-width: 320px) {
+    .tools-page {
+      padding: 0.5rem;
+    }
+
+    .page-title {
+      font-size: 1.3rem;
+      padding: 0 0.4rem;
+    }
+
+    .page-description {
+      font-size: 0.8rem;
+      padding: 0 0.4rem;
+    }
+
+    .category-header h2 {
+      font-size: 1.2rem;
+      padding: 0 0.4rem;
+    }
+
+    .category-header p {
+      font-size: 0.75rem;
+      padding: 0 0.4rem;
+    }
+
+    .tool-card {
+      padding: 0.7rem;
+      margin: 0 0.1rem;
+    }
+
+    .tool-header h3 {
+      font-size: 0.9rem;
+    }
+
+    .tool-description {
+      font-size: 0.75rem;
+    }
+
+    .tech-tag {
+      font-size: 0.6rem;
+      padding: 0.08rem 0.3rem;
+    }
+
+    .tool-cta {
+      font-size: 0.65rem;
     }
   }
 </style> 
