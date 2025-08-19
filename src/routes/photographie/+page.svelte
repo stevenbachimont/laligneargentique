@@ -64,7 +64,7 @@
           </div>
         </div>
         <div class="block-cta">
-          <span class="cta-text">Cliquez pour voir le portfolio</span>
+          <span class="cta-text">Voir le portfolio</span>
           <span class="cta-arrow">→</span>
         </div>
       </div>
@@ -100,7 +100,7 @@
         </div>
 
         <div class="block-cta">
-          <span class="cta-text">Cliquez pour voir les balades</span>
+          <span class="cta-text">Renseignements et réservations ici</span>
           <span class="cta-arrow">→</span>
         </div>
       </div>
