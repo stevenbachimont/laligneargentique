@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
-import Page from './+page.svelte';
+import Page from '../../../../src/routes/web/outils/+page.svelte';
 
 describe('/web/outils', () => {
   it('affiche le titre principal', () => {
