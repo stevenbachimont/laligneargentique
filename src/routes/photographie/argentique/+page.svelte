@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-import { baladesStore, type Balade } from '$lib/services/baladesPrismaService';
-import { BaladesClientService } from '$lib/services/baladesClientService';
+import { baladesStore, type Balade } from '$lib/services/baladesClientService';
+import { baladesClientService } from '$lib/services/baladesClientService';
 
   // Balades programmées depuis le service
   let baladesProgrammees: Balade[] = [];
@@ -23,26 +23,17 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
       console.log('🔄 Actualisation manuelle des balades...');
       isSyncing = true;
       
-      // Désactiver temporairement la synchronisation automatique
-      BaladesClientService.stopAutoSync();
-      
       // Synchroniser immédiatement
-      const success = await BaladesClientService.syncStore();
+      const success = await baladesClientService.getBalades();
       
-      if (success) {
+      if (success.length > 0) {
         console.log('✅ Balades actualisées avec succès');
         lastSyncTime = new Date();
-        // Redémarrer la synchronisation automatique
-        BaladesClientService.startAutoSync(5000);
       } else {
         console.log('❌ Échec de l\'actualisation des balades');
-        // Redémarrer la synchronisation automatique même en cas d'échec
-        BaladesClientService.startAutoSync(5000);
       }
     } catch (error) {
       console.error('❌ Erreur lors de l\'actualisation:', error);
-      // Redémarrer la synchronisation automatique en cas d'erreur
-      BaladesClientService.startAutoSync(5000);
     } finally {
       isSyncing = false;
     }
@@ -50,12 +41,9 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
 
   onMount(() => {
     // Charger les balades au démarrage
-    BaladesClientService.getBalades().catch(error => {
+    baladesClientService.getBalades().catch(error => {
       console.error('❌ Erreur lors du chargement des balades:', error);
     });
-
-    // Démarrer la synchronisation automatique (toutes les 5 secondes)
-    BaladesClientService.startAutoSync(5000);
 
     // S'abonner au store des balades
     const unsubscribe = baladesStore.subscribe(balades => {
@@ -65,10 +53,11 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
 
     setTimeout(() => { isVisible = true; }, 100);
 
-    // Nettoyer l'abonnement et arrêter la synchronisation
+    // Nettoyer l'abonnement
     return () => {
-      unsubscribe();
-      BaladesClientService.stopAutoSync();
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
     };
   });
 </script>
@@ -130,9 +119,9 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
               {isSyncing ? '🔄 Synchronisation...' : '🔄 Actualiser'}
             </button>
             <div class="sync-status">
-              <span class="sync-indicator {BaladesClientService.isAutoSyncActive() ? 'active' : 'inactive'}">
-                {BaladesClientService.isAutoSyncActive() ? '🟢' : '🔴'} Auto-sync
-              </span>
+                      <span class="sync-indicator">
+          🔄 Synchronisation manuelle
+        </span>
               <span class="last-sync">
                 Dernière sync: {lastSyncTime.toLocaleTimeString('fr-FR')}
               </span>

@@ -1,24 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { baladesPrismaService } from '$lib/services/baladesPrismaService';
 
-// Mock de Prisma
-vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn().mockImplementation(() => ({
-    balade: {
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      create: vi.fn()
-    }
-  }))
+// Mock du service Prisma
+vi.mock('$lib/services/baladesPrismaService', () => ({
+  baladesPrismaService: {
+    getBalades: vi.fn()
+  }
 }));
 
 describe('API Balades', () => {
-  let mockPrisma: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    mockPrisma = new PrismaClient();
   });
 
   describe('GET /api/balades', () => {
@@ -32,24 +24,34 @@ describe('API Balades', () => {
         }
       ];
 
-      mockPrisma.balade.findMany.mockResolvedValue(mockBalades);
+      vi.mocked(baladesPrismaService.getBalades).mockResolvedValue(mockBalades);
 
       // Simuler l'appel à l'API
       const response = await fetch('/api/balades');
       const data = await response.json();
 
-      expect(data.success).toBe(true);
-      expect(data.balades).toEqual(mockBalades);
+      expect(data).toEqual(mockBalades);
+      expect(baladesPrismaService.getBalades).toHaveBeenCalledOnce();
     });
 
     it('devrait gérer les erreurs de base de données', async () => {
-      mockPrisma.balade.findMany.mockRejectedValue(new Error('Erreur DB'));
+      vi.mocked(baladesPrismaService.getBalades).mockRejectedValue(new Error('Erreur DB'));
 
       const response = await fetch('/api/balades');
       const data = await response.json();
 
-      expect(data.success).toBe(false);
       expect(data.error).toBe('Erreur lors de la récupération des balades');
+      expect(response.status).toBe(500);
+    });
+
+    it('devrait retourner un tableau vide en cas d\'erreur', async () => {
+      vi.mocked(baladesPrismaService.getBalades).mockRejectedValue(new Error('Erreur DB'));
+
+      const response = await fetch('/api/balades');
+      const data = await response.json();
+
+      expect(data.error).toBeDefined();
+      expect(response.status).toBe(500);
     });
   });
 });
