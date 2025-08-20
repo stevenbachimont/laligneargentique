@@ -1,14 +1,22 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { baladesService } from '$lib/services/baladesService';
+import { baladesPrismaService } from '$lib/services/baladesPrismaService';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const { baladeId, nombrePlaces, action } = await request.json();
     
-    if (!baladeId || !nombrePlaces || !action) {
+    // Validation des paramètres selon l'action
+    if (!action) {
       return json({ 
-        error: 'Paramètres manquants: baladeId, nombrePlaces et action sont requis' 
+        error: 'Paramètre manquant: action est requis' 
+      }, { status: 400 });
+    }
+
+    // Pour les actions autres que sync, nombrePlaces est requis
+    if (action !== 'sync' && (!baladeId || !nombrePlaces)) {
+      return json({ 
+        error: 'Paramètres manquants: baladeId et nombrePlaces sont requis pour cette action' 
       }, { status: 400 });
     }
 
@@ -16,13 +24,13 @@ export const POST: RequestHandler = async ({ request }) => {
     
     switch (action) {
       case 'reserver':
-        success = await baladesService.reserverPlaces(baladeId, nombrePlaces);
+        success = await baladesPrismaService.reserverPlaces(baladeId, nombrePlaces);
         break;
       case 'annuler':
-        success = await baladesService.annulerReservation(baladeId, nombrePlaces);
+        success = await baladesPrismaService.annulerReservation(baladeId, nombrePlaces);
         break;
       case 'reinitialiser':
-        success = await baladesService.reinitialiserPlaces(baladeId);
+        success = await baladesPrismaService.reinitialiserPlaces(baladeId);
         break;
       case 'sync':
         // Pour la synchronisation, on renvoie juste les données actuelles
@@ -36,7 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (success) {
       // Récupérer les balades mises à jour pour les renvoyer au client
-      const baladesMisesAJour = baladesService.getBalades();
+      const baladesMisesAJour = await baladesPrismaService.getBalades();
       return json({ 
         success: true, 
         message: `Places mises à jour avec succès pour la balade ${baladeId}`,

@@ -22,28 +22,14 @@ vi.mock('$app/stores', () => ({
   }
 }));
 
-// Mock de window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-    assign: vi.fn(),
-    replace: vi.fn()
-  },
-  writable: true
-});
-
-// Mock de window.open
-Object.defineProperty(window, 'open', {
-  value: vi.fn(),
-  writable: true
-});
+// Les autres mocks sont dans vitest-setup-client.ts
 
 describe('/photographie/argentique/reservation', () => {
   it('affiche le titre de la page avec le thème de la balade', async () => {
     render(Page);
     
     // Attendre que la balade soit chargée
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByRole('heading', { name: /Réservation - Architecture médiévale/ })).toBeInTheDocument();
   });
@@ -51,7 +37,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche les détails de la balade', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // Vérifier les informations de la balade
     expect(screen.getByText('Architecture médiévale')).toBeInTheDocument();
@@ -68,7 +54,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche les consignes de sécurité', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByText('📋 Consignes et Matériel')).toBeInTheDocument();
     expect(screen.getByText('📸 Consignes de sécurité')).toBeInTheDocument();
@@ -81,7 +67,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche le matériel fourni', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByText('🎒 Matériel fourni')).toBeInTheDocument();
     
@@ -93,7 +79,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche le plan et parcours', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByText('🗺️ Plan et Parcours')).toBeInTheDocument();
     expect(screen.getByText('🗺️ Parcours de la balade')).toBeInTheDocument();
@@ -106,7 +92,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche le formulaire de réservation', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByText('Réserver votre place')).toBeInTheDocument();
     expect(screen.getByLabelText('Prénom *')).toBeInTheDocument();
@@ -120,7 +106,7 @@ describe('/photographie/argentique/reservation', () => {
   it('pré-remplit le formulaire avec les données de la balade', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // Vérifier que la date est pré-remplie
     const dateInput = screen.getByLabelText('Date souhaitée *') as HTMLInputElement;
@@ -141,7 +127,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche le bouton de retour', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByRole('button', { name: /← Retour aux balades/ })).toBeInTheDocument();
   });
@@ -149,7 +135,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche le bouton pour ouvrir Google Maps', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByRole('button', { name: /🗺️ Ouvrir le parcours sur Google Maps/ })).toBeInTheDocument();
   });
@@ -157,7 +143,7 @@ describe('/photographie/argentique/reservation', () => {
   it('affiche le résumé du parcours', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     expect(screen.getByText('📊 Résumé du parcours')).toBeInTheDocument();
     expect(screen.getByText('Durée totale :')).toBeInTheDocument();

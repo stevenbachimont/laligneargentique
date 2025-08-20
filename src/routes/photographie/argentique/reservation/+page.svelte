@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { baladesService, type Balade } from '$lib/services/baladesService';
+  import { baladesStore, type Balade } from '$lib/services/baladesPrismaService';
+  import { BaladesClientService } from '$lib/services/baladesClientService';
 
   // Récupérer les paramètres de l'URL
   $: baladeId = $page.url.searchParams.get('id');
@@ -124,22 +125,30 @@
   }
 
   // Balades programmées depuis le service
-  const baladesProgrammees = baladesService.getBalades();
+  let baladesProgrammees: Balade[] = [];
 
-  onMount(() => {
+  onMount(async () => {
+    // Charger les balades au démarrage
+    try {
+      baladesProgrammees = await BaladesClientService.getBalades();
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des balades:', error);
+    }
+
     // Récupérer la balade sélectionnée
     if (baladeId) {
-      balade = baladesProgrammees.find((b: Balade) => b.id === parseInt(baladeId));
+      // Chercher la balade dans la liste chargée
+      balade = baladesProgrammees.find(b => b.id === parseInt(baladeId));
     } else if (baladeData) {
       try {
         balade = JSON.parse(decodeURIComponent(baladeData));
-      } catch (e) {
-        console.error('Erreur lors du parsing des données de la balade:', e);
+      } catch (error) {
+        console.error('❌ Erreur lors du décodage des données de la balade:', error);
       }
     }
 
+    // Pré-remplir le formulaire avec les données de la balade
     if (balade) {
-      // Pré-remplir le formulaire avec les données de la balade
       argentiqueForm.dateSouhaitee = balade.date;
       argentiqueForm.baladeId = balade.id.toString();
       placesDisponibles = balade.placesDisponibles;
@@ -331,7 +340,7 @@
                   {#each balade.consignes as consigne}
                     <div class="consigne-item">
                       <span class="consigne-icon">⚠️</span>
-                      <span class="consigne-text">{consigne}</span>
+                      <span class="consigne-text">{consigne.texte}</span>
                     </div>
                   {/each}
                 {/if}
@@ -344,7 +353,7 @@
                   {#each balade.materiel as item}
                     <div class="materiel-item">
                       <span class="materiel-icon">📱</span>
-                      <span class="materiel-text">{item}</span>
+                      <span class="materiel-text">{item.nom}</span>
                     </div>
                   {/each}
                 {/if}

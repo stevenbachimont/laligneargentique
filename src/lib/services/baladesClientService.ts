@@ -1,14 +1,37 @@
-import { baladesStore } from './baladesService';
+import { baladesStore } from './baladesPrismaService';
 
 // Service client pour synchroniser les places disponibles
 export class BaladesClientService {
   
+  private static syncInterval: NodeJS.Timeout | null = null;
+  private static isAutoSyncEnabled = false;
+  
+  // Récupérer toutes les balades depuis l'API
+  static async getBalades(): Promise<any[]> {
+    try {
+      const response = await fetch('/api/balades');
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des balades');
+      }
+      
+      const data = await response.json();
+      if (data.success && data.balades) {
+        // Mettre à jour le store
+        baladesStore.set(data.balades);
+        return data.balades;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des balades:', error);
+      return [];
+    }
+  }
+  
   // Mettre à jour les places via l'API et synchroniser le store
   static async updatePlaces(baladeId: number, nombrePlaces: number, action: 'reserver' | 'annuler' | 'reinitialiser'): Promise<boolean> {
     try {
-      // Construire l'URL complète
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/balades/update-places`, {
+      const response = await fetch('/api/balades/update-places', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,36 +67,46 @@ export class BaladesClientService {
   // Synchroniser le store avec les données du serveur
   static async syncStore(): Promise<boolean> {
     try {
-      // Construire l'URL complète
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/balades/update-places`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          baladeId: 1, // ID factice pour déclencher une synchronisation
-          nombrePlaces: 0,
-          action: 'sync'
-        })
-      });
-
-      if (!response.ok) {
-        return false;
-      }
-
-      const data = await response.json();
-      
-      if (data.success && data.balades) {
-        baladesStore.set(data.balades);
-        console.log('✅ Store synchronisé avec le serveur');
-        return true;
-      }
-
-      return false;
+      const balades = await this.getBalades();
+      return balades.length > 0;
     } catch (error) {
       console.error('❌ Erreur lors de la synchronisation du store:', error);
       return false;
     }
+  }
+
+  // Démarrer la synchronisation automatique
+  static startAutoSync(intervalMs: number = 10000): void {
+    if (this.isAutoSyncEnabled) {
+      console.log('⚠️ Synchronisation automatique déjà active');
+      return;
+    }
+
+    console.log(`🔄 Démarrage de la synchronisation automatique (${intervalMs}ms)`);
+    this.isAutoSyncEnabled = true;
+    
+    this.syncInterval = setInterval(async () => {
+      try {
+        await this.syncStore();
+        console.log('✅ Synchronisation automatique effectuée');
+      } catch (error) {
+        console.error('❌ Erreur lors de la synchronisation automatique:', error);
+      }
+    }, intervalMs);
+  }
+
+  // Arrêter la synchronisation automatique
+  static stopAutoSync(): void {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval);
+      this.syncInterval = null;
+      this.isAutoSyncEnabled = false;
+      console.log('⏹️ Synchronisation automatique arrêtée');
+    }
+  }
+
+  // Vérifier si la synchronisation automatique est active
+  static isAutoSyncActive(): boolean {
+    return this.isAutoSyncEnabled;
   }
 }
