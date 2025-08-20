@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Balade {
+  id                  Int      @id @default(autoincrement())
+  date                String
+  heure               String
+  lieu                String
+  theme               String
+  placesDisponibles   Int
+  placesInitiales     Int
+  prix                String
+  description         String
+  
+  // Relations
+  consignes           Consigne[]
+  materiel            Materiel[]
+  coordonnees         Coordonnee[]
+  parcours            EtapeParcours[]
+  reservations        Reservation[]
+  
+  // Timestamps
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Consigne {
+  id        Int      @id @default(autoincrement())
+  texte     String
+  baladeId  Int
+  balade    Balade   @relation(fields: [baladeId], references: [id], onDelete: Cascade)
+}
+
+model Materiel {
+  id        Int      @id @default(autoincrement())
+  nom       String
+  baladeId  Int
+  balade    Balade   @relation(fields: [baladeId], references: [id], onDelete: Cascade)
+}
+
+model Coordonnee {
+  id        Int      @id @default(autoincrement())
+  lat       Float
+  lng       Float
+  name      String
+  baladeId  Int
+  balade    Balade   @relation(fields: [baladeId], references: [id], onDelete: Cascade)
+}
+
+model EtapeParcours {
+  id          Int      @id @default(autoincrement())
+  titre       String
+  description String
+  duree       String
+  distance    String
+  baladeId    Int
+  balade      Balade   @relation(fields: [baladeId], references: [id], onDelete: Cascade)
+}
+
+model Reservation {
+  id              Int      @id @default(autoincrement())
+  baladeId        Int
+  balade          Balade   @relation(fields: [baladeId], references: [id])
+  prenom          String
+  nom             String
+  email           String
+  telephone       String?
+  dateSouhaitee   String
+  nombrePersonnes Int
+  message         String
+  statut          String   @default("en_attente") // en_attente, confirmee, annulee
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

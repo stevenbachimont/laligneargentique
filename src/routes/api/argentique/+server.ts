@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { EmailService } from '$lib/server/emailService';
 import { ValidationService } from '$lib/server/validationService';
 import type { EmailData } from '$lib/server/types';
-import { baladesService } from '$lib/services/baladesService';
+import { baladesPrismaService } from '$lib/services/baladesPrismaService';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -24,11 +24,12 @@ export const POST: RequestHandler = async ({ request }) => {
     // Mettre à jour les places disponibles si une balade est spécifiée
     if (data.baladeId && data.nombrePersonnes) {
       try {
-        await baladesService.reserverPlaces(parseInt(data.baladeId), data.nombrePersonnes);
-        console.log(`✅ Places réservées pour la balade ${data.baladeId}: ${data.nombrePersonnes} place(s)`);
-        
-        // En production, le store sera mis à jour via l'API
-        // En développement, le store est mis à jour directement
+        const success = await baladesPrismaService.reserverPlaces(parseInt(data.baladeId), data.nombrePersonnes);
+        if (success) {
+          console.log(`✅ Places réservées pour la balade ${data.baladeId}: ${data.nombrePersonnes} place(s)`);
+        } else {
+          throw new Error('Échec de la réservation des places');
+        }
       } catch (error) {
         console.error('❌ Erreur lors de la réservation des places:', error);
         return json({ 

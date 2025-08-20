@@ -2,11 +2,8 @@ import { render, screen } from '@testing-library/svelte';
 import { describe, it, expect, vi } from 'vitest';
 import Page from './+page.svelte';
 
-// Mock de window.open
-Object.defineProperty(window, 'open', {
-  value: vi.fn(),
-  writable: true
-});
+// Les mocks sont maintenant dans vitest-setup-client.ts
+// Pas besoin de mocks supplémentaires ici
 
 describe('/photographie/argentique', () => {
   it('affiche le titre principal', async () => {
@@ -48,7 +45,8 @@ describe('/photographie/argentique', () => {
   it('affiche toutes les balades programmées', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Attendre que les données soient chargées via l'API
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // Vérifier qu'il y a des balades affichées
     const baladeCards = screen.getAllByText(/Architecture médiévale|Street Art|Nature en ville/);
@@ -67,7 +65,8 @@ describe('/photographie/argentique', () => {
   it('affiche les dates et heures des balades', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Attendre que les données soient chargées
+    await new Promise(resolve => setTimeout(resolve, 200));
     
     // Vérifier que les heures sont affichées (avec l'emoji 🕐)
     const heureElements = screen.getAllByText(/🕐/);
@@ -78,10 +77,11 @@ describe('/photographie/argentique', () => {
     expect(heures.some(text => text && /\d{1,2}:\d{2}/.test(text))).toBe(true);
   });
 
-    it('affiche le nombre de places disponibles', async () => {
+  it('affiche le nombre de places disponibles', async () => {
     render(Page);
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Attendre que les données soient chargées
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // Vérifier que les places disponibles sont affichées
     // Utiliser une regex pour capturer n'importe quel nombre de places
@@ -93,10 +93,11 @@ describe('/photographie/argentique', () => {
     expect(placesText.some(text => text && text.includes('places disponibles'))).toBe(true);
   });
 
-    it('affiche les boutons de réservation avec le bon état', async () => {
+  it('affiche les boutons de réservation avec le bon état', async () => {
     render(Page);
     
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Attendre que les données soient chargées
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // Vérifier qu'il y a des boutons de réservation
     const reserveButtons = screen.getAllByRole('button', { name: 'Réserver' });
@@ -131,5 +132,19 @@ describe('/photographie/argentique', () => {
     expect(screen.getByText(/Composition, exposition, développement/)).toBeInTheDocument();
     expect(screen.getByText(/Découverte des quartiers historiques/)).toBeInTheDocument();
     expect(screen.getByText(/Maximum 5 participants par balade pour un accompagnement personnalisé/)).toBeInTheDocument();
+  });
+
+  it('permet d\'actualiser les balades', async () => {
+    render(Page);
+    
+    // Attendre que les données soient chargées
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Vérifier que le bouton d'actualisation est présent
+    const refreshButton = screen.getByRole('button', { name: /🔄 Actualiser/ });
+    expect(refreshButton).toBeInTheDocument();
+    
+    // Le bouton devrait être cliquable
+    expect(refreshButton).not.toBeDisabled();
   });
 });

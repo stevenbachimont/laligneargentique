@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-import { baladesStore, baladesService, type Balade } from '$lib/services/baladesService';
+import { baladesStore, type Balade } from '$lib/services/baladesPrismaService';
 import { BaladesClientService } from '$lib/services/baladesClientService';
 
   // Balades programmées depuis le service
   let baladesProgrammees: Balade[] = [];
-
   let isVisible = false;
+  let isSyncing = false;
+  let lastSyncTime = new Date();
 
   // Fonction pour rediriger vers la page de réservation
   function reserverBalade(balade: any) {
@@ -19,34 +20,56 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
   // Fonction pour actualiser les places disponibles
   async function refreshBalades() {
     try {
+      console.log('🔄 Actualisation manuelle des balades...');
+      isSyncing = true;
+      
+      // Désactiver temporairement la synchronisation automatique
+      BaladesClientService.stopAutoSync();
+      
+      // Synchroniser immédiatement
       const success = await BaladesClientService.syncStore();
+      
       if (success) {
         console.log('✅ Balades actualisées avec succès');
+        lastSyncTime = new Date();
+        // Redémarrer la synchronisation automatique
+        BaladesClientService.startAutoSync(5000);
       } else {
-        console.log('ℹ️ Actualisation non disponible (mode développement)');
+        console.log('❌ Échec de l\'actualisation des balades');
+        // Redémarrer la synchronisation automatique même en cas d'échec
+        BaladesClientService.startAutoSync(5000);
       }
     } catch (error) {
       console.error('❌ Erreur lors de l\'actualisation:', error);
+      // Redémarrer la synchronisation automatique en cas d'erreur
+      BaladesClientService.startAutoSync(5000);
+    } finally {
+      isSyncing = false;
     }
   }
 
-
-
   onMount(() => {
+    // Charger les balades au démarrage
+    BaladesClientService.getBalades().catch(error => {
+      console.error('❌ Erreur lors du chargement des balades:', error);
+    });
+
+    // Démarrer la synchronisation automatique (toutes les 5 secondes)
+    BaladesClientService.startAutoSync(5000);
+
     // S'abonner au store des balades
     const unsubscribe = baladesStore.subscribe(balades => {
       baladesProgrammees = balades;
-    });
-
-    // Synchroniser le store avec le serveur en production
-    BaladesClientService.syncStore().catch(error => {
-      console.log('ℹ️ Synchronisation non disponible (mode développement)');
+      console.log('🔄 Store mis à jour:', balades.length, 'balades');
     });
 
     setTimeout(() => { isVisible = true; }, 100);
 
-    // Nettoyer l'abonnement
-    return unsubscribe;
+    // Nettoyer l'abonnement et arrêter la synchronisation
+    return () => {
+      unsubscribe();
+      BaladesClientService.stopAutoSync();
+    };
   });
 </script>
 
@@ -97,13 +120,24 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
       <div class="container">
         <div class="section-header">
-          <div>
-            <h2>Balades programmées</h2>
-            <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
+          <h2>📅 Balades Programmées</h2>
+          <div class="header-actions">
+            <button 
+              class="btn-refresh {isSyncing ? 'syncing' : ''}" 
+              on:click={refreshBalades}
+              disabled={isSyncing}
+            >
+              {isSyncing ? '🔄 Synchronisation...' : '🔄 Actualiser'}
+            </button>
+            <div class="sync-status">
+              <span class="sync-indicator {BaladesClientService.isAutoSyncActive() ? 'active' : 'inactive'}">
+                {BaladesClientService.isAutoSyncActive() ? '🟢' : '🔴'} Auto-sync
+              </span>
+              <span class="last-sync">
+                Dernière sync: {lastSyncTime.toLocaleTimeString('fr-FR')}
+              </span>
+            </div>
           </div>
-          <button class="btn-refresh" on:click={refreshBalades} title="Actualiser les places disponibles">
-            🔄 Actualiser
-          </button>
         </div>
         
         <div class="balades-grid">
@@ -120,7 +154,7 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
                   <p class="balade-heure">🕐 {balade.heure}</p>
                 </div>
                                                                    <div class="balade-status">
-                    <span class="places {baladesService.getBaladeStatus(balade.id)}">
+                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : 'limite'}">
                       {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
                     </span>
                     <span class="prix">{balade.prix}</span>
@@ -131,12 +165,12 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
                    <button 
                      class="btn-reserver" 
                      on:click={() => reserverBalade(balade)}
-                     disabled={baladesService.isBaladeComplete(balade.id)}
+                     disabled={balade.placesDisponibles === 0}
                    >
-                     {baladesService.isBaladeComplete(balade.id) ? 'Complet' : 'Réserver'}
+                     {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
                    </button>
                    <span class="inscription-info">
-                     {baladesService.isBaladeComplete(balade.id) ? 'Places épuisées' : 'Inscriptions ouvertes'}
+                     {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
                    </span>
                  </div>
             </div>
@@ -318,6 +352,12 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
     margin-bottom: 0;
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
   .btn-refresh {
     background: linear-gradient(45deg, #4CAF50, #45a049);
     color: white;
@@ -339,6 +379,34 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
 
   .btn-refresh:active {
     transform: translateY(0);
+  }
+
+  .btn-refresh.syncing {
+    background: linear-gradient(45deg, #ff9800, #ffb74d);
+    color: #000;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .sync-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .sync-indicator {
+    font-size: 1rem;
+  }
+
+  .sync-indicator.active {
+    color: #00ff00;
+  }
+
+  .sync-indicator.inactive {
+    color: #ff6b6b;
   }
 
   .balades-grid {
@@ -731,6 +799,12 @@ import { BaladesClientService } from '$lib/services/baladesClientService';
       margin-bottom: 1rem;
       padding: 0 1rem;
       text-align: center;
+    }
+
+    .header-actions {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .btn-refresh {
