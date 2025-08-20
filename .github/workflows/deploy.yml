@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - steven
 
 jobs:
   test:
@@ -33,25 +34,7 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v3
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Le fichier .env est géré directement sur le VPS
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/monsite:latest
-          platforms: linux/amd64
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
-
-      - name: Déployer sur le VPS (pull + restart)
+      - name: Déployer sur le VPS (build local + restart)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -60,17 +43,27 @@ jobs:
           port: 22
           script: |
             cd /root/monsite
-            # Le fichier .env existe déjà sur le VPS, pas besoin de le recréer
-            docker-compose pull
-            docker-compose up -d --force-recreate
+            
+            # Récupérer les derniers changements
+            echo "📥 Récupération des derniers changements..."
+            git pull origin ${{ github.ref_name }}
+            
+            # Arrêter le conteneur actuel
+            echo "🛑 Arrêt du conteneur actuel..."
+            docker-compose down
+            
+            # Construire l'image localement avec les variables d'environnement
+            echo "🔨 Construction de l'image localement..."
+            docker-compose up -d --build
+            
+            # Vérifier que le conteneur démarre correctement
+            echo "🔍 Vérification du démarrage..."
+            sleep 10
+            docker-compose ps
             
             # Nettoyer les images Docker inutilisées
             echo "🧹 Nettoyage des images Docker inutilisées..."
             docker image prune -f
             docker system prune -f --volumes
             
-            # Supprimer spécifiquement les anciennes images monsite (garder seulement la dernière)
-            echo "🗑️ Suppression des anciennes images monsite..."
-            docker images "stevenbachimont/monsite" --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | head -n -1 | awk '{print $2}' | xargs -r docker rmi -f || true
-            
-            echo "✅ Nettoyage terminé" 
+            echo "✅ Déploiement terminé" 
