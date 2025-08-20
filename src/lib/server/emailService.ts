@@ -34,10 +34,22 @@ export class EmailService {
   constructor() {
     // Utiliser le transporteur Gmail par défaut, sinon le SMTP personnalisé
     if (env.EMAIL_USER && env.EMAIL_APP_PASSWORD) {
+      console.log('Configuration email détectée:', {
+        user: env.EMAIL_USER,
+        password: env.EMAIL_APP_PASSWORD ? 'Configuré' : 'Manquant'
+      });
       this.transporter = createTransporter();
     } else if (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) {
+      console.log('Configuration SMTP personnalisée détectée');
       this.transporter = createCustomTransporter();
     } else {
+      console.error('Configuration email manquante:', {
+        emailUser: env.EMAIL_USER || 'Non configuré',
+        emailPassword: env.EMAIL_APP_PASSWORD ? 'Configuré' : 'Non configuré',
+        smtpHost: env.SMTP_HOST || 'Non configuré',
+        smtpUser: env.SMTP_USER || 'Non configuré',
+        smtpPass: env.SMTP_PASS ? 'Configuré' : 'Non configuré'
+      });
       throw new Error('Configuration email manquante. Veuillez configurer les variables d\'environnement.');
     }
   }
@@ -73,8 +85,14 @@ export class EmailService {
 
       return true;
     } catch (error) {
-      console.error('Erreur lors de l\'envoi des emails:', error);
-      throw new Error('Erreur lors de l\'envoi des emails');
+      console.error('Erreur lors de l\'envoi des emails argentique:', error);
+      console.error('Détails de l\'erreur:', {
+        message: error instanceof Error ? error.message : 'Erreur inconnue',
+        stack: error instanceof Error ? error.stack : undefined,
+        code: (error as any)?.code,
+        response: (error as any)?.response
+      });
+      throw new Error(`Erreur lors de l'envoi des emails: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   }
 
