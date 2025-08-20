@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { EmailService } from '$lib/server/emailService';
 import { ValidationService } from '$lib/server/validationService';
 import type { EmailData } from '$lib/server/types';
+import { baladesService } from '$lib/services/baladesService';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -19,6 +20,19 @@ export const POST: RequestHandler = async ({ request }) => {
 
     // Nettoyage des données
     const sanitizedData = ValidationService.sanitizeData(data);
+
+    // Mettre à jour les places disponibles si une balade est spécifiée
+    if (data.baladeId && data.nombrePersonnes) {
+      try {
+        await baladesService.reserverPlaces(parseInt(data.baladeId), data.nombrePersonnes);
+        console.log(`✅ Places réservées pour la balade ${data.baladeId}: ${data.nombrePersonnes} place(s)`);
+      } catch (error) {
+        console.error('❌ Erreur lors de la réservation des places:', error);
+        return json({ 
+          error: error instanceof Error ? error.message : 'Erreur lors de la réservation des places' 
+        }, { status: 400 });
+      }
+    }
 
     // Envoi des emails
     const emailService = new EmailService();
