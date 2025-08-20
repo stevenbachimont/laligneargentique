@@ -29,25 +29,34 @@ describe('/contact', () => {
 
     render(Page);
     
-    // Remplir tous les champs avec des données valides
-    await fireEvent.input(screen.getByLabelText(/^Prénom \*$/i), { target: { value: 'Jean' } });
-    await fireEvent.input(screen.getByLabelText(/^Nom \*$/i), { target: { value: 'Dupont' } });
-    await fireEvent.input(screen.getByLabelText(/^Email \*$/i), { target: { value: 'jean.dupont@exemple.com' } });
-    await fireEvent.input(screen.getByLabelText(/^Message \*$/i), { target: { value: 'Bonjour ! Je souhaite vous contacter pour un projet.' } });
+    // Remplir le formulaire avec des données valides
+    const prenomInput = screen.getByLabelText(/^Prénom \*$/i);
+    const nomInput = screen.getByLabelText(/^Nom \*$/i);
+    const emailInput = screen.getByLabelText(/^Email \*$/i);
+    const messageInput = screen.getByLabelText(/^Message \*$/i);
+    
+    await fireEvent.input(prenomInput, { target: { value: 'Jean' } });
+    await fireEvent.input(nomInput, { target: { value: 'Dupont' } });
+    await fireEvent.input(emailInput, { target: { value: 'jean@exemple.com' } });
+    await fireEvent.input(messageInput, { target: { value: 'Bonjour ! Ceci est un message de test pour valider le formulaire.' } });
     
     // Soumettre le formulaire
-    await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
+    const submitButton = screen.getByRole('button', { name: /envoyer/i });
+    await fireEvent.click(submitButton);
     
+    // Vérifier que fetch a été appelé
     expect(mockFetch).toHaveBeenCalledWith('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nom: 'Dupont',
         prenom: 'Jean',
-        email: 'jean.dupont@exemple.com',
-        message: 'Bonjour ! Je souhaite vous contacter pour un projet.'
+        email: 'jean@exemple.com',
+        message: 'Bonjour ! Ceci est un message de test pour valider le formulaire.'
       })
     });
+    
+    // Vérifier le message de succès
     expect(await screen.findByText(/message envoyé/i)).toBeInTheDocument();
   });
 
@@ -59,16 +68,25 @@ describe('/contact', () => {
 
     render(Page);
     
-    // Remplir tous les champs avec des données valides
-    await fireEvent.input(screen.getByLabelText(/^Prénom \*$/i), { target: { value: 'Jean' } });
-    await fireEvent.input(screen.getByLabelText(/^Nom \*$/i), { target: { value: 'Dupont' } });
-    await fireEvent.input(screen.getByLabelText(/^Email \*$/i), { target: { value: 'jean.dupont@exemple.com' } });
-    await fireEvent.input(screen.getByLabelText(/^Message \*$/i), { target: { value: 'Bonjour ! Je souhaite vous contacter pour un projet.' } });
+    // Remplir le formulaire avec des données valides
+    const prenomInput = screen.getByLabelText(/^Prénom \*$/i);
+    const nomInput = screen.getByLabelText(/^Nom \*$/i);
+    const emailInput = screen.getByLabelText(/^Email \*$/i);
+    const messageInput = screen.getByLabelText(/^Message \*$/i);
+    
+    await fireEvent.input(prenomInput, { target: { value: 'Jean' } });
+    await fireEvent.input(nomInput, { target: { value: 'Dupont' } });
+    await fireEvent.input(emailInput, { target: { value: 'jean@exemple.com' } });
+    await fireEvent.input(messageInput, { target: { value: 'Bonjour ! Ceci est un message de test pour valider le formulaire.' } });
     
     // Soumettre le formulaire
-    await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
+    const submitButton = screen.getByRole('button', { name: /envoyer/i });
+    await fireEvent.click(submitButton);
     
+    // Vérifier que fetch a été appelé
     expect(mockFetch).toHaveBeenCalled();
+    
+    // Vérifier le message d'erreur
     expect(await screen.findByText(/erreur lors de l'envoi du message\./i)).toBeInTheDocument();
   });
 });
