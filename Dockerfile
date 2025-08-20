@@ -7,11 +7,6 @@ RUN npm ci
 
 COPY . .
 
-# Définir les variables d'environnement par défaut pour l'email
-ENV EMAIL_USER=default_email_user
-ENV EMAIL_APP_PASSWORD=default_email_password
-ENV ADMIN_EMAIL=default_admin_email
-
 RUN npm run build
 
 EXPOSE 3000
