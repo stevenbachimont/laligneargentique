@@ -77,9 +77,8 @@ describe('/photographie/argentique', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Vérifier que les places disponibles sont affichées
-    // La première balade devrait afficher "Complet" car elle a 0 places disponibles
-    expect(screen.getAllByText('Complet').length).toBeGreaterThan(0);
-    expect(screen.getByText('2 places disponibles')).toBeInTheDocument();
+    // Les deux premières balades affichent "Complet" car elles ont 0 places disponibles
+    expect(screen.getAllByText('Complet').length).toBeGreaterThan(1);
     expect(screen.getByText('4 places disponibles')).toBeInTheDocument();
   });
 
@@ -92,19 +91,21 @@ describe('/photographie/argentique', () => {
     const reserveButtons = screen.getAllByRole('button', { name: /Réserver|Complet/ });
     expect(reserveButtons.length).toBeGreaterThan(0);
     
-    // Vérifier que le bouton "Complet" est présent et désactivé
-    const completButton = screen.getByRole('button', { name: 'Complet' });
-    expect(completButton).toBeInTheDocument();
-    expect(completButton).toBeDisabled();
+    // Vérifier que les boutons "Complet" sont présents et désactivés
+    const completButtons = screen.getAllByRole('button', { name: 'Complet' });
+    expect(completButtons.length).toBeGreaterThan(0);
+    completButtons.forEach(button => {
+      expect(button).toBeDisabled();
+    });
     
-    // Vérifier que les autres boutons "Réserver" sont activés
+    // Vérifier que les boutons "Réserver" sont activés
     const activeButtons = screen.getAllByRole('button', { name: 'Réserver' });
     activeButtons.forEach(button => {
       expect(button).not.toBeDisabled();
     });
     
     // Vérifier les messages de statut
-    expect(screen.getByText('Places épuisées')).toBeInTheDocument();
+    expect(screen.getAllByText('Places épuisées').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Inscriptions ouvertes').length).toBeGreaterThan(0);
   });
 

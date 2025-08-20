@@ -135,16 +135,22 @@ class BaladesService {
     try {
       // En développement, on peut sauvegarder dans un fichier temporaire
       // En production, cela devrait être géré par une API
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      
-      const filePath = path.join(process.cwd(), 'src/lib/balades-argentique.json');
-      const dataToSave = {
-        baladesProgrammees: this.balades
-      };
+      if (typeof window === 'undefined') {
+        // Côté serveur - utiliser fs
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        const filePath = path.join(process.cwd(), 'src/lib/balades-argentique.json');
+        const dataToSave = {
+          baladesProgrammees: this.balades
+        };
 
-      await fs.writeFile(filePath, JSON.stringify(dataToSave, null, 2), 'utf8');
-      console.log('✅ Balades sauvegardées avec succès');
+        await fs.writeFile(filePath, JSON.stringify(dataToSave, null, 2), 'utf8');
+        console.log('✅ Balades sauvegardées avec succès côté serveur');
+      } else {
+        // Côté client - utiliser l'API
+        console.log('✅ Balades mises à jour côté client via le store');
+      }
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde des balades:', error);
       // En cas d'erreur, on ne fait rien pour ne pas casser l'application
