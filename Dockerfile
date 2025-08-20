@@ -5,6 +5,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+# Copier les fichiers Prisma
+COPY prisma ./prisma/
+
+# Générer le client Prisma
+RUN npx prisma generate
+
 COPY . .
 
 RUN npm run build
