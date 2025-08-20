@@ -28,6 +28,11 @@ echo "DATABASE_URL=file:./prisma/dev.db" >> .env
 
 echo "✅ Fichier .env généré avec succès"
 
+# Créer la base de données si elle n'existe pas
+echo "🗄️ Vérification de la base de données..."
+npx prisma db push --accept-data-loss
+echo "✅ Base de données prête"
+
 # Démarrer l'application
 echo "🌐 Démarrage du serveur..."
 npm run preview -- --host 0.0.0.0 --port 3000 

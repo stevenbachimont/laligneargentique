@@ -8,6 +8,9 @@ RUN npm ci
 # Copier les fichiers Prisma
 COPY prisma ./prisma/
 
+# Définir DATABASE_URL pour le build
+ENV DATABASE_URL=file:./prisma/dev.db
+
 # Générer le client Prisma
 RUN npx prisma generate
 
