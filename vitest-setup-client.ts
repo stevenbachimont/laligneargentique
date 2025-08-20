@@ -1,59 +1,180 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
-// Mock de fetch pour les tests
+// Mock global de fetch
 global.fetch = vi.fn();
 
+// Mock des stores Svelte avec des données de test
+const mockBaladesStore = {
+  subscribe: vi.fn((callback) => {
+    // Simuler des données de test
+    const mockBalades = [
+      {
+        id: 1,
+        date: '2024-01-15',
+        heure: '14:00',
+        lieu: 'Quartier du Bouffay',
+        theme: 'Architecture médiévale',
+        placesDisponibles: 3,
+        placesInitiales: 5,
+        prix: '45€',
+        description: 'Découverte des façades historiques et des ruelles pittoresques',
+        consignes: [
+          { id: 1, texte: 'Apportez des vêtements confortables et adaptés à la météo' },
+          { id: 2, texte: 'Chaussures de marche recommandées' }
+        ],
+        materiel: [
+          { id: 1, nom: 'Appareil photo argentique format 120' },
+          { id: 2, nom: 'Pellicule 400 ISO (incluses)' }
+        ],
+        coordonnees: [
+          { id: 1, lat: 47.2138, lng: -1.5564, name: 'Place du Bouffay' },
+          { id: 2, lat: 47.2140, lng: -1.5566, name: 'Rue Kervégan' },
+          { id: 3, lat: 47.2142, lng: -1.5568, name: 'Place Saint-Pierre' },
+          { id: 4, lat: 47.2144, lng: -1.5570, name: 'Rue de la Fosse' },
+          { id: 5, lat: 47.2146, lng: -1.5572, name: 'Quai de la Fosse' }
+        ],
+        parcours: [
+          { id: 1, titre: 'Départ - Place du Bouffay', description: 'Rendez-vous devant la fontaine', duree: '30 min', distance: '0 km' },
+          { id: 2, titre: 'Étape 1 - Rue Kervégan', description: 'Découverte des façades médiévales', duree: '45 min', distance: '200m' },
+          { id: 3, titre: 'Étape 2 - Place Saint-Pierre', description: 'Photographie de l\'église', duree: '30 min', distance: '400m' },
+          { id: 4, titre: 'Étape 3 - Rue de la Fosse', description: 'Portraits de rue', duree: '45 min', distance: '600m' },
+          { id: 5, titre: 'Arrivée - Quai de la Fosse', description: 'Vue sur la Loire', duree: '30 min', distance: '800m' }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+    callback(mockBalades);
+    return { unsubscribe: vi.fn() };
+  }),
+  set: vi.fn(),
+  update: vi.fn()
+};
+
+// Mock des stores Svelte
+vi.mock('svelte/store', () => ({
+  writable: vi.fn(() => mockBaladesStore),
+  readable: vi.fn(() => ({
+    subscribe: vi.fn()
+  })),
+  derived: vi.fn(() => ({
+    subscribe: vi.fn()
+  }))
+}));
+
+// Mock des modules SvelteKit
+vi.mock('$app/stores', () => ({
+  page: {
+    subscribe: vi.fn((callback) => {
+      callback({ url: { searchParams: { get: () => '1' } } });
+      return { unsubscribe: vi.fn() };
+    })
+  },
+  navigating: {
+    subscribe: vi.fn()
+  },
+  updated: {
+    subscribe: vi.fn()
+  }
+}));
+
+vi.mock('$app/navigation', () => ({
+  goto: vi.fn(),
+  invalidate: vi.fn(),
+  preloadData: vi.fn()
+}));
+
+// Mock des services Prisma côté client
+vi.mock('$lib/services/baladesPrismaService', () => ({
+  baladesPrismaService: {
+    getBalades: vi.fn(),
+    getBaladeById: vi.fn(),
+    reserverPlaces: vi.fn(),
+    creerReservation: vi.fn()
+  }
+}));
+
+// Mock des services client avec des données de test
+vi.mock('$lib/services/baladesClientService', () => ({
+  baladesClientService: {
+    getBalades: vi.fn().mockResolvedValue([
+      {
+        id: 1,
+        date: '2024-01-15',
+        heure: '14:00',
+        lieu: 'Quartier du Bouffay',
+        theme: 'Architecture médiévale',
+        placesDisponibles: 3,
+        placesInitiales: 5,
+        prix: '45€',
+        description: 'Découverte des façades historiques et des ruelles pittoresques',
+        consignes: [
+          { id: 1, texte: 'Apportez des vêtements confortables et adaptés à la météo' },
+          { id: 2, texte: 'Chaussures de marche recommandées' }
+        ],
+        materiel: [
+          { id: 1, nom: 'Appareil photo argentique format 120' },
+          { id: 2, nom: 'Pellicule 400 ISO (incluses)' }
+        ],
+        coordonnees: [
+          { id: 1, lat: 47.2138, lng: -1.5564, name: 'Place du Bouffay' },
+          { id: 2, lat: 47.2140, lng: -1.5566, name: 'Rue Kervégan' },
+          { id: 3, lat: 47.2142, lng: -1.5568, name: 'Place Saint-Pierre' },
+          { id: 4, lat: 47.2144, lng: -1.5570, name: 'Rue de la Fosse' },
+          { id: 5, lat: 47.2146, lng: -1.5572, name: 'Quai de la Fosse' }
+        ],
+        parcours: [
+          { id: 1, titre: 'Départ - Place du Bouffay', description: 'Rendez-vous devant la fontaine', duree: '30 min', distance: '0 km' },
+          { id: 2, titre: 'Étape 1 - Rue Kervégan', description: 'Découverte des façades médiévales', duree: '45 min', distance: '200m' },
+          { id: 3, titre: 'Étape 2 - Place Saint-Pierre', description: 'Photographie de l\'église', duree: '30 min', distance: '400m' },
+          { id: 4, titre: 'Étape 3 - Rue de la Fosse', description: 'Portraits de rue', duree: '45 min', distance: '600m' },
+          { id: 5, titre: 'Arrivée - Quai de la Fosse', description: 'Vue sur la Loire', duree: '30 min', distance: '800m' }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]),
+    reserverPlaces: vi.fn().mockResolvedValue(true),
+    isBaladeComplete: vi.fn().mockReturnValue(false),
+    getBaladeStatus: vi.fn().mockReturnValue('disponible')
+  },
+  baladesStore: mockBaladesStore
+}));
+
 // Mock des données de test
-const mockBalades = [
+export const mockBalades = [
   {
     id: 1,
-    date: "2024-02-15",
-    heure: "14:00",
-    lieu: "Quartier du Bouffay",
-    theme: "Architecture médiévale",
-    placesDisponibles: 2,
+    date: '2024-01-15',
+    heure: '14:00',
+    lieu: 'Quartier du Bouffay',
+    theme: 'Architecture médiévale',
+    placesDisponibles: 3,
     placesInitiales: 5,
-    prix: "45€",
-    description: "Découverte des façades historiques et des ruelles pittoresques",
+    prix: '45€',
+    description: 'Découverte des façades historiques et des ruelles pittoresques',
     consignes: [
-      { id: 1, texte: "Apportez des vêtements confortables et adaptés à la météo", baladeId: 1 },
-      { id: 2, texte: "Chaussures de marche recommandées", baladeId: 1 }
+      { id: 1, texte: 'Apportez des vêtements confortables et adaptés à la météo' },
+      { id: 2, texte: 'Chaussures de marche recommandées' }
     ],
     materiel: [
-      { id: 1, nom: "Appareil photo argentique format 120", baladeId: 1 },
-      { id: 2, nom: "Pellicule 400 ISO (incluses)", baladeId: 1 }
+      { id: 1, nom: 'Appareil photo argentique format 120' },
+      { id: 2, nom: 'Pellicule 400 ISO (incluses)' }
     ],
     coordonnees: [
-      { id: 1, lat: 47.2138, lng: -1.5564, name: "Place du Bouffay", baladeId: 1 }
+      { id: 1, lat: 47.2138, lng: -1.5564, name: 'Place du Bouffay' },
+      { id: 2, lat: 47.2140, lng: -1.5566, name: 'Rue Kervégan' },
+      { id: 3, lat: 47.2142, lng: -1.5568, name: 'Place Saint-Pierre' },
+      { id: 4, lat: 47.2144, lng: -1.5570, name: 'Rue de la Fosse' },
+      { id: 5, lat: 47.2146, lng: -1.5572, name: 'Quai de la Fosse' }
     ],
     parcours: [
-      { id: 1, titre: "Départ - Place du Bouffay", description: "Rendez-vous devant la fontaine", duree: "30 min", distance: "0 km", baladeId: 1 }
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: 2,
-    date: "2024-02-22",
-    heure: "10:00",
-    lieu: "Île de Nantes",
-    theme: "Street Art & Contemporain",
-    placesDisponibles: 5,
-    placesInitiales: 5,
-    prix: "45€",
-    description: "Capture des œuvres d'art urbain et de l'architecture moderne",
-    consignes: [
-      { id: 3, texte: "Vêtements urbains et confortables", baladeId: 2 }
-    ],
-    materiel: [
-      { id: 3, nom: "Appareil photo argentique 35mm", baladeId: 2 }
-    ],
-    coordonnees: [
-      { id: 2, lat: 47.2038, lng: -1.5644, name: "Hangar à Bananes", baladeId: 2 }
-    ],
-    parcours: [
-      { id: 2, titre: "Départ - Hangar à Bananes", description: "Rendez-vous devant le Hangar", duree: "30 min", distance: "0 km", baladeId: 2 }
+      { id: 1, titre: 'Départ - Place du Bouffay', description: 'Rendez-vous devant la fontaine', duree: '30 min', distance: '0 km' },
+      { id: 2, titre: 'Étape 1 - Rue Kervégan', description: 'Découverte des façades médiévales', duree: '45 min', distance: '200m' },
+      { id: 3, titre: 'Étape 2 - Place Saint-Pierre', description: 'Photographie de l\'église', duree: '30 min', distance: '400m' },
+      { id: 4, titre: 'Étape 3 - Rue de la Fosse', description: 'Portraits de rue', duree: '45 min', distance: '600m' },
+      { id: 5, titre: 'Arrivée - Quai de la Fosse', description: 'Vue sur la Loire', duree: '30 min', distance: '800m' }
     ],
     createdAt: new Date(),
     updatedAt: new Date()

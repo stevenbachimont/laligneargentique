@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { baladesStore, type Balade } from '$lib/services/baladesPrismaService';
-  import { BaladesClientService } from '$lib/services/baladesClientService';
+  import { baladesStore, type Balade } from '$lib/services/baladesClientService';
+  import { baladesClientService } from '$lib/services/baladesClientService';
 
   // Récupérer les paramètres de l'URL
   $: baladeId = $page.url.searchParams.get('id');
@@ -130,7 +130,7 @@
   onMount(async () => {
     // Charger les balades au démarrage
     try {
-      baladesProgrammees = await BaladesClientService.getBalades();
+      baladesProgrammees = await baladesClientService.getBalades();
     } catch (error) {
       console.error('❌ Erreur lors du chargement des balades:', error);
     }

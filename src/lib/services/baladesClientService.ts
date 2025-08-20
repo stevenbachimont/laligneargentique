@@ -1,35 +1,48 @@
-import { baladesStore } from './baladesPrismaService';
+import { writable } from 'svelte/store';
 
-// Service client pour synchroniser les places disponibles
-export class BaladesClientService {
-  
-  private static syncInterval: NodeJS.Timeout | null = null;
-  private static isAutoSyncEnabled = false;
-  
+// Types basés sur Prisma (copiés ici pour éviter l'import)
+export interface Balade {
+  id: number;
+  date: string;
+  heure: string;
+  lieu: string;
+  theme: string;
+  placesDisponibles: number;
+  placesInitiales: number;
+  prix: string;
+  description: string;
+  consignes: { id: number; texte: string }[];
+  materiel: { id: number; nom: string }[];
+  coordonnees: { id: number; lat: number; lng: number; name: string }[];
+  parcours: { id: number; titre: string; description: string; duree: string; distance: string }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Store Svelte pour les balades (côté client uniquement)
+export const baladesStore = writable<Balade[]>([]);
+
+class BaladesClientService {
   // Récupérer toutes les balades depuis l'API
-  static async getBalades(): Promise<any[]> {
+  async getBalades(): Promise<Balade[]> {
     try {
       const response = await fetch('/api/balades');
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération des balades');
       }
+      const balades = await response.json();
       
-      const data = await response.json();
-      if (data.success && data.balades) {
-        // Mettre à jour le store
-        baladesStore.set(data.balades);
-        return data.balades;
-      }
-      
-      return [];
+      // Mettre à jour le store
+      baladesStore.set(balades);
+      return balades;
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des balades:', error);
       return [];
     }
   }
-  
-  // Mettre à jour les places via l'API et synchroniser le store
-  static async updatePlaces(baladeId: number, nombrePlaces: number, action: 'reserver' | 'annuler' | 'reinitialiser'): Promise<boolean> {
+
+  // Réserver des places via l'API
+  async reserverPlaces(baladeId: number, nombrePlaces: number): Promise<boolean> {
     try {
       const response = await fetch('/api/balades/update-places', {
         method: 'POST',
@@ -39,74 +52,51 @@ export class BaladesClientService {
         body: JSON.stringify({
           baladeId,
           nombrePlaces,
-          action
+          action: 'reserver'
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur lors de la mise à jour des places');
+        throw new Error('Erreur lors de la réservation');
       }
 
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success && data.balades) {
-        // Mettre à jour le store avec les nouvelles données
-        baladesStore.set(data.balades);
-        console.log('✅ Store synchronisé avec les données mises à jour');
+      if (result.success) {
+        // Mettre à jour le store
+        await this.getBalades();
+        console.log('✅ Places réservées avec succès');
         return true;
+      } else {
+        console.error('❌ Échec de la réservation:', result.message);
+        return false;
       }
-
-      return false;
     } catch (error) {
-      console.error('❌ Erreur lors de la synchronisation des places:', error);
+      console.error('❌ Erreur lors de la réservation:', error);
       return false;
     }
   }
 
-  // Synchroniser le store avec les données du serveur
-  static async syncStore(): Promise<boolean> {
-    try {
-      const balades = await this.getBalades();
-      return balades.length > 0;
-    } catch (error) {
-      console.error('❌ Erreur lors de la synchronisation du store:', error);
-      return false;
-    }
+  // Vérifier si une balade est complète
+  isBaladeComplete(baladeId: number): boolean {
+    let balades: Balade[] = [];
+    baladesStore.subscribe(val => balades = val)();
+    const balade = balades.find(b => b.id === baladeId);
+    return balade ? balade.placesDisponibles === 0 : false;
   }
 
-  // Démarrer la synchronisation automatique
-  static startAutoSync(intervalMs: number = 10000): void {
-    if (this.isAutoSyncEnabled) {
-      console.log('⚠️ Synchronisation automatique déjà active');
-      return;
-    }
-
-    console.log(`🔄 Démarrage de la synchronisation automatique (${intervalMs}ms)`);
-    this.isAutoSyncEnabled = true;
+  // Obtenir le statut d'une balade
+  getBaladeStatus(baladeId: number): 'disponible' | 'limite' | 'complete' {
+    let balades: Balade[] = [];
+    baladesStore.subscribe(val => balades = val)();
+    const balade = balades.find(b => b.id === baladeId);
     
-    this.syncInterval = setInterval(async () => {
-      try {
-        await this.syncStore();
-        console.log('✅ Synchronisation automatique effectuée');
-      } catch (error) {
-        console.error('❌ Erreur lors de la synchronisation automatique:', error);
-      }
-    }, intervalMs);
-  }
-
-  // Arrêter la synchronisation automatique
-  static stopAutoSync(): void {
-    if (this.syncInterval) {
-      clearInterval(this.syncInterval);
-      this.syncInterval = null;
-      this.isAutoSyncEnabled = false;
-      console.log('⏹️ Synchronisation automatique arrêtée');
-    }
-  }
-
-  // Vérifier si la synchronisation automatique est active
-  static isAutoSyncActive(): boolean {
-    return this.isAutoSyncEnabled;
+    if (!balade) return 'complete';
+    if (balade.placesDisponibles === 0) return 'complete';
+    if (balade.placesDisponibles <= 2) return 'limite';
+    return 'disponible';
   }
 }
+
+// Instance singleton du service client
+export const baladesClientService = new BaladesClientService();
