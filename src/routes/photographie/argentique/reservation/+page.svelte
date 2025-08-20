@@ -16,11 +16,109 @@
     nombrePersonnes: 1,
     message: ''
   };
-  let argentiqueSent = false;
   let argentiqueError = '';
   let placesDisponibles = 5;
   let balade: any = null;
   let isVisible = false;
+
+  // Validation côté client
+  let errors: Record<string, string> = {};
+  let isSubmitting = false;
+
+  // Validation en temps réel
+  $: if (argentiqueForm.prenom) validateField('prenom', argentiqueForm.prenom);
+  $: if (argentiqueForm.nom) validateField('nom', argentiqueForm.nom);
+  $: if (argentiqueForm.email) validateField('email', argentiqueForm.email);
+  $: if (argentiqueForm.telephone) validateField('telephone', argentiqueForm.telephone);
+  $: if (argentiqueForm.message) validateField('message', argentiqueForm.message);
+
+  function validateField(field: string, value: string): boolean {
+    errors[field] = '';
+    
+    switch (field) {
+      case 'prenom':
+        if (value.length < 2) {
+          errors[field] = 'Le prénom doit contenir au moins 2 caractères';
+          return false;
+        }
+        if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(value)) {
+          errors[field] = 'Le prénom ne peut contenir que des lettres, espaces, tirets et apostrophes';
+          return false;
+        }
+        break;
+        
+      case 'nom':
+        if (value.length < 2) {
+          errors[field] = 'Le nom doit contenir au moins 2 caractères';
+          return false;
+        }
+        if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(value)) {
+          errors[field] = 'Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes';
+          return false;
+        }
+        break;
+        
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          errors[field] = 'Veuillez entrer une adresse email valide';
+          return false;
+        }
+        break;
+        
+      case 'telephone':
+        if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
+          errors[field] = 'Le numéro de téléphone ne peut contenir que des chiffres, espaces, tirets, plus et parenthèses';
+          return false;
+        }
+        break;
+        
+      case 'message':
+        if (value.length < 10) {
+          errors[field] = 'Le message doit contenir au moins 10 caractères';
+          return false;
+        }
+        if (value.length > 1000) {
+          errors[field] = 'Le message ne peut pas dépasser 1000 caractères';
+          return false;
+        }
+        break;
+    }
+    
+    return true;
+  }
+
+  function validateForm(): boolean {
+    const fields = ['prenom', 'nom', 'email', 'message'];
+    let isValid = true;
+    
+    fields.forEach(field => {
+      if (!validateField(field, argentiqueForm[field as keyof typeof argentiqueForm] as string)) {
+        isValid = false;
+      }
+    });
+    
+    return isValid;
+  }
+
+  function clearErrors() {
+    errors = {};
+    argentiqueError = '';
+  }
+
+  function resetForm() {
+    argentiqueForm = {
+      nom: '',
+      prenom: '',
+      email: '',
+      telephone: '',
+      dateSouhaitee: '',
+      nombrePersonnes: 1,
+      message: ''
+    };
+    clearErrors();
+    placesDisponibles = 5;
+  }
 
   // Balades programmées (même données que la page principale)
   const baladesProgrammees = [
@@ -117,37 +215,64 @@
 
   async function handleArgentiqueSubmit(e: Event) {
     e.preventDefault();
+    clearErrors(); // Clear previous errors
+
+    console.log('🔍 Début de la soumission du formulaire');
+    console.log('📝 Données du formulaire:', argentiqueForm);
+
+    if (!validateForm()) {
+      console.log('❌ Validation échouée');
+      argentiqueError = 'Veuillez corriger les erreurs dans le formulaire.';
+      return;
+    }
+
+    console.log('✅ Validation réussie, envoi à l\'API...');
+    isSubmitting = true;
+    
     try {
+      const requestBody = JSON.stringify(argentiqueForm);
+      console.log('📤 Corps de la requête:', requestBody);
+      
       const response = await fetch('/api/argentique', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(argentiqueForm)
+        body: requestBody
       });
 
+      console.log('📥 Réponse reçue:', response.status, response.statusText);
+
       const data = await response.json();
+      console.log('📋 Données de réponse:', data);
 
       if (response.ok) {
-        argentiqueSent = true;
-        argentiqueError = '';
-        argentiqueForm = {
-          nom: '',
-          prenom: '',
-          email: '',
-          telephone: '',
-          dateSouhaitee: '',
-          nombrePersonnes: 1,
-          message: ''
-        };
-        placesDisponibles = 5;
+        console.log('✅ Succès !');
+        // Rediriger vers la page de confirmation avec les données
+        const confirmationData = encodeURIComponent(JSON.stringify({
+          ...argentiqueForm,
+          theme: balade?.theme || 'Balade Argentique',
+          heure: balade?.heure || '',
+          lieu: balade?.lieu || '',
+          prix: balade?.prix || '',
+          date: balade?.date || argentiqueForm.dateSouhaitee
+        }));
+        
+        window.location.href = `/photographie/argentique/reservation/confirmation?data=${confirmationData}`;
       } else {
-        argentiqueError = data.error || 'Erreur lors de l\'envoi de la demande.';
-        argentiqueSent = false;
+        console.log('❌ Erreur API:', data.error);
+        if (data.details && data.details.length > 0) {
+          console.log('📋 Détails des erreurs:', data.details);
+          argentiqueError = `Erreur de validation: ${data.details.join(', ')}`;
+        } else {
+          argentiqueError = data.error || 'Erreur lors de l\'envoi de la demande.';
+        }
       }
     } catch (err) {
+      console.error('💥 Erreur lors de la requête:', err);
       argentiqueError = 'Erreur lors de l\'envoi de la demande.';
-      argentiqueSent = false;
+    } finally {
+      isSubmitting = false;
     }
   }
 
@@ -567,101 +692,113 @@
           <h2>Réserver votre place</h2>
           <p class="section-subtitle">Remplissez le formulaire ci-dessous pour confirmer votre réservation</p>
           
-          {#if argentiqueSent}
-            <div class="success-container">
-              <div class="success-message">
-                <h3>✅ Réservation envoyée avec succès !</h3>
-                <p>Je vous recontacterai dans les plus brefs délais pour confirmer votre réservation et vous donner tous les détails pratiques.</p>
-                <p><strong>Merci de votre intérêt pour La ligne Argentique !</strong></p>
-                <button class="btn-retour" on:click={retourArgentique}>
-                  Retour aux balades
-                </button>
+          <form on:submit={handleArgentiqueSubmit} class="reservation-form">
+            <div class="form-grid">
+              <div class="form-group {errors.prenom ? 'error' : ''}">
+                <label for="prenom">Prénom *</label>
+                <input 
+                  type="text" 
+                  id="prenom" 
+                  bind:value={argentiqueForm.prenom} 
+                  required 
+                  placeholder="Votre prénom"
+                  class={errors.prenom ? 'error' : ''}
+                />
+                {#if errors.prenom}
+                  <p class="error-text">{errors.prenom}</p>
+                {/if}
+              </div>
+              <div class="form-group {errors.nom ? 'error' : ''}">
+                <label for="nom">Nom *</label>
+                <input 
+                  type="text" 
+                  id="nom" 
+                  bind:value={argentiqueForm.nom} 
+                  required 
+                  placeholder="Votre nom"
+                  class={errors.nom ? 'error' : ''}
+                />
+                {#if errors.nom}
+                  <p class="error-text">{errors.nom}</p>
+                {/if}
+              </div>
+              <div class="form-group {errors.email ? 'error' : ''}">
+                <label for="email">Email *</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  bind:value={argentiqueForm.email} 
+                  required 
+                  placeholder="votre.email@exemple.com"
+                  class={errors.email ? 'error' : ''}
+                />
+                {#if errors.email}
+                  <p class="error-text">{errors.email}</p>
+                {/if}
+              </div>
+              <div class="form-group {errors.telephone ? 'error' : ''}">
+                <label for="telephone">Téléphone</label>
+                <input 
+                  type="tel" 
+                  id="telephone" 
+                  bind:value={argentiqueForm.telephone} 
+                  placeholder="06 12 34 56 78"
+                  class={errors.telephone ? 'error' : ''}
+                />
+                {#if errors.telephone}
+                  <p class="error-text">{errors.telephone}</p>
+                {/if}
+              </div>
+              <div class="form-group">
+                <label for="dateSouhaitee">Date souhaitée *</label>
+                <input 
+                  type="date" 
+                  id="dateSouhaitee" 
+                  bind:value={argentiqueForm.dateSouhaitee} 
+                  required 
+                />
+              </div>
+              <div class="form-group">
+                <label for="nombrePersonnes">Nombre de personnes *</label>
+                <select id="nombrePersonnes" bind:value={argentiqueForm.nombrePersonnes} required>
+                  {#each Array.from({length: placesDisponibles}, (_, i) => i + 1) as nombre}
+                    <option value={nombre}>{nombre} personne{nombre > 1 ? 's' : ''}</option>
+                  {/each}
+                </select>
               </div>
             </div>
-          {:else}
-            <form on:submit={handleArgentiqueSubmit} class="reservation-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="prenom">Prénom *</label>
-                  <input 
-                    type="text" 
-                    id="prenom" 
-                    bind:value={argentiqueForm.prenom} 
-                    required 
-                    placeholder="Votre prénom"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="nom">Nom *</label>
-                  <input 
-                    type="text" 
-                    id="nom" 
-                    bind:value={argentiqueForm.nom} 
-                    required 
-                    placeholder="Votre nom"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="email">Email *</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    bind:value={argentiqueForm.email} 
-                    required 
-                    placeholder="votre.email@exemple.com"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="telephone">Téléphone</label>
-                  <input 
-                    type="tel" 
-                    id="telephone" 
-                    bind:value={argentiqueForm.telephone} 
-                    placeholder="06 12 34 56 78"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="dateSouhaitee">Date souhaitée *</label>
-                  <input 
-                    type="date" 
-                    id="dateSouhaitee" 
-                    bind:value={argentiqueForm.dateSouhaitee} 
-                    required 
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="nombrePersonnes">Nombre de personnes *</label>
-                  <select id="nombrePersonnes" bind:value={argentiqueForm.nombrePersonnes} required>
-                    {#each Array.from({length: placesDisponibles}, (_, i) => i + 1) as nombre}
-                      <option value={nombre}>{nombre} personne{nombre > 1 ? 's' : ''}</option>
-                    {/each}
-                  </select>
-                </div>
+            
+            <div class="form-group full-width {errors.message ? 'error' : ''}">
+              <label for="message">Message (préférences, questions...)</label>
+              <textarea 
+                id="message" 
+                bind:value={argentiqueForm.message} 
+                rows="4"
+                placeholder="Décrivez vos attentes, vos préférences de lieux, ou posez vos questions..."
+                class={errors.message ? 'error' : ''}
+              ></textarea>
+              <div class="message-info">
+                <span class="char-count {argentiqueForm.message.length > 900 ? 'warning' : ''}">
+                  {argentiqueForm.message.length}/1000 caractères
+                </span>
+                {#if errors.message}
+                  <p class="error-text">{errors.message}</p>
+                {/if}
               </div>
-              
-              <div class="form-group full-width">
-                <label for="message">Message (préférences, questions...)</label>
-                <textarea 
-                  id="message" 
-                  bind:value={argentiqueForm.message} 
-                  rows="4"
-                  placeholder="Décrivez vos attentes, vos préférences de lieux, ou posez vos questions..."
-                ></textarea>
+            </div>
+            
+            {#if argentiqueError}
+              <div class="error-message">
+                {argentiqueError}
               </div>
-              
-              {#if argentiqueError}
-                <div class="error-message">
-                  {argentiqueError}
-                </div>
-              {/if}
-              
-              <div class="form-actions">
-                <button type="submit" class="btn-submit">
-                  Confirmer ma réservation
-                </button>
-              </div>
-            </form>
-          {/if}
+            {/if}
+            
+            <div class="form-actions">
+              <button type="submit" class="btn-submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Envoi en cours...' : 'Confirmer ma réservation'}
+              </button>
+            </div>
+          </form>
         </div>
       </section>
     {:else}
@@ -1224,7 +1361,7 @@
     padding: 0.75rem;
     color: #fff;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+    transition: all 0.3s ease;
     width: 100%;
     box-sizing: border-box;
   }
@@ -1235,6 +1372,20 @@
     outline: none;
     border-color: #ffd700;
     background: rgba(255,255,255,0.15);
+  }
+
+  .form-group input.error,
+  .form-group select.error,
+  .form-group textarea.error {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+  }
+
+  .form-group input.error:focus,
+  .form-group select.error:focus,
+  .form-group textarea.error:focus {
+    border-color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.15);
   }
 
   .form-group input::placeholder,
@@ -1271,6 +1422,13 @@
   .btn-submit:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  }
+
+  .btn-submit:disabled {
+    background: rgba(255, 215, 0, 0.5);
+    cursor: not-allowed;
+    color: rgba(0, 0, 0, 0.7);
+    box-shadow: none;
   }
 
   .error-message {
@@ -1313,6 +1471,43 @@
     background: linear-gradient(45deg, #00cc00, #00ff00);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
+  }
+
+  .error-text {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 107, 107, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #ff6b6b;
+  }
+
+  .message-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 0.5rem;
+    gap: 1rem;
+  }
+
+  .char-count {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0.3rem 0.6rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .char-count.warning {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.3);
+  }
+
+  .form-group.error label {
+    color: #ff6b6b;
   }
 
   /* Animations */

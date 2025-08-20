@@ -35,17 +35,24 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-## Configuration EmailJS
+## Configuration Email
 
-Pour que le formulaire de contact fonctionne, vous devez configurer les variables d'environnement EmailJS :
+Pour que les formulaires de contact et de réservation fonctionnent, vous devez configurer les variables d'environnement email :
 
 1. Créez un fichier `.env` à la racine du projet
-2. Ajoutez vos clés EmailJS :
+2. Ajoutez vos paramètres email :
 
 ```bash
-VITE_EMAILJS_SERVICE_ID=votre_service_id
-VITE_EMAILJS_TEMPLATE_ID=votre_template_id
-VITE_EMAILJS_PUBLIC_KEY=votre_public_key
+# Configuration Gmail (recommandé)
+EMAIL_USER=votre-email@gmail.com
+EMAIL_APP_PASSWORD=votre-mot-de-passe-d-application
+ADMIN_EMAIL=votre-email-admin@gmail.com
+
+# Ou configuration SMTP personnalisé
+# SMTP_HOST=smtp.votre-fournisseur.com
+# SMTP_PORT=587
+# SMTP_USER=votre-email@votre-fournisseur.com
+# SMTP_PASS=votre-mot-de-passe
 ```
 
 ## Déploiement Docker
@@ -60,4 +67,4 @@ docker build -t monsite .
 docker-compose up -d
 ```
 
-> **Note** : Les variables d'environnement EmailJS peuvent être surchargées via docker-compose ou définies dans le Dockerfile.
+> **Note** : Les variables d'environnement peuvent être surchargées via docker-compose ou définies dans le Dockerfile.
