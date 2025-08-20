@@ -14,10 +14,10 @@ describe('/contact', () => {
   it('affiche le titre et les champs du formulaire', () => {
     render(Page);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/contact/i);
-    expect(screen.getByLabelText(/^Prénom$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Nom$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Email$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Message$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Prénom \*$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Nom \*$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Email \*$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Message \*$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /envoyer/i })).toBeInTheDocument();
   });
 
@@ -28,10 +28,14 @@ describe('/contact', () => {
     });
 
     render(Page);
-    await fireEvent.input(screen.getByLabelText(/^Prénom$/i), { target: { value: 'Jean' } });
-    await fireEvent.input(screen.getByLabelText(/^Nom$/i), { target: { value: 'Dupont' } });
-    await fireEvent.input(screen.getByLabelText(/^Email$/i), { target: { value: 'jean@exemple.com' } });
-    await fireEvent.input(screen.getByLabelText(/^Message$/i), { target: { value: 'Bonjour !' } });
+    
+    // Remplir tous les champs avec des données valides
+    await fireEvent.input(screen.getByLabelText(/^Prénom \*$/i), { target: { value: 'Jean' } });
+    await fireEvent.input(screen.getByLabelText(/^Nom \*$/i), { target: { value: 'Dupont' } });
+    await fireEvent.input(screen.getByLabelText(/^Email \*$/i), { target: { value: 'jean.dupont@exemple.com' } });
+    await fireEvent.input(screen.getByLabelText(/^Message \*$/i), { target: { value: 'Bonjour ! Je souhaite vous contacter pour un projet.' } });
+    
+    // Soumettre le formulaire
     await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
     
     expect(mockFetch).toHaveBeenCalledWith('/api/contact', {
@@ -40,8 +44,8 @@ describe('/contact', () => {
       body: JSON.stringify({
         nom: 'Dupont',
         prenom: 'Jean',
-        email: 'jean@exemple.com',
-        message: 'Bonjour !'
+        email: 'jean.dupont@exemple.com',
+        message: 'Bonjour ! Je souhaite vous contacter pour un projet.'
       })
     });
     expect(await screen.findByText(/message envoyé/i)).toBeInTheDocument();
@@ -54,13 +58,17 @@ describe('/contact', () => {
     });
 
     render(Page);
-    await fireEvent.input(screen.getByLabelText(/^Prénom$/i), { target: { value: 'Jean' } });
-    await fireEvent.input(screen.getByLabelText(/^Nom$/i), { target: { value: 'Dupont' } });
-    await fireEvent.input(screen.getByLabelText(/^Email$/i), { target: { value: 'jean@exemple.com' } });
-    await fireEvent.input(screen.getByLabelText(/^Message$/i), { target: { value: 'Bonjour !' } });
+    
+    // Remplir tous les champs avec des données valides
+    await fireEvent.input(screen.getByLabelText(/^Prénom \*$/i), { target: { value: 'Jean' } });
+    await fireEvent.input(screen.getByLabelText(/^Nom \*$/i), { target: { value: 'Dupont' } });
+    await fireEvent.input(screen.getByLabelText(/^Email \*$/i), { target: { value: 'jean.dupont@exemple.com' } });
+    await fireEvent.input(screen.getByLabelText(/^Message \*$/i), { target: { value: 'Bonjour ! Je souhaite vous contacter pour un projet.' } });
+    
+    // Soumettre le formulaire
     await fireEvent.click(screen.getByRole('button', { name: /envoyer/i }));
     
     expect(mockFetch).toHaveBeenCalled();
     expect(await screen.findByText(/erreur lors de l'envoi du message\./i)).toBeInTheDocument();
   });
-}); 
+});
