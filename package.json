@@ -16,7 +16,8 @@
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright test",
 		"migrate": "node scripts/migrate-data.js",
-		"test:api": "node scripts/test-api.js"
+		"test:api": "node scripts/test-api.js",
+		"init-db": "node scripts/init-db.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
