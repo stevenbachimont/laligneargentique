@@ -26,6 +26,9 @@ export const POST: RequestHandler = async ({ request }) => {
       try {
         await baladesService.reserverPlaces(parseInt(data.baladeId), data.nombrePersonnes);
         console.log(`✅ Places réservées pour la balade ${data.baladeId}: ${data.nombrePersonnes} place(s)`);
+        
+        // En production, le store sera mis à jour via l'API
+        // En développement, le store est mis à jour directement
       } catch (error) {
         console.error('❌ Erreur lors de la réservation des places:', error);
         return json({ 

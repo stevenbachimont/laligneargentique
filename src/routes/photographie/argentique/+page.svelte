@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { baladesStore, baladesService, type Balade } from '$lib/services/baladesService';
+import { baladesStore, baladesService, type Balade } from '$lib/services/baladesService';
+import { BaladesClientService } from '$lib/services/baladesClientService';
 
   // Balades programmées depuis le service
   let baladesProgrammees: Balade[] = [];
@@ -15,12 +16,31 @@
     window.open(`/photographie/argentique/reservation?id=${balade.id}&data=${baladeData}`, '_blank');
   }
 
+  // Fonction pour actualiser les places disponibles
+  async function refreshBalades() {
+    try {
+      const success = await BaladesClientService.syncStore();
+      if (success) {
+        console.log('✅ Balades actualisées avec succès');
+      } else {
+        console.log('ℹ️ Actualisation non disponible (mode développement)');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'actualisation:', error);
+    }
+  }
+
 
 
   onMount(() => {
     // S'abonner au store des balades
     const unsubscribe = baladesStore.subscribe(balades => {
       baladesProgrammees = balades;
+    });
+
+    // Synchroniser le store avec le serveur en production
+    BaladesClientService.syncStore().catch(error => {
+      console.log('ℹ️ Synchronisation non disponible (mode développement)');
     });
 
     setTimeout(() => { isVisible = true; }, 100);
@@ -76,8 +96,15 @@
     <!-- Section Balades Programmées -->
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
       <div class="container">
-        <h2>Balades programmées</h2>
-        <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
+        <div class="section-header">
+          <div>
+            <h2>Balades programmées</h2>
+            <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
+          </div>
+          <button class="btn-refresh" on:click={refreshBalades} title="Actualiser les places disponibles">
+            🔄 Actualiser
+          </button>
+        </div>
         
         <div class="balades-grid">
           {#each baladesProgrammees as balade}
@@ -276,11 +303,42 @@
     color: #ffd700;
   }
 
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+  }
+
   .section-subtitle {
-    text-align: center;
+    text-align: left;
     color: rgba(255,255,255,0.8);
     font-size: 1.1rem;
-    margin-bottom: 3rem;
+    margin-bottom: 0;
+  }
+
+  .btn-refresh {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .btn-refresh:hover {
+    background: linear-gradient(45deg, #45a049, #4CAF50);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  }
+
+  .btn-refresh:active {
+    transform: translateY(0);
   }
 
   .balades-grid {
@@ -661,10 +719,23 @@
       padding: 0 1rem;
     }
 
+    .section-header {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+
     .section-subtitle {
       font-size: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       padding: 0 1rem;
+      text-align: center;
+    }
+
+    .btn-refresh {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
     }
 
     .features-grid,
