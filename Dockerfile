@@ -11,6 +11,9 @@ COPY prisma ./prisma/
 # Générer le client Prisma
 RUN npx prisma generate
 
+# Créer la base de données SQLite si elle n'existe pas
+RUN npx prisma db push
+
 COPY . .
 
 RUN npm run build

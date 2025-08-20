@@ -24,6 +24,7 @@ echo "EMAIL_USER=$EMAIL_USER" > .env
 echo "EMAIL_APP_PASSWORD=$EMAIL_APP_PASSWORD" >> .env
 echo "ADMIN_EMAIL=$ADMIN_EMAIL" >> .env
 echo "NODE_ENV=production" >> .env
+echo "DATABASE_URL=file:./prisma/dev.db" >> .env
 
 echo "✅ Fichier .env généré avec succès"
 
