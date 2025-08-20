@@ -39,6 +39,7 @@ describe('/photographie', () => {
     expect(screen.getByRole('heading', { name: 'Prochaines balades' })).toBeInTheDocument();
     expect(screen.getByText('Architecture médiévale')).toBeInTheDocument();
     expect(screen.getByText('Street Art & Contemporain')).toBeInTheDocument();
+    // Note: La troisième balade n'est pas affichée dans l'aperçu de la page principale
   });
 
   it('affiche les appels à l\'action', () => {

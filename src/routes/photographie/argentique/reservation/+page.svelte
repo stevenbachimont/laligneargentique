@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import { baladesService, type Balade } from '$lib/services/baladesService';
 
   // Récupérer les paramètres de l'URL
   $: baladeId = $page.url.searchParams.get('id');
@@ -14,7 +15,8 @@
     telephone: '',
     dateSouhaitee: '',
     nombrePersonnes: 1,
-    message: ''
+    message: '',
+    baladeId: ''
   };
   let argentiqueError = '';
   let placesDisponibles = 5;
@@ -114,86 +116,20 @@
       telephone: '',
       dateSouhaitee: '',
       nombrePersonnes: 1,
-      message: ''
+      message: '',
+      baladeId: ''
     };
     clearErrors();
     placesDisponibles = 5;
   }
 
-  // Balades programmées (même données que la page principale)
-  const baladesProgrammees = [
-    {
-      id: 1,
-      date: '2024-02-15',
-      heure: '14:00',
-      lieu: 'Quartier du Bouffay',
-      theme: 'Architecture médiévale',
-      placesDisponibles: 3,
-      prix: '45€',
-      description: 'Découverte des façades historiques et des ruelles pittoresques',
-      consignes: [
-        'Apportez des vêtements confortables et adaptés à la météo',
-        'Chaussures de marche recommandées',
-        'Appareil photo fourni, mais vous pouvez apporter le vôtre si vous le souhaitez',
-        'Prévoir une bouteille d\'eau'
-      ],
-      materiel: [
-        'Appareil photo argentique 35mm',
-        'Pellicule 400 ISO (incluses)',
-        'Guide technique de prise de vue',
-        'Support pour développement'
-      ]
-    },
-    {
-      id: 2,
-      date: '2024-02-22',
-      heure: '10:00',
-      lieu: 'Île de Nantes',
-      theme: 'Street Art & Contemporain',
-      placesDisponibles: 2,
-      prix: '45€',
-      description: 'Capture des œuvres d\'art urbain et de l\'architecture moderne',
-      consignes: [
-        'Vêtements urbains et confortables',
-        'Attention aux zones de passage et aux piétons',
-        'Respect des œuvres d\'art et de l\'espace public',
-        'Prévoir de la crème solaire si beau temps'
-      ],
-      materiel: [
-        'Appareil photo argentique 35mm',
-        'Pellicule 200 ISO pour la lumière du jour',
-        'Filtres polarisants (optionnel)',
-        'Guide des techniques de street photography'
-      ]
-    },
-    {
-      id: 3,
-      date: '2024-03-01',
-      heure: '16:00',
-      lieu: 'Jardin des Plantes',
-      theme: 'Nature en ville',
-      placesDisponibles: 4,
-      prix: '45€',
-      description: 'Photographie botanique et paysages urbains verdoyants',
-      consignes: [
-        'Vêtements adaptés à la météo et au jardinage',
-        'Chaussures fermées recommandées',
-        'Respect de la flore et de la faune',
-        'Pas de cueillette de plantes'
-      ],
-      materiel: [
-        'Appareil photo argentique 35mm',
-        'Pellicule 100 ISO pour la netteté',
-        'Objectif macro pour les détails botaniques',
-        'Trépied léger (fourni)'
-      ]
-    }
-  ];
+  // Balades programmées depuis le service
+  const baladesProgrammees = baladesService.getBalades();
 
   onMount(() => {
     // Récupérer la balade sélectionnée
     if (baladeId) {
-      balade = baladesProgrammees.find(b => b.id === parseInt(baladeId));
+      balade = baladesProgrammees.find((b: Balade) => b.id === parseInt(baladeId));
     } else if (baladeData) {
       try {
         balade = JSON.parse(decodeURIComponent(baladeData));
@@ -205,6 +141,7 @@
     if (balade) {
       // Pré-remplir le formulaire avec les données de la balade
       argentiqueForm.dateSouhaitee = balade.date;
+      argentiqueForm.baladeId = balade.id.toString();
       placesDisponibles = balade.placesDisponibles;
       argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
       argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
@@ -304,53 +241,13 @@
 
   // Fonction pour créer l'URL Google Maps avec le parcours complet
   function createGoogleMapsRoute(balade: any) {
-    const steps = getParcoursSteps(balade);
-    if (steps.length === 0) return null;
-
-    // Coordonnées des points d'intérêt pour chaque balade
-    const coordinates: Record<number, Array<{lat: number, lng: number, name: string}>> = {
-      1: [ // Architecture médiévale
-        { lat: 47.2138, lng: -1.5564, name: 'Place du Bouffay' },
-        { lat: 47.2142, lng: -1.5568, name: 'Rue Kervégan' },
-        { lat: 47.2148, lng: -1.5572, name: 'Place Saint-Pierre' },
-        { lat: 47.2152, lng: -1.5578, name: 'Rue de la Fosse' },
-        { lat: 47.2156, lng: -1.5582, name: 'Quai de la Fosse' },
-        { lat: 47.2150, lng: -1.5576, name: 'Rue des Trois-Croissants' },
-        { lat: 47.2144, lng: -1.5570, name: 'Place Royale' },
-        { lat: 47.2138, lng: -1.5566, name: 'Cours Cambronne' },
-        { lat: 47.2138, lng: -1.5564, name: 'Place du Bouffay' }
-      ],
-      2: [ // Street Art & Contemporain
-        { lat: 47.2038, lng: -1.5644, name: 'Hangar à Bananes' },
-        { lat: 47.2042, lng: -1.5648, name: 'Quai des Antilles' },
-        { lat: 47.2048, lng: -1.5652, name: 'Parc des Chantiers' },
-        { lat: 47.2052, lng: -1.5658, name: 'Les Nefs' },
-        { lat: 47.2056, lng: -1.5662, name: 'Machine de l\'Île' },
-        { lat: 47.2050, lng: -1.5656, name: 'Rue des Chantiers' },
-        { lat: 47.2044, lng: -1.5650, name: 'Place de la Petite Hollande' },
-        { lat: 47.2038, lng: -1.5644, name: 'Hangar à Bananes' }
-      ],
-      3: [ // Nature en ville
-        { lat: 47.2188, lng: -1.5484, name: 'Entrée Jardin des Plantes' },
-        { lat: 47.2192, lng: -1.5488, name: 'Allée principale' },
-        { lat: 47.2198, lng: -1.5492, name: 'Serres tropicales' },
-        { lat: 47.2202, lng: -1.5498, name: 'Jardin japonais' },
-        { lat: 47.2206, lng: -1.5502, name: 'Rocaille alpine' },
-        { lat: 47.2200, lng: -1.5496, name: 'Grandes allées' },
-        { lat: 47.2194, lng: -1.5490, name: 'Bassin central' },
-        { lat: 47.2188, lng: -1.5486, name: 'Jardin de l\'École' },
-        { lat: 47.2188, lng: -1.5484, name: 'Entrée Jardin des Plantes' }
-      ]
-    };
-
-    const baladeCoords = coordinates[balade.id as keyof typeof coordinates];
-    if (!baladeCoords) return null;
+    if (!balade.coordonnees || balade.coordonnees.length === 0) return null;
 
     // Créer l'URL Google Maps avec le parcours
     let url = 'https://www.google.com/maps/dir/';
     
     // Ajouter tous les points du parcours
-    baladeCoords.forEach((coord, index) => {
+    balade.coordonnees.forEach((coord: any, index: number) => {
       if (index > 0) url += '/';
       url += `${coord.lat},${coord.lng}`;
     });
@@ -363,178 +260,14 @@
 
   // Fonction pour obtenir les étapes du parcours
   function getParcoursSteps(balade: any) {
-    const parcours = {
-      1: [ // Architecture médiévale
-        {
-          titre: 'Départ - Place du Bouffay',
-          description: 'Rendez-vous devant la fontaine, présentation de l\'appareil photo et consignes de sécurité. Premières photos de l\'architecture médiévale.',
-          duree: '30 min',
-          distance: '0 km'
-        },
-        {
-          titre: 'Rue Kervégan',
-          description: 'Remonter la rue en direction de la cathédrale. Photographier les façades à colombages, les enseignes historiques et les détails architecturaux.',
-          duree: '45 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Place Saint-Pierre',
-          description: 'Arrêt devant la cathédrale Saint-Pierre-et-Saint-Paul. Photos de l\'architecture gothique, des sculptures et de la perspective de la rue.',
-          duree: '40 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Rue de la Fosse',
-          description: 'Descendre vers la Loire en passant par cette rue historique. Capture des hôtels particuliers du XVIIIe siècle et des cours intérieures.',
-          duree: '35 min',
-          distance: '0.3 km'
-        },
-        {
-          titre: 'Quai de la Fosse',
-          description: 'Arrivée sur les quais de la Loire. Photos du fleuve, des bateaux traditionnels et de l\'architecture portuaire historique.',
-          duree: '30 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Rue des Trois-Croissants',
-          description: 'Remonter par cette rue pittoresque. Photographier les passages couverts, les escaliers et les détails de ferronnerie.',
-          duree: '25 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Place Royale',
-          description: 'Arrêt sur cette place emblématique. Photos de la statue de Louis XVI, de l\'architecture classique et de la perspective des rues.',
-          duree: '30 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Cours Cambronne',
-          description: 'Dernière étape dans ce jardin public. Capture des hôtels particuliers, des grilles en fer forgé et de l\'ambiance bourgeoise.',
-          duree: '25 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Retour - Place du Bouffay',
-          description: 'Retour au point de départ par la rue de la Juiverie. Dernières photos et conclusion de la balade.',
-          duree: '20 min',
-          distance: '0.3 km'
-        }
-      ],
-      2: [ // Street Art & Contemporain
-        {
-          titre: 'Départ - Hangar à Bananes',
-          description: 'Rendez-vous devant le Hangar à Bananes. Présentation du matériel et explication des techniques de street photography.',
-          duree: '30 min',
-          distance: '0 km'
-        },
-        {
-          titre: 'Quai des Antilles',
-          description: 'Début du parcours le long des quais. Photos des œuvres d\'art urbain, des graffitis et de l\'architecture contemporaine.',
-          duree: '40 min',
-          distance: '0.3 km'
-        },
-        {
-          titre: 'Parc des Chantiers',
-          description: 'Entrée dans le parc industriel. Photographier les grues, les vestiges des chantiers navals et les installations métalliques.',
-          duree: '50 min',
-          distance: '0.4 km'
-        },
-        {
-          titre: 'Les Nefs',
-          description: 'Passage devant les anciennes halles de construction navale. Capture de l\'architecture industrielle et des structures métalliques.',
-          duree: '35 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Machine de l\'Île',
-          description: 'Arrêt devant la Machine de l\'Île. Photos de l\'éléphant mécanique, des créatures fantastiques et de l\'ambiance steampunk.',
-          duree: '45 min',
-          distance: '0.3 km'
-        },
-        {
-          titre: 'Rue des Chantiers',
-          description: 'Remonter par cette rue bordée d\'ateliers. Photographier les façades industrielles et les détails architecturaux.',
-          duree: '30 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Place de la Petite Hollande',
-          description: 'Arrêt sur cette place moderne. Capture de l\'architecture contemporaine et des installations artistiques.',
-          duree: '25 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Retour - Hangar à Bananes',
-          description: 'Retour au point de départ. Dernières photos et conclusion de la balade street art.',
-          duree: '15 min',
-          distance: '0.1 km'
-        }
-      ],
-      3: [ // Nature en ville
-        {
-          titre: 'Départ - Entrée principale',
-          description: 'Rendez-vous à l\'entrée du Jardin des Plantes. Présentation du matériel et explication des techniques de photo botanique.',
-          duree: '30 min',
-          distance: '0 km'
-        },
-        {
-          titre: 'Allée principale',
-          description: 'Début de la promenade dans l\'allée centrale. Photos des arbres centenaires et de la perspective du jardin.',
-          duree: '25 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Serres tropicales',
-          description: 'Entrée dans les serres chaudes. Photographie des plantes exotiques, des fleurs tropicales et de l\'ambiance humide.',
-          duree: '45 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Jardin japonais',
-          description: 'Passage par le jardin zen. Capture des bonsaïs, des pierres, des lanternes et de l\'ambiance contemplative.',
-          duree: '40 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Rocaille alpine',
-          description: 'Montée vers la rocaille. Photos des plantes de montagne, des rochers et de la vue sur le jardin.',
-          duree: '35 min',
-          distance: '0.2 km'
-        },
-        {
-          titre: 'Grandes allées',
-          description: 'Promenade dans les allées ombragées. Capture des arbres majestueux, des perspectives et de la lumière filtrée.',
-          duree: '50 min',
-          distance: '0.3 km'
-        },
-        {
-          titre: 'Bassin central',
-          description: 'Arrêt au bassin principal. Photos des nénuphars, des reflets dans l\'eau et de la faune aquatique.',
-          duree: '30 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Jardin de l\'École',
-          description: 'Passage par le jardin botanique. Capture des plantes médicinales et des étiquettes scientifiques.',
-          duree: '25 min',
-          distance: '0.1 km'
-        },
-        {
-          titre: 'Retour - Entrée principale',
-          description: 'Retour à l\'entrée. Dernières photos et conclusion de la balade nature.',
-          duree: '20 min',
-          distance: '0.1 km'
-        }
-      ]
-    };
-    return parcours[balade.id as keyof typeof parcours] || [];
+    return balade.parcours || [];
   }
 
   // Fonction pour calculer la distance totale
   function getTotalDistance(balade: any) {
     const steps = getParcoursSteps(balade);
     let total = 0;
-    steps.forEach(step => {
+    steps.forEach((step: any) => {
       const distance = parseFloat(step.distance.replace(' km', ''));
       if (!isNaN(distance)) {
         total += distance;
@@ -576,7 +309,9 @@
                 <p class="balade-prix">💰 {balade.prix}</p>
               </div>
               <div class="balade-status">
-                <span class="places">{balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''} disponible{balade.placesDisponibles > 1 ? 's' : ''}</span>
+                <span class="places">
+                  {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                </span>
               </div>
             </div>
             <p class="balade-description">{balade.description}</p>

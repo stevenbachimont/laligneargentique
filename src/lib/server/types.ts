@@ -7,6 +7,7 @@ export interface EmailData {
   dateSouhaitee: string;
   nombrePersonnes: number;
   message?: string;
+  baladeId?: string; // ID de la balade pour la réservation
 }
 
 // Types pour les réponses API

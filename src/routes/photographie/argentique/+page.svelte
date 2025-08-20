@@ -1,39 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { baladesStore, baladesService, type Balade } from '$lib/services/baladesService';
 
-  // Balades programmées
-  let baladesProgrammees = [
-    {
-      id: 1,
-      date: '2024-02-15',
-      heure: '14:00',
-      lieu: 'Quartier du Bouffay',
-      theme: 'Architecture médiévale',
-      placesDisponibles: 3,
-      prix: '45€',
-      description: 'Découverte des façades historiques et des ruelles pittoresques'
-    },
-    {
-      id: 2,
-      date: '2024-02-22',
-      heure: '10:00',
-      lieu: 'Île de Nantes',
-      theme: 'Street Art & Contemporain',
-      placesDisponibles: 2,
-      prix: '45€',
-      description: 'Capture des œuvres d\'art urbain et de l\'architecture moderne'
-    },
-    {
-      id: 3,
-      date: '2024-03-01',
-      heure: '16:00',
-      lieu: 'Jardin des Plantes',
-      theme: 'Nature en ville',
-      placesDisponibles: 4,
-      prix: '45€',
-      description: 'Photographie botanique et paysages urbains verdoyants'
-    }
-  ];
+  // Balades programmées depuis le service
+  let baladesProgrammees: Balade[] = [];
 
   let isVisible = false;
 
@@ -48,7 +18,15 @@
 
 
   onMount(() => {
+    // S'abonner au store des balades
+    const unsubscribe = baladesStore.subscribe(balades => {
+      baladesProgrammees = balades;
+    });
+
     setTimeout(() => { isVisible = true; }, 100);
+
+    // Nettoyer l'abonnement
+    return unsubscribe;
   });
 </script>
 
@@ -114,18 +92,26 @@
                   <p class="balade-lieu">📍 {balade.lieu}</p>
                   <p class="balade-heure">🕐 {balade.heure}</p>
                 </div>
-                <div class="balade-status">
-                  <span class="places">{balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''} disponible{balade.placesDisponibles > 1 ? 's' : ''}</span>
-                  <span class="prix">{balade.prix}</span>
-                </div>
+                                                                   <div class="balade-status">
+                    <span class="places {baladesService.getBaladeStatus(balade.id)}">
+                      {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                    </span>
+                    <span class="prix">{balade.prix}</span>
+                  </div>
               </div>
               <p class="balade-description">{balade.description}</p>
-              <div class="balade-actions">
-                <button class="btn-reserver" on:click={() => reserverBalade(balade)}>
-                  Réserver
-                </button>
-                <span class="inscription-info">Inscriptions ouvertes</span>
-              </div>
+                               <div class="balade-actions">
+                   <button 
+                     class="btn-reserver" 
+                     on:click={() => reserverBalade(balade)}
+                     disabled={baladesService.isBaladeComplete(balade.id)}
+                   >
+                     {baladesService.isBaladeComplete(balade.id) ? 'Complet' : 'Réserver'}
+                   </button>
+                   <span class="inscription-info">
+                     {baladesService.isBaladeComplete(balade.id) ? 'Places épuisées' : 'Inscriptions ouvertes'}
+                   </span>
+                 </div>
             </div>
           {/each}
         </div>
@@ -402,6 +388,28 @@
 
   .btn-reserver:hover {
     transform: translateY(-2px);
+  }
+
+  .btn-reserver:disabled {
+    background: rgba(255, 215, 0, 0.3);
+    color: rgba(0, 0, 0, 0.5);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .places {
+    display: block;
+    font-size: 1rem;
+    color: #00ff00;
+    font-weight: bold;
+  }
+
+  .places.limite {
+    color: #ffd700;
+  }
+
+  .places.complete {
+    color: #ff6b6b;
   }
 
   .inscription-info {
