@@ -43,8 +43,8 @@ describe('/photographie', () => {
 
   it('affiche les appels à l\'action', () => {
     render(Page);
-    expect(screen.getByText('Cliquez pour voir le portfolio')).toBeInTheDocument();
-    expect(screen.getByText('Cliquez pour voir les balades')).toBeInTheDocument();
+    expect(screen.getByText('Voir le portfolio')).toBeInTheDocument();
+    expect(screen.getByText('Renseignements et réservations ici')).toBeInTheDocument();
   });
 
   it('rend les blocs cliquables', () => {

@@ -54,4 +54,4 @@ describe('/web', () => {
     expect(portfolioBlock).toHaveAttribute('tabindex', '0');
     expect(toolsBlock).toHaveAttribute('tabindex', '0');
   });
-}); 
+});
