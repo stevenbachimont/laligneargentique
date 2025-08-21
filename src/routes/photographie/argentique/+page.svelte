@@ -11,8 +11,8 @@
   function reserverBalade(balade: any) {
     // Encoder les données de la balade pour l'URL
     const baladeData = encodeURIComponent(JSON.stringify(balade));
-    // Rediriger vers la page de réservation avec les données
-    window.open(`/photographie/argentique/reservation?id=${balade.id}&data=${baladeData}`, '_blank');
+    // Rediriger vers la page de réservation avec les données dans le même onglet
+    window.location.href = `/photographie/argentique/reservation?id=${balade.id}&data=${baladeData}`;
   }
 
 
