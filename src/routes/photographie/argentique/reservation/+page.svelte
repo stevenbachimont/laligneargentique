@@ -299,14 +299,52 @@
   // Fonction pour calculer la distance totale
   function getTotalDistance(balade: any) {
     const steps = getParcoursSteps(balade);
+    if (steps.length === 0) return '0.0';
+    
+    // Si les étapes ont une propriété distance, l'utiliser
+    if (steps[0].distance) {
+      let total = 0;
+      steps.forEach((step: any) => {
+        if (step.distance && typeof step.distance === 'string') {
+          const distance = parseFloat(step.distance.replace(' km', ''));
+          if (!isNaN(distance)) {
+            total += distance;
+          }
+        }
+      });
+      return total.toFixed(1);
+    }
+    
+    // Sinon, calculer approximativement à partir des coordonnées GPS
     let total = 0;
-    steps.forEach((step: any) => {
-      const distance = parseFloat(step.distance.replace(' km', ''));
-      if (!isNaN(distance)) {
+    for (let i = 1; i < steps.length; i++) {
+      const prevStep = steps[i - 1];
+      const currentStep = steps[i];
+      
+      if (prevStep.latitude && prevStep.longitude && currentStep.latitude && currentStep.longitude) {
+        // Calcul approximatif de la distance entre deux points GPS
+        const distance = calculateDistance(
+          prevStep.latitude, prevStep.longitude,
+          currentStep.latitude, currentStep.longitude
+        );
         total += distance;
       }
-    });
+    }
+    
     return total.toFixed(1);
+  }
+
+  // Fonction pour calculer la distance entre deux points GPS (formule de Haversine)
+  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 
   // Fonction pour compter les points photo

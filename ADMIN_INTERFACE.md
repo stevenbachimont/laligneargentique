@@ -8,7 +8,7 @@ L'interface d'administration permet de gérer les balades et les réservations d
 
 - **URL :** `https://votre-domaine.com/admin`
 - **Code d'accès :** Configuré dans le fichier `.env` (variable `ADMIN_ACCESS_CODE`)
-- **Code par défaut :** `argentique2024`
+
 
 ## 🎯 Fonctionnalités
 

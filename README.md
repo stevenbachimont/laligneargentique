@@ -157,6 +157,8 @@ Accédez à l'interface d'administration sécurisée : `/admin`
 **Fonctionnalités :**
 - 🔐 Authentification par code
 - 📋 Gestion complète des balades (ajouter, modifier, supprimer)
+- 🗺️ **Gestion des parcours étape par étape** (ajout, modification, réorganisation, suppression)
+- 📍 **Gestion des coordonnées GPS** (latitude/longitude pour chaque étape)
 - 📅 Gestion des réservations
 - 🔍 Recherche et filtrage
 - 📊 Statistiques

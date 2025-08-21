@@ -2,6 +2,21 @@
   import { onMount } from 'svelte';
   import type { Balade } from '$lib/server/baladesService';
 
+  // Types pour les étapes du parcours
+  interface EtapeParcours {
+    id: number;
+    titre: string;
+    description: string;
+    latitude: number;
+    longitude: number;
+    ordre: number;
+  }
+
+  interface CoordonneeGPS {
+    latitude: number;
+    longitude: number;
+  }
+
   let balades: Balade[] = [];
   let isLoading = true;
   let errorMessage = '';
@@ -10,6 +25,7 @@
   let selectedBalade: Balade | null = null;
   let isEditing = false;
   let isAdding = false;
+  let isEditingParcours = false;
 
   // Formulaire pour ajouter/modifier une balade
   let baladeForm = {
@@ -21,6 +37,19 @@
     placesDisponibles: 5,
     description: ''
   };
+
+  // Gestion du parcours
+  let parcoursEtapes: EtapeParcours[] = [];
+  let currentEtape: EtapeParcours | null = null;
+  let isAddingEtape = false;
+  let isEditingEtape = false;
+
+  // Variables réactives pour le formulaire d'étape
+  let etapeTitre = '';
+  let etapeDescription = '';
+  let etapeLatitude = 0;
+  let etapeLongitude = 0;
+  let etapeOrdre = 1;
 
   onMount(async () => {
     await loadBalades();
@@ -84,6 +113,223 @@
       placesDisponibles: 5,
       description: ''
     };
+  }
+
+  // Fonctions pour la gestion du parcours
+  function editParcours(balade: Balade) {
+    isEditingParcours = true;
+    selectedBalade = balade;
+    
+    // Charger le parcours existant
+    if (balade.parcours && Array.isArray(balade.parcours)) {
+      parcoursEtapes = balade.parcours.map((etape: any, index: number) => {
+        // Récupérer les coordonnées correspondantes
+        let latitude = 0;
+        let longitude = 0;
+        
+        if (balade.coordonnees && Array.isArray(balade.coordonnees) && balade.coordonnees[index]) {
+          const coord = balade.coordonnees[index] as any;
+          // Structure actuelle : {lat: number, lng: number, name: string}
+          if (coord.lat !== undefined && coord.lng !== undefined) {
+            latitude = coord.lat;
+            longitude = coord.lng;
+          }
+          // Structure alternative : {latitude: number, longitude: number}
+          else if (coord.latitude !== undefined && coord.longitude !== undefined) {
+            latitude = coord.latitude;
+            longitude = coord.longitude;
+          }
+        }
+        
+        return {
+          id: index + 1,
+          titre: etape.titre || '',
+          description: etape.description || '',
+          latitude: latitude,
+          longitude: longitude,
+          ordre: index + 1
+        };
+      });
+    } else {
+      parcoursEtapes = [];
+    }
+  }
+
+  function cancelParcoursEdit() {
+    isEditingParcours = false;
+    selectedBalade = null;
+    parcoursEtapes = [];
+    currentEtape = null;
+    isAddingEtape = false;
+    isEditingEtape = false;
+  }
+
+  function addEtape() {
+    isAddingEtape = true;
+    isEditingEtape = false;
+    etapeTitre = '';
+    etapeDescription = '';
+    etapeLatitude = 0;
+    etapeLongitude = 0;
+    etapeOrdre = parcoursEtapes.length + 1;
+    currentEtape = {
+      id: parcoursEtapes.length + 1,
+      titre: '',
+      description: '',
+      latitude: 0,
+      longitude: 0,
+      ordre: parcoursEtapes.length + 1
+    };
+  }
+
+  function editEtape(etape: EtapeParcours) {
+    isEditingEtape = true;
+    isAddingEtape = false;
+    etapeTitre = etape.titre;
+    etapeDescription = etape.description;
+    etapeLatitude = etape.latitude;
+    etapeLongitude = etape.longitude;
+    etapeOrdre = etape.ordre;
+    currentEtape = { ...etape };
+  }
+
+  function cancelEtapeEdit() {
+    isAddingEtape = false;
+    isEditingEtape = false;
+    currentEtape = null;
+    etapeTitre = '';
+    etapeDescription = '';
+    etapeLatitude = 0;
+    etapeLongitude = 0;
+    etapeOrdre = 1;
+  }
+
+  function saveEtape() {
+    if (!etapeTitre || !etapeDescription) {
+      errorMessage = 'Veuillez remplir le titre et la description de l\'étape';
+      return;
+    }
+
+    const etapeData = {
+      id: currentEtape?.id || parcoursEtapes.length + 1,
+      titre: etapeTitre,
+      description: etapeDescription,
+      latitude: etapeLatitude,
+      longitude: etapeLongitude,
+      ordre: etapeOrdre
+    };
+
+    if (isAddingEtape) {
+      // Ajouter une nouvelle étape
+      parcoursEtapes.push(etapeData);
+    } else if (isEditingEtape && currentEtape) {
+      // Modifier une étape existante
+      const index = parcoursEtapes.findIndex(e => e.id === currentEtape?.id);
+      if (index !== -1) {
+        parcoursEtapes[index] = etapeData;
+      }
+    }
+
+    // Réorganiser les ordres
+    parcoursEtapes.forEach((etape, index) => {
+      etape.ordre = index + 1;
+    });
+
+    cancelEtapeEdit();
+    successMessage = isAddingEtape ? 'Étape ajoutée avec succès !' : 'Étape modifiée avec succès !';
+    setTimeout(() => { successMessage = ''; }, 3000);
+  }
+
+  function deleteEtape(etapeId: number) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette étape ?')) {
+      return;
+    }
+
+    parcoursEtapes = parcoursEtapes.filter(e => e.id !== etapeId);
+    
+    // Réorganiser les ordres
+    parcoursEtapes.forEach((etape, index) => {
+      etape.ordre = index + 1;
+    });
+
+    successMessage = 'Étape supprimée avec succès !';
+    setTimeout(() => { successMessage = ''; }, 3000);
+  }
+
+  function moveEtapeUp(etapeId: number) {
+    const index = parcoursEtapes.findIndex(e => e.id === etapeId);
+    if (index > 0) {
+      [parcoursEtapes[index], parcoursEtapes[index - 1]] = [parcoursEtapes[index - 1], parcoursEtapes[index]];
+      // Mettre à jour les ordres
+      parcoursEtapes.forEach((etape, i) => {
+        etape.ordre = i + 1;
+      });
+    }
+  }
+
+  function moveEtapeDown(etapeId: number) {
+    const index = parcoursEtapes.findIndex(e => e.id === etapeId);
+    if (index < parcoursEtapes.length - 1) {
+      [parcoursEtapes[index], parcoursEtapes[index + 1]] = [parcoursEtapes[index + 1], parcoursEtapes[index]];
+      // Mettre à jour les ordres
+      parcoursEtapes.forEach((etape, i) => {
+        etape.ordre = i + 1;
+      });
+    }
+  }
+
+  async function saveParcours() {
+    if (parcoursEtapes.length === 0) {
+      errorMessage = 'Le parcours doit contenir au moins une étape';
+      return;
+    }
+
+    try {
+      // Préparer les données du parcours
+      const parcoursData = parcoursEtapes.map(etape => ({
+        titre: etape.titre,
+        description: etape.description,
+        latitude: etape.latitude,
+        longitude: etape.longitude
+      }));
+
+      // Préparer les coordonnées GPS
+      const coordonneesData = parcoursEtapes.map(etape => ({
+        latitude: etape.latitude,
+        longitude: etape.longitude
+      }));
+
+      // Mettre à jour la balade avec le nouveau parcours
+      const updatedBalade = {
+        ...selectedBalade,
+        parcours: parcoursData,
+        coordonnees: coordonneesData
+      };
+
+      const response = await fetch(`/api/admin/balades/${selectedBalade?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedBalade)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        successMessage = 'Parcours sauvegardé avec succès !';
+        await loadBalades();
+        cancelParcoursEdit();
+        
+        setTimeout(() => {
+          successMessage = '';
+        }, 3000);
+      } else {
+        errorMessage = data.error || 'Erreur lors de la sauvegarde du parcours';
+      }
+    } catch (error) {
+      errorMessage = 'Erreur lors de la sauvegarde du parcours';
+    }
   }
 
   async function saveBalade() {
@@ -335,6 +581,9 @@
                   <button class="btn-edit" on:click={() => editBalade(balade)}>
                     ✏️ Modifier
                   </button>
+                  <button class="btn-parcours" on:click={() => editParcours(balade)}>
+                    🗺️ Parcours
+                  </button>
                   <button class="btn-delete" on:click={() => deleteBalade(balade.id)}>
                     🗑️ Supprimer
                   </button>
@@ -343,6 +592,148 @@
             {/each}
           </div>
         {/if}
+      </div>
+    {/if}
+
+    <!-- Interface d'édition du parcours -->
+    {#if isEditingParcours && selectedBalade}
+      <div class="parcours-section">
+        <div class="parcours-header">
+          <h2>🗺️ Édition du parcours - {selectedBalade.theme}</h2>
+          <div class="parcours-actions">
+            <button class="btn-add-etape" on:click={addEtape}>
+              ➕ Ajouter une étape
+            </button>
+            <button class="btn-save-parcours" on:click={saveParcours}>
+              💾 Sauvegarder le parcours
+            </button>
+            <button class="btn-cancel-parcours" on:click={cancelParcoursEdit}>
+              ❌ Annuler
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulaire d'ajout/modification d'étape -->
+        {#if isAddingEtape || isEditingEtape}
+          <div class="etape-form-section">
+            <h3>{isAddingEtape ? 'Ajouter une étape' : 'Modifier l\'étape'}</h3>
+            
+            <form on:submit|preventDefault={saveEtape} class="etape-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="etape-titre">Titre de l'étape *</label>
+                  <input 
+                    type="text" 
+                    id="etape-titre"
+                    bind:value={etapeTitre}
+                    placeholder="Ex: Départ - Place du Bouffay"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="etape-ordre">Ordre</label>
+                  <input 
+                    type="number" 
+                    id="etape-ordre"
+                    bind:value={etapeOrdre}
+                    min="1"
+                    max="20"
+                    readonly
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="etape-latitude">Latitude *</label>
+                  <input 
+                    type="number" 
+                    id="etape-latitude"
+                    bind:value={etapeLatitude}
+                    step="0.000001"
+                    placeholder="Ex: 47.2138"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="etape-longitude">Longitude *</label>
+                  <input 
+                    type="number" 
+                    id="etape-longitude"
+                    bind:value={etapeLongitude}
+                    step="0.000001"
+                    placeholder="Ex: -1.5564"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="etape-description">Description de l'étape *</label>
+                <textarea 
+                  id="etape-description"
+                  bind:value={etapeDescription}
+                  rows="3"
+                  placeholder="Description détaillée de cette étape du parcours..."
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-save">
+                  {isAddingEtape ? 'Ajouter l\'étape' : 'Modifier l\'étape'}
+                </button>
+                <button type="button" class="btn-cancel" on:click={cancelEtapeEdit}>
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        {/if}
+
+        <!-- Liste des étapes du parcours -->
+        <div class="etapes-section">
+          <h3>Étapes du parcours ({parcoursEtapes.length})</h3>
+          
+          {#if parcoursEtapes.length === 0}
+            <div class="empty-etapes">
+              <p>Aucune étape définie. Cliquez sur "Ajouter une étape" pour commencer.</p>
+            </div>
+          {:else}
+            <div class="etapes-list">
+              {#each parcoursEtapes as etape (etape.id)}
+                <div class="etape-card">
+                  <div class="etape-header">
+                    <div class="etape-ordre">
+                      <span class="ordre-number">{etape.ordre}</span>
+                    </div>
+                    <div class="etape-info">
+                      <h4>{etape.titre}</h4>
+                      <p class="etape-coords">📍 {etape.latitude.toFixed(6)}, {etape.longitude.toFixed(6)}</p>
+                    </div>
+                    <div class="etape-actions">
+                      <button class="btn-move-up" on:click={() => moveEtapeUp(etape.id)} disabled={etape.ordre === 1}>
+                        ⬆️
+                      </button>
+                      <button class="btn-move-down" on:click={() => moveEtapeDown(etape.id)} disabled={etape.ordre === parcoursEtapes.length}>
+                        ⬇️
+                      </button>
+                      <button class="btn-edit-etape" on:click={() => editEtape(etape)}>
+                        ✏️
+                      </button>
+                      <button class="btn-delete-etape" on:click={() => deleteEtape(etape.id)}>
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                  <div class="etape-description">
+                    <p>{etape.description}</p>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
       </div>
     {/if}
   </div>
@@ -710,6 +1101,239 @@
     transform: translateY(-1px);
   }
 
+  .btn-parcours {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .btn-parcours:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  }
+
+  /* Styles pour l'édition du parcours */
+  .parcours-section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .parcours-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .parcours-header h2 {
+    color: #4CAF50;
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .parcours-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-add-etape {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+
+  .btn-add-etape:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  }
+
+  .btn-save-parcours {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+  }
+
+  .btn-save-parcours:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  }
+
+  .btn-cancel-parcours {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-cancel-parcours:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+  }
+
+  .etape-form-section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .etape-form-section h3 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .etape-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .etapes-section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .etapes-section h3 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .empty-etapes {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .etapes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .etape-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .etape-card:hover {
+    transform: translateY(-1px);
+  }
+
+  .etape-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .etape-ordre {
+    background: #4CAF50;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  .etape-info {
+    flex: 1;
+  }
+
+  .etape-info h4 {
+    color: #4CAF50;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+  }
+
+  .etape-coords {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+    margin: 0;
+  }
+
+  .etape-actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .btn-move-up, .btn-move-down, .btn-edit-etape, .btn-delete-etape {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+  }
+
+  .btn-move-up:hover, .btn-move-down:hover {
+    background: rgba(76, 175, 80, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-edit-etape:hover {
+    background: rgba(255, 193, 7, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-delete-etape:hover {
+    background: rgba(255, 0, 0, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-move-up:disabled, .btn-move-down:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .etape-description {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .etape-description p {
+    margin: 0;
+  }
+
   /* Animations */
   .fade-in {
     opacity: 1;
@@ -769,6 +1393,25 @@
     }
 
     .balade-actions {
+      justify-content: center;
+    }
+
+    .parcours-header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .parcours-actions {
+      justify-content: center;
+    }
+
+    .etape-header {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .etape-actions {
       justify-content: center;
     }
   }

@@ -32,7 +32,9 @@ export const PUT: RequestHandler = async ({ params, request }) => {
       lieu: baladeData.lieu,
       prix: baladeData.prix,
       placesDisponibles: baladeData.placesDisponibles || existingBalade.placesDisponibles,
-      description: baladeData.description
+      description: baladeData.description,
+      parcours: baladeData.parcours || existingBalade.parcours,
+      coordonnees: baladeData.coordonnees || existingBalade.coordonnees
     });
 
     if (updatedBalade) {
