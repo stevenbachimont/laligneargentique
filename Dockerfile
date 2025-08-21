@@ -5,17 +5,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Copier les fichiers Prisma
-COPY prisma ./prisma/
-
-# Définir DATABASE_URL pour le build
-ENV DATABASE_URL=file:./prisma/dev.db
-
-# Générer le client Prisma
-RUN npx prisma generate
-
-# Créer la base de données SQLite si elle n'existe pas
-RUN npx prisma db push
+# Créer le dossier data pour la base SQLite
+RUN mkdir -p data
 
 COPY . .
 
