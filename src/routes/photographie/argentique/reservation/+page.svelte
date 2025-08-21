@@ -3,7 +3,7 @@
   import { page } from '$app/stores';
 
   // Récupérer les paramètres de l'URL
-  $: baladeId = $page.url.searchParams.get('id');
+  $: baladeId = $page.url.searchParams.get('baladeId') || $page.url.searchParams.get('id');
   $: baladeData = $page.url.searchParams.get('data');
 
   // Variables pour le formulaire
@@ -20,6 +20,7 @@
   let placesDisponibles = 5;
   let balade: any = null;
   let isVisible = false;
+  let isLoading = true;
 
   // Validation côté client
   let errors: Record<string, string> = {};
@@ -120,27 +121,40 @@
     placesDisponibles = 5;
   }
 
-  onMount(() => {
+  onMount(async () => {
+    console.log('🔍 Chargement de la page de réservation');
+    console.log('📋 baladeId:', baladeId);
+    console.log('📋 baladeData:', baladeData);
+    
     // Récupérer la balade sélectionnée
     if (baladeId) {
-      // Charger les données depuis l'API
-      fetch(`/api/balades`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            balade = data.balades.find((b: any) => b.id === parseInt(baladeId));
-            if (balade) {
-              // Pré-remplir le formulaire avec les données de la balade
-              argentiqueForm.dateSouhaitee = balade.date;
-              placesDisponibles = balade.placesDisponibles;
-              argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
-              argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
-            }
+      try {
+        // Charger les données depuis l'API
+        const response = await fetch(`/api/balades`);
+        const data = await response.json();
+        
+        console.log('📊 Données API reçues:', data);
+        
+        if (data.success) {
+          const baladeIdInt = parseInt(baladeId);
+          console.log('🔍 Recherche de la balade avec ID:', baladeIdInt);
+          console.log('📋 Balades disponibles:', data.balades.map((b: any) => ({ id: b.id, theme: b.theme })));
+          
+          balade = data.balades.find((b: any) => b.id === baladeIdInt);
+          
+          if (balade) {
+            // Pré-remplir le formulaire avec les données de la balade
+            argentiqueForm.dateSouhaitee = balade.date;
+            placesDisponibles = balade.placesDisponibles;
+            argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
+            argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
+          } else {
+            console.error('❌ Balade non trouvée avec ID:', baladeIdInt);
           }
-        })
-        .catch(error => {
-          console.error('Erreur lors du chargement des balades:', error);
-        });
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des balades:', error);
+      }
     } else if (baladeData) {
       try {
         balade = JSON.parse(decodeURIComponent(baladeData));
@@ -157,6 +171,7 @@
       argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
     }
 
+    isLoading = false;
     setTimeout(() => { isVisible = true; }, 100);
   });
 
@@ -278,7 +293,7 @@
 
   // Fonction pour obtenir les étapes du parcours
   function getParcoursSteps(balade: any) {
-    return balade.parcours || [];
+    return balade?.parcours || [];
   }
 
   // Fonction pour calculer la distance totale
@@ -310,7 +325,12 @@
   </div>
 
   <div class="content">
-    {#if balade}
+    {#if isLoading}
+      <div class="loading-container">
+        <h2>Chargement de la balade...</h2>
+        <p>Veuillez patienter pendant que nous récupérons les informations.</p>
+      </div>
+    {:else if balade}
       <!-- Section Détails de la Balade -->
       <section class="balade-details {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.2s">
         <div class="container">
@@ -371,7 +391,8 @@
       </section>
 
       <!-- Section Plan et Parcours -->
-      <section class="plan-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.3s">
+      {#if balade?.parcours && balade.parcours.length > 0}
+        <section class="plan-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.3s">
         <div class="container">
           <h2>🗺️ Plan et Parcours</h2>
           <div class="plan-content">
@@ -436,6 +457,7 @@
           </div>
         </div>
       </section>
+      {/if}
 
       <!-- Section Formulaire de Réservation -->
       <section class="reservation-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
@@ -2164,5 +2186,24 @@
       font-weight: 600;
       color: #ffd700;
     }
+  }
+
+  .loading-container {
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .loading-container h2 {
+    color: #ffd700;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+  }
+
+  .loading-container p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    line-height: 1.6;
   }
 </style>
