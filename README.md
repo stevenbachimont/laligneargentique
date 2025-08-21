@@ -117,8 +117,26 @@ Content-Type: application/json
 
 ### Base de Données
 Les données sont stockées dans `data/balades.db` avec les tables :
-- `balades` : Informations des balades et places disponibles
+- `balades` : Informations des balades (date, heure, lieu, thème, places disponibles, etc.)
 - `reservations` : Historique des réservations
+
+### Gestion des Balades
+Pour gérer les balades facilement, utilisez le script de maintenance :
+
+```bash
+# Lancer le gestionnaire interactif
+npm run manage-balades
+
+# Ou directement
+node scripts/manage-balades.js
+```
+
+**Fonctionnalités :**
+- 📋 Lister toutes les balades
+- ➕ Ajouter une nouvelle balade
+- ✏️ Modifier une balade existante
+- 🗑️ Supprimer une balade
+- 📋 Voir les réservations
 
 ## 🧪 Tests
 

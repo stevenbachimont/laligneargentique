@@ -58,7 +58,7 @@ if (baladeCount.count === 0) {
 
   // Balade 1
   insertBalade.run(
-    '2024-02-15',
+    '2024-03-15',
     '14:00',
     'Quartier du Bouffay',
     'Architecture médiévale',
@@ -104,7 +104,7 @@ if (baladeCount.count === 0) {
 
   // Balade 2
   insertBalade.run(
-    '2024-02-22',
+    '2024-03-22',
     '10:00',
     'Île de Nantes',
     'Street Art & Contemporain',
@@ -150,7 +150,7 @@ if (baladeCount.count === 0) {
 
   // Balade 3
   insertBalade.run(
-    '2024-03-01',
+    '2024-04-05',
     '16:00',
     'Jardin des Plantes',
     'Nature en ville',

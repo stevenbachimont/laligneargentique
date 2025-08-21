@@ -56,6 +56,19 @@ try {
       },
       {
         date: '2024-03-22',
+        heure: '10:00',
+        lieu: 'Île de Nantes',
+        theme: 'Street Art & Contemporain',
+        places_disponibles: 2,
+        prix: '45€',
+        description: 'Capture des œuvres d\'art urbain et de l\'architecture moderne',
+        consignes: JSON.stringify(['Appareil photo argentique requis', 'Pellicule 400 ISO recommandée']),
+        materiel: JSON.stringify(['Appareil photo argentique', 'Pellicules', 'Objectif grand angle (optionnel)']),
+        coordonnees: JSON.stringify([{ lat: 47.2078, lng: -1.5647, name: 'Les Machines de l\'île' }]),
+        parcours: JSON.stringify([{ titre: 'Départ - Les Machines de l\'île', description: 'Point de rendez-vous', duree: '15 min', distance: '0 km' }])
+      },
+      {
+        date: '2024-04-05',
         heure: '16:00',
         lieu: 'Jardin des Plantes',
         theme: 'Nature en ville',
@@ -64,7 +77,7 @@ try {
         description: 'Photographie botanique et paysages urbains verdoyants',
         consignes: JSON.stringify(['Appareil photo argentique requis', 'Pellicule 100 ISO recommandée']),
         materiel: JSON.stringify(['Appareil photo argentique', 'Pellicules', 'Objectif macro (optionnel)']),
-        coordonnees: JSON.stringify([{ lat: 47.2138, lng: -1.5561, name: 'Jardin des Plantes' }]),
+        coordonnees: JSON.stringify([{ lat: 47.2189, lng: -1.5432, name: 'Jardin des Plantes' }]),
         parcours: JSON.stringify([{ titre: 'Départ - Entrée principale', description: 'Point de rendez-vous', duree: '15 min', distance: '0 km' }])
       }
     ];

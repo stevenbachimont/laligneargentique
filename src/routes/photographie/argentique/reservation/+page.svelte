@@ -230,7 +230,9 @@
   }
 
   function formatDate(dateString: string) {
+    if (!dateString) return '';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
     return date.toLocaleDateString('fr-FR', {
       weekday: 'long',
       year: 'numeric',
@@ -499,13 +501,12 @@
                 {/if}
               </div>
               <div class="form-group">
-                <label for="dateSouhaitee">Date souhaitée *</label>
-                <input 
-                  type="date" 
-                  id="dateSouhaitee" 
-                  bind:value={argentiqueForm.dateSouhaitee} 
-                  required 
-                />
+                <label>Date et heure de la balade</label>
+                <div class="balade-datetime-display">
+                  <span class="datetime-info">
+                    📅 {formatDate(balade?.date || '')} à 🕐 {balade?.heure || ''}
+                  </span>
+                </div>
               </div>
               <div class="form-group">
                 <label for="nombrePersonnes">Nombre de personnes *</label>
@@ -1197,6 +1198,21 @@
     padding: 3rem;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .balade-datetime-display {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+
+  .datetime-info {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffd700;
   }
 
   .error-container h2 {
@@ -2133,6 +2149,20 @@
       padding: 0.6rem 1rem;
       font-size: 0.8rem;
       width: 100%;
+    }
+
+    .balade-datetime-display {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .datetime-info {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffd700;
     }
   }
 </style>
