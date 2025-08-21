@@ -22,9 +22,15 @@ Le site inclut un système de gestion des balades argentique avec base de donné
 - ✅ **API REST simple** pour les opérations CRUD
 
 ### Statuts des Balades
-- 🟢 **Disponible** : Plus de 2 places disponibles
-- 🟡 **Limite** : 1-2 places disponibles  
-- 🔴 **Complet** : 0 place disponible
+- 🟢 **Disponible** : 4-5 places disponibles (vert)
+- 🟠 **Moyen** : 2-3 places disponibles (orange)
+- 🔴 **Critique/Complet** : 0-1 place disponible (rouge)
+
+### Système de Code Couleur
+Le site utilise un système de code couleur intuitif pour indiquer la disponibilité :
+- **🟢 Vert (#00ff00)** : Places nombreuses (4-5), pas d'urgence
+- **🟠 Orange (#ff8c00)** : Places moyennes (2-3), réserver bientôt
+- **🔴 Rouge (#ff6b6b)** : Places critiques (0-1) ou balade complète
 
 ## 🚀 Installation et Démarrage
 

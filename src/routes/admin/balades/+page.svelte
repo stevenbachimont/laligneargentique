@@ -323,9 +323,9 @@
                     <p class="balade-prix">💰 {balade.prix}</p>
                   </div>
                   <div class="balade-status">
-                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles <= 2 ? 'limite' : 'disponible'}">
-                      {balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''}
-                    </span>
+                                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
+                  {balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''}
+                </span>
                   </div>
                 </div>
                 
@@ -654,8 +654,12 @@
     margin-bottom: 0.5rem;
   }
 
+  .places.orange {
+    color: #ff8c00;
+  }
+
   .places.limite {
-    color: #ffd700;
+    color: #ff6b6b;
   }
 
   .places.complete {
