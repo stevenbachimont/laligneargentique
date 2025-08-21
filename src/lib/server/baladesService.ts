@@ -243,11 +243,26 @@ class BaladesService {
     prix: string;
     placesDisponibles: number;
     description: string;
+    parcours?: Array<{
+      titre: string;
+      description: string;
+      latitude: number;
+      longitude: number;
+    }>;
+    coordonnees?: Array<{
+      latitude: number;
+      longitude: number;
+    }>;
   }): Balade | null {
     try {
+      // Récupérer la balade existante pour les valeurs par défaut
+      const existingBalade = this.getBaladeById(baladeId);
+      if (!existingBalade) return null;
+
       const stmt = db.prepare(`
         UPDATE balades 
-        SET theme = ?, date = ?, heure = ?, lieu = ?, prix = ?, places_disponibles = ?, description = ?
+        SET theme = ?, date = ?, heure = ?, lieu = ?, prix = ?, places_disponibles = ?, description = ?,
+            parcours = ?, coordonnees = ?
         WHERE id = ?
       `);
       
@@ -259,6 +274,8 @@ class BaladesService {
         baladeData.prix,
         baladeData.placesDisponibles,
         baladeData.description,
+        JSON.stringify(baladeData.parcours || existingBalade.parcours),
+        JSON.stringify(baladeData.coordonnees || existingBalade.coordonnees),
         baladeId
       );
 

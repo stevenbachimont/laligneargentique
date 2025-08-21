@@ -90,4 +90,45 @@ describe('BaladesService', () => {
       expect(status).toBe('disponible');
     });
   });
+
+  describe('modifierBalade', () => {
+    it('devrait retourner null pour une balade inexistante', () => {
+      const baladeData = {
+        theme: 'Balade inexistante',
+        date: '2024-04-01',
+        heure: '10:00',
+        lieu: 'Lieu',
+        prix: '60€',
+        placesDisponibles: 5,
+        description: 'Description'
+      };
+
+      const result = baladesService.modifierBalade(999, baladeData);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('creerBalade', () => {
+    it('devrait créer une nouvelle balade', () => {
+      const baladeData = {
+        theme: 'Nouvelle balade',
+        date: '2024-04-01',
+        heure: '10:00',
+        lieu: 'Nouveau lieu',
+        prix: '60€',
+        placesDisponibles: 5,
+        description: 'Description de la nouvelle balade'
+      };
+
+      const result = baladesService.creerBalade(baladeData);
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('supprimerBalade', () => {
+    it('devrait supprimer une balade existante', () => {
+      const result = baladesService.supprimerBalade(1);
+      expect(result).toBe(true);
+    });
+  });
 });
