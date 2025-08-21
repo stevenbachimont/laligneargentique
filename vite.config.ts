@@ -5,9 +5,12 @@ import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
 	// Charger les variables d'environnement
-	loadEnv(mode, process.cwd(), '');
+	const env = loadEnv(mode, process.cwd(), '');
 	
 	return {
+		define: {
+			'import.meta.env.VITE_ADMIN_ACCESS_CODE': JSON.stringify(env.ADMIN_ACCESS_CODE)
+		},
 		plugins: [
 			sveltekit(),
 			paraglideVitePlugin({
