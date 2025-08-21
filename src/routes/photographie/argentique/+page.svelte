@@ -1,13 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-import { baladesStore, type Balade } from '$lib/services/baladesClientService';
-import { baladesClientService } from '$lib/services/baladesClientService';
+  import type { Balade } from '$lib/server/baladesService';
 
-  // Balades programmées depuis le service
+  // Balades programmées depuis l'API
   let baladesProgrammees: Balade[] = [];
+
   let isVisible = false;
-  let isSyncing = false;
-  let lastSyncTime = new Date();
 
   // Fonction pour rediriger vers la page de réservation
   function reserverBalade(balade: any) {
@@ -17,48 +15,24 @@ import { baladesClientService } from '$lib/services/baladesClientService';
     window.open(`/photographie/argentique/reservation?id=${balade.id}&data=${baladeData}`, '_blank');
   }
 
-  // Fonction pour actualiser les places disponibles
-  async function refreshBalades() {
+
+
+  onMount(async () => {
     try {
-      console.log('🔄 Actualisation manuelle des balades...');
-      isSyncing = true;
+      // Charger les balades depuis l'API
+      const response = await fetch('/api/balades');
+      const data = await response.json();
       
-      // Synchroniser immédiatement
-      const success = await baladesClientService.getBalades();
-      
-      if (success.length > 0) {
-        console.log('✅ Balades actualisées avec succès');
-        lastSyncTime = new Date();
+      if (data.success) {
+        baladesProgrammees = data.balades;
       } else {
-        console.log('❌ Échec de l\'actualisation des balades');
+        console.error('Erreur lors du chargement des balades:', data.error);
       }
     } catch (error) {
-      console.error('❌ Erreur lors de l\'actualisation:', error);
-    } finally {
-      isSyncing = false;
+      console.error('Erreur lors du chargement des balades:', error);
     }
-  }
-
-  onMount(() => {
-    // Charger les balades au démarrage
-    baladesClientService.getBalades().catch(error => {
-      console.error('❌ Erreur lors du chargement des balades:', error);
-    });
-
-    // S'abonner au store des balades
-    const unsubscribe = baladesStore.subscribe(balades => {
-      baladesProgrammees = balades;
-      console.log('🔄 Store mis à jour:', balades.length, 'balades');
-    });
 
     setTimeout(() => { isVisible = true; }, 100);
-
-    // Nettoyer l'abonnement
-    return () => {
-      if (unsubscribe && typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-    };
   });
 </script>
 
@@ -108,26 +82,8 @@ import { baladesClientService } from '$lib/services/baladesClientService';
     <!-- Section Balades Programmées -->
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
       <div class="container">
-        <div class="section-header">
-          <h2>📅 Balades Programmées</h2>
-          <div class="header-actions">
-            <button 
-              class="btn-refresh {isSyncing ? 'syncing' : ''}" 
-              on:click={refreshBalades}
-              disabled={isSyncing}
-            >
-              {isSyncing ? '🔄 Synchronisation...' : '🔄 Actualiser'}
-            </button>
-            <div class="sync-status">
-                      <span class="sync-indicator">
-          🔄 Synchronisation manuelle
-        </span>
-              <span class="last-sync">
-                Dernière sync: {lastSyncTime.toLocaleTimeString('fr-FR')}
-              </span>
-            </div>
-          </div>
-        </div>
+        <h2>Balades programmées</h2>
+        <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
         
         <div class="balades-grid">
           {#each baladesProgrammees as balade}
@@ -142,26 +98,26 @@ import { baladesClientService } from '$lib/services/baladesClientService';
                   <p class="balade-lieu">📍 {balade.lieu}</p>
                   <p class="balade-heure">🕐 {balade.heure}</p>
                 </div>
-                                                                   <div class="balade-status">
-                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : 'limite'}">
-                      {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
-                    </span>
-                    <span class="prix">{balade.prix}</span>
-                  </div>
+                <div class="balade-status">
+                  <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles <= 2 ? 'limite' : 'disponible'}">
+                    {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                  </span>
+                  <span class="prix">{balade.prix}</span>
+                </div>
               </div>
               <p class="balade-description">{balade.description}</p>
-                               <div class="balade-actions">
-                   <button 
-                     class="btn-reserver" 
-                     on:click={() => reserverBalade(balade)}
-                     disabled={balade.placesDisponibles === 0}
-                   >
-                     {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
-                   </button>
-                   <span class="inscription-info">
-                     {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
-                   </span>
-                 </div>
+              <div class="balade-actions">
+                <button 
+                  class="btn-reserver" 
+                  on:click={() => reserverBalade(balade)}
+                  disabled={balade.placesDisponibles === 0}
+                >
+                  {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
+                </button>
+                <span class="inscription-info">
+                  {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
+                </span>
+              </div>
             </div>
           {/each}
         </div>
@@ -326,76 +282,11 @@ import { baladesClientService } from '$lib/services/baladesClientService';
     color: #ffd700;
   }
 
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-    gap: 1rem;
-  }
-
   .section-subtitle {
-    text-align: left;
+    text-align: center;
     color: rgba(255,255,255,0.8);
     font-size: 1.1rem;
-    margin-bottom: 0;
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .btn-refresh {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .btn-refresh:hover {
-    background: linear-gradient(45deg, #45a049, #4CAF50);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-  }
-
-  .btn-refresh:active {
-    transform: translateY(0);
-  }
-
-  .btn-refresh.syncing {
-    background: linear-gradient(45deg, #ff9800, #ffb74d);
-    color: #000;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
-  .sync-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.8);
-  }
-
-  .sync-indicator {
-    font-size: 1rem;
-  }
-
-  .sync-indicator.active {
-    color: #00ff00;
-  }
-
-  .sync-indicator.inactive {
-    color: #ff6b6b;
+    margin-bottom: 3rem;
   }
 
   .balades-grid {
@@ -471,6 +362,14 @@ import { baladesClientService } from '$lib/services/baladesClientService';
     margin-bottom: 0.5rem;
   }
 
+  .places.limite {
+    color: #ffd700;
+  }
+
+  .places.complete {
+    color: #ff6b6b;
+  }
+
   .prix {
     display: block;
     font-size: 1.1rem;
@@ -510,21 +409,6 @@ import { baladesClientService } from '$lib/services/baladesClientService';
     color: rgba(0, 0, 0, 0.5);
     cursor: not-allowed;
     transform: none;
-  }
-
-  .places {
-    display: block;
-    font-size: 1rem;
-    color: #00ff00;
-    font-weight: bold;
-  }
-
-  .places.limite {
-    color: #ffd700;
-  }
-
-  .places.complete {
-    color: #ff6b6b;
   }
 
   .inscription-info {
@@ -776,29 +660,10 @@ import { baladesClientService } from '$lib/services/baladesClientService';
       padding: 0 1rem;
     }
 
-    .section-header {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 1rem;
-    }
-
     .section-subtitle {
       font-size: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
       padding: 0 1rem;
-      text-align: center;
-    }
-
-    .header-actions {
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-refresh {
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
     }
 
     .features-grid,

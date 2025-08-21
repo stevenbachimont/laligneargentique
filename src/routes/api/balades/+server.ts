@@ -1,12 +1,20 @@
 import { json } from '@sveltejs/kit';
-import { baladesPrismaService } from '$lib/services/baladesPrismaService';
+import type { RequestHandler } from './$types';
+import { baladesService } from '$lib/server/baladesService';
 
-export async function GET() {
+export const GET: RequestHandler = async () => {
   try {
-    const balades = await baladesPrismaService.getBalades();
-    return json(balades);
+    const balades = baladesService.getAllBalades();
+    
+    return json({
+      success: true,
+      balades
+    });
   } catch (error) {
-    console.error('❌ Erreur lors de la récupération des balades:', error);
-    return json({ error: 'Erreur lors de la récupération des balades' }, { status: 500 });
+    console.error('Erreur lors de la récupération des balades:', error);
+    return json({
+      success: false,
+      error: 'Erreur lors de la récupération des balades'
+    }, { status: 500 });
   }
-}
+};

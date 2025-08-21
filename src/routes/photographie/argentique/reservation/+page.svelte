@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { baladesStore, type Balade } from '$lib/services/baladesClientService';
-  import { baladesClientService } from '$lib/services/baladesClientService';
 
   // Récupérer les paramètres de l'URL
   $: baladeId = $page.url.searchParams.get('id');
@@ -16,8 +14,7 @@
     telephone: '',
     dateSouhaitee: '',
     nombrePersonnes: 1,
-    message: '',
-    baladeId: ''
+    message: ''
   };
   let argentiqueError = '';
   let placesDisponibles = 5;
@@ -117,40 +114,44 @@
       telephone: '',
       dateSouhaitee: '',
       nombrePersonnes: 1,
-      message: '',
-      baladeId: ''
+      message: ''
     };
     clearErrors();
     placesDisponibles = 5;
   }
 
-  // Balades programmées depuis le service
-  let baladesProgrammees: Balade[] = [];
-
-  onMount(async () => {
-    // Charger les balades au démarrage
-    try {
-      baladesProgrammees = await baladesClientService.getBalades();
-    } catch (error) {
-      console.error('❌ Erreur lors du chargement des balades:', error);
-    }
-
+  onMount(() => {
     // Récupérer la balade sélectionnée
     if (baladeId) {
-      // Chercher la balade dans la liste chargée
-      balade = baladesProgrammees.find(b => b.id === parseInt(baladeId));
+      // Charger les données depuis l'API
+      fetch(`/api/balades`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            balade = data.balades.find((b: any) => b.id === parseInt(baladeId));
+            if (balade) {
+              // Pré-remplir le formulaire avec les données de la balade
+              argentiqueForm.dateSouhaitee = balade.date;
+              placesDisponibles = balade.placesDisponibles;
+              argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
+              argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Erreur lors du chargement des balades:', error);
+        });
     } else if (baladeData) {
       try {
         balade = JSON.parse(decodeURIComponent(baladeData));
-      } catch (error) {
-        console.error('❌ Erreur lors du décodage des données de la balade:', error);
+      } catch (e) {
+        console.error('Erreur lors du parsing des données de la balade:', e);
       }
     }
 
-    // Pré-remplir le formulaire avec les données de la balade
     if (balade) {
+      // Pré-remplir le formulaire avec les données de la balade
       argentiqueForm.dateSouhaitee = balade.date;
-      argentiqueForm.baladeId = balade.id.toString();
       placesDisponibles = balade.placesDisponibles;
       argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
       argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
@@ -176,10 +177,16 @@
     isSubmitting = true;
     
     try {
-      const requestBody = JSON.stringify(argentiqueForm);
+              // Ajouter l'ID de la balade aux données
+        const requestData = {
+          ...argentiqueForm,
+          baladeId: parseInt(balade?.id?.toString() || '0')
+        };
+      
+      const requestBody = JSON.stringify(requestData);
       console.log('📤 Corps de la requête:', requestBody);
       
-      const response = await fetch('/api/argentique', {
+      const response = await fetch('/api/balades/reservation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -318,9 +325,7 @@
                 <p class="balade-prix">💰 {balade.prix}</p>
               </div>
               <div class="balade-status">
-                <span class="places">
-                  {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
-                </span>
+                <span class="places">{balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''} disponible{balade.placesDisponibles > 1 ? 's' : ''}</span>
               </div>
             </div>
             <p class="balade-description">{balade.description}</p>
@@ -340,7 +345,7 @@
                   {#each balade.consignes as consigne}
                     <div class="consigne-item">
                       <span class="consigne-icon">⚠️</span>
-                      <span class="consigne-text">{consigne.texte}</span>
+                      <span class="consigne-text">{consigne}</span>
                     </div>
                   {/each}
                 {/if}
@@ -353,7 +358,7 @@
                   {#each balade.materiel as item}
                     <div class="materiel-item">
                       <span class="materiel-icon">📱</span>
-                      <span class="materiel-text">{item.nom}</span>
+                      <span class="materiel-text">{item}</span>
                     </div>
                   {/each}
                 {/if}

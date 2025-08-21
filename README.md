@@ -2,6 +2,30 @@
 
 Site web portfolio présentant des travaux photographiques et de développement web, avec un système de réservation pour des balades photo argentique.
 
+## 🎯 Fonctionnalités
+
+- **Portfolio Photographique** : Séries Street, Portraits, Paysages et Quotidien
+- **Portfolio Web** : Projets de développement web
+- **Balades Argentique** : Système de réservation automatique avec gestion des places
+- **Formulaire de Contact** : Envoi d'emails automatique
+- **Interface Responsive** : Optimisé pour tous les appareils
+
+## 🚀 Système de Réservation avec Base de Données
+
+Le site inclut un système de gestion des balades argentique avec base de données SQLite :
+
+### Fonctionnalités
+- ✅ **Base de données SQLite** pour la persistance des données
+- ✅ **Gestion automatique des places** lors des réservations
+- ✅ **Validation des réservations** côté serveur
+- ✅ **Interface utilisateur réactive** avec statuts visuels
+- ✅ **API REST simple** pour les opérations CRUD
+
+### Statuts des Balades
+- 🟢 **Disponible** : Plus de 2 places disponibles
+- 🟡 **Limite** : 1-2 places disponibles  
+- 🔴 **Complet** : 0 place disponible
+
 ## Creating a project
 
 If you're seeing this, you've probably already done this step. Congrats!
@@ -68,3 +92,50 @@ docker-compose up -d
 ```
 
 > **Note** : Les variables d'environnement peuvent être surchargées via docker-compose ou définies dans le Dockerfile.
+
+## 🛠️ API de Gestion des Balades
+
+### Récupérer les Balades
+```bash
+GET /api/balades
+```
+
+### Créer une Réservation
+```bash
+POST /api/balades/reservation
+Content-Type: application/json
+
+{
+  "baladeId": 1,
+  "prenom": "Jean",
+  "nom": "Dupont",
+  "email": "jean.dupont@email.com",
+  "nombrePersonnes": 2,
+  "message": "Message optionnel"
+}
+```
+
+### Base de Données
+Les données sont stockées dans `data/balades.db` avec les tables :
+- `balades` : Informations des balades et places disponibles
+- `reservations` : Historique des réservations
+
+## 🧪 Tests
+
+Le projet inclut une suite de tests complète :
+
+```bash
+# Lancer tous les tests
+npm test
+
+# Tests spécifiques
+npm run test:unit    # Tests unitaires
+npm run test:e2e     # Tests end-to-end
+```
+
+### Couverture des Tests
+- ✅ **Service de gestion des balades**
+- ✅ **Validation des données**
+- ✅ **Interface utilisateur**
+- ✅ **API endpoints**
+- ✅ **Intégration des composants**
