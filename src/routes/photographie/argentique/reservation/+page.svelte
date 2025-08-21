@@ -143,7 +143,6 @@
           balade = data.balades.find((b: any) => b.id === baladeIdInt);
           
           if (balade) {
-            console.log('✅ Balade trouvée:', balade);
             // Pré-remplir le formulaire avec les données de la balade
             argentiqueForm.dateSouhaitee = balade.date;
             placesDisponibles = balade.placesDisponibles;
@@ -294,7 +293,7 @@
 
   // Fonction pour obtenir les étapes du parcours
   function getParcoursSteps(balade: any) {
-    return balade.parcours || [];
+    return balade?.parcours || [];
   }
 
   // Fonction pour calculer la distance totale
@@ -392,7 +391,8 @@
       </section>
 
       <!-- Section Plan et Parcours -->
-      <section class="plan-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.3s">
+      {#if balade?.parcours && balade.parcours.length > 0}
+        <section class="plan-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.3s">
         <div class="container">
           <h2>🗺️ Plan et Parcours</h2>
           <div class="plan-content">
@@ -457,6 +457,7 @@
           </div>
         </div>
       </section>
+      {/if}
 
       <!-- Section Formulaire de Réservation -->
       <section class="reservation-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
