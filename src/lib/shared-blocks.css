@@ -226,9 +226,24 @@
 }
 
 .places-dispo {
-  color: #00ff00;
   font-size: 0.8rem;
   font-weight: 500;
+}
+
+.places-dispo.disponible {
+  color: #00ff00;
+}
+
+.places-dispo.orange {
+  color: #ff8c00;
+}
+
+.places-dispo.limite {
+  color: #ff6b6b;
+}
+
+.places-dispo.complete {
+  color: #ff6b6b;
 }
 
 /* CTA des blocs */

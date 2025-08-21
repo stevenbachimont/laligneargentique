@@ -54,30 +54,7 @@
           Nantes sous un angle différent, à travers le prisme de l'argentique.
         </p>
         
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">📷</div>
-            <h3>Appareils fournis</h3>
-            <p>Appareils photo argentiques restaurés et pellicules incluses. Chaque participant dispose de son propre appareil pendant la balade.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🎯</div>
-            <h3>Techniques enseignées</h3>
-            <p>Composition, exposition, développement au caffénol. Apprenez les bases et les subtilités de la photographie argentique.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🏛️</div>
-            <h3>Lieux insolites</h3>
-            <p>Découverte des quartiers historiques et contemporains de Nantes, des endroits méconnus et des perspectives uniques.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">👥</div>
-            <h3>Groupe limité</h3>
-            <p>Maximum 5 participants par balade pour un accompagnement personnalisé et une expérience conviviale.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+        
 
     <!-- Section Balades Programmées -->
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
@@ -99,7 +76,7 @@
                   <p class="balade-heure">🕐 {balade.heure}</p>
                 </div>
                 <div class="balade-status">
-                  <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles <= 2 ? 'limite' : 'disponible'}">
+                  <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
                     {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
                   </span>
                   <span class="prix">{balade.prix}</span>
@@ -123,6 +100,31 @@
         </div>
       </div>
     </section>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📷</div>
+        <h3>Appareils fournis</h3>
+        <p>Appareils photo argentiques restaurés et pellicules incluses. Chaque participant dispose de son propre appareil pendant la balade.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>Techniques enseignées</h3>
+        <p>Composition, exposition, développement au caffénol. Apprenez les bases et les subtilités de la photographie argentique.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏛️</div>
+        <h3>Lieux insolites</h3>
+        <p>Découverte des quartiers historiques et contemporains de Nantes, des endroits méconnus et des perspectives uniques.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Groupe limité</h3>
+        <p>Maximum 5 participants par balade pour un accompagnement personnalisé et une expérience conviviale.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 
 
@@ -362,8 +364,22 @@
     margin-bottom: 0.5rem;
   }
 
+  .places {
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .places.disponible {
+    color: #00ff00;
+  }
+
+  .places.orange {
+    color: #ff8c00;
+  }
+
   .places.limite {
-    color: #ffd700;
+    color: #ff6b6b;
   }
 
   .places.complete {

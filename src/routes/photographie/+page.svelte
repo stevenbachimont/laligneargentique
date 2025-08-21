@@ -126,7 +126,7 @@
                   <div class="balade-preview-info">
                     <h4>{balade.theme}</h4>
                     <p>📍 {balade.lieu} • 🕐 {balade.heure}</p>
-                    <span class="places-dispo">{balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''} disponible{balade.placesDisponibles > 1 ? 's' : ''}</span>
+                    <span class="places-dispo {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">{balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''} disponible{balade.placesDisponibles > 1 ? 's' : ''}</span>
                   </div>
                   <div class="reservation-hint">Cliquez pour réserver</div>
                 </div>
