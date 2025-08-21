@@ -25,6 +25,7 @@ echo "EMAIL_APP_PASSWORD=$EMAIL_APP_PASSWORD" >> .env
 echo "ADMIN_EMAIL=$ADMIN_EMAIL" >> .env
 echo "NODE_ENV=production" >> .env
 echo "DATABASE_URL=file:./data/balades.db" >> .env
+echo "ADMIN_ACCESS_CODE=$ADMIN_ACCESS_CODE" >> .env
 
 echo "✅ Fichier .env généré avec succès"
 

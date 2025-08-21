@@ -26,17 +26,37 @@ Le site inclut un système de gestion des balades argentique avec base de donné
 - 🟡 **Limite** : 1-2 places disponibles  
 - 🔴 **Complet** : 0 place disponible
 
+## 🚀 Installation et Démarrage
+
+1. **Cloner le projet**
+```bash
+git clone <url-du-repo>
+cd monsite
+```
+
+2. **Installer les dépendances**
+```bash
+npm install
+```
+
+3. **Configurer l'environnement**
+```bash
+# Option 1 : Script automatique
+./setup-env.sh
+
+# Option 2 : Manuel
+cp env.example .env
+# Puis éditez le fichier .env avec vos valeurs
+```
+
+4. **Lancer le serveur de développement**
+```bash
+npm run dev
+```
+
 ## Creating a project
 
 If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
 
 ## Developing
 
@@ -121,7 +141,22 @@ Les données sont stockées dans `data/balades.db` avec les tables :
 - `reservations` : Historique des réservations
 
 ### Gestion des Balades
-Pour gérer les balades facilement, utilisez le script de maintenance :
+
+#### Interface Web d'Administration
+Accédez à l'interface d'administration sécurisée : `/admin`
+
+**Code d'accès :** Configuré dans le fichier `.env` (variable `ADMIN_ACCESS_CODE`)
+**Code par défaut :** `argentique2024`
+
+**Fonctionnalités :**
+- 🔐 Authentification par code
+- 📋 Gestion complète des balades (ajouter, modifier, supprimer)
+- 📅 Gestion des réservations
+- 🔍 Recherche et filtrage
+- 📊 Statistiques
+
+#### Script de Maintenance (Alternative)
+Pour gérer les balades en ligne de commande :
 
 ```bash
 # Lancer le gestionnaire interactif

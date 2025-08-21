@@ -29,6 +29,9 @@ export interface Reservation {
   nombrePersonnes: number;
   message?: string;
   createdAt: string;
+  theme?: string;
+  date?: string;
+  heure?: string;
 }
 
 class BaladesService {
@@ -177,6 +180,128 @@ class BaladesService {
     const result = stmt.run(placesInitiales, baladeId);
     
     return result.changes > 0;
+  }
+
+  // Créer une nouvelle balade
+  creerBalade(baladeData: {
+    theme: string;
+    date: string;
+    heure: string;
+    lieu: string;
+    prix: string;
+    placesDisponibles: number;
+    description: string;
+    consignes: string[];
+    materiel: string[];
+    coordonnees: Array<{lat: number, lng: number, name: string}>;
+    parcours: Array<{
+      titre: string;
+      description: string;
+      duree: string;
+      distance: string;
+    }>;
+  }): Balade | null {
+    try {
+      const stmt = db.prepare(`
+        INSERT INTO balades (
+          theme, date, heure, lieu, prix, places_disponibles, description,
+          consignes, materiel, coordonnees, parcours
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const result = stmt.run(
+        baladeData.theme,
+        baladeData.date,
+        baladeData.heure,
+        baladeData.lieu,
+        baladeData.prix,
+        baladeData.placesDisponibles,
+        baladeData.description,
+        JSON.stringify(baladeData.consignes),
+        JSON.stringify(baladeData.materiel),
+        JSON.stringify(baladeData.coordonnees),
+        JSON.stringify(baladeData.parcours)
+      );
+
+      if (result.changes > 0) {
+        return this.getBaladeById(result.lastInsertRowid as number);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Erreur lors de la création de la balade:', error);
+      return null;
+    }
+  }
+
+  // Modifier une balade existante
+  modifierBalade(baladeId: number, baladeData: {
+    theme: string;
+    date: string;
+    heure: string;
+    lieu: string;
+    prix: string;
+    placesDisponibles: number;
+    description: string;
+  }): Balade | null {
+    try {
+      const stmt = db.prepare(`
+        UPDATE balades 
+        SET theme = ?, date = ?, heure = ?, lieu = ?, prix = ?, places_disponibles = ?, description = ?
+        WHERE id = ?
+      `);
+      
+      const result = stmt.run(
+        baladeData.theme,
+        baladeData.date,
+        baladeData.heure,
+        baladeData.lieu,
+        baladeData.prix,
+        baladeData.placesDisponibles,
+        baladeData.description,
+        baladeId
+      );
+
+      if (result.changes > 0) {
+        return this.getBaladeById(baladeId);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Erreur lors de la modification de la balade:', error);
+      return null;
+    }
+  }
+
+  // Supprimer une balade
+  supprimerBalade(baladeId: number): boolean {
+    try {
+      // Supprimer d'abord les réservations associées
+      const deleteReservations = db.prepare('DELETE FROM reservations WHERE balade_id = ?');
+      deleteReservations.run(baladeId);
+      
+      // Puis supprimer la balade
+      const deleteBalade = db.prepare('DELETE FROM balades WHERE id = ?');
+      const result = deleteBalade.run(baladeId);
+      
+      return result.changes > 0;
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la balade:', error);
+      return false;
+    }
+  }
+
+  // Supprimer une réservation
+  supprimerReservation(reservationId: number): boolean {
+    try {
+      const deleteReservation = db.prepare('DELETE FROM reservations WHERE id = ?');
+      const result = deleteReservation.run(reservationId);
+      
+      return result.changes > 0;
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la réservation:', error);
+      return false;
+    }
   }
 }
 
