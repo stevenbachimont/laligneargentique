@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { baladesService } from './baladesService';
+import db from './database';
 
-// Mock de la base de données
 vi.mock('./database', () => ({
   default: {
     prepare: vi.fn(() => ({
@@ -18,7 +18,8 @@ vi.mock('./database', () => ({
           consignes: JSON.stringify(['Test consigne']),
           materiel: JSON.stringify(['Test materiel']),
           coordonnees: JSON.stringify([{ lat: 47.2138, lng: -1.5561, name: 'Test' }]),
-          parcours: JSON.stringify([{ titre: 'Test', description: 'Test', duree: '30 min', distance: '0 km' }])
+          parcours: JSON.stringify([{ titre: 'Test', description: 'Test', duree: '30 min', distance: '0 km' }]),
+          statut: 'en_ligne'
         }
       ]),
       get: vi.fn((id) => {
@@ -35,12 +36,13 @@ vi.mock('./database', () => ({
             consignes: JSON.stringify(['Test consigne']),
             materiel: JSON.stringify(['Test materiel']),
             coordonnees: JSON.stringify([{ lat: 47.2138, lng: -1.5561, name: 'Test' }]),
-            parcours: JSON.stringify([{ titre: 'Test', description: 'Test', duree: '30 min', distance: '0 km' }])
+            parcours: JSON.stringify([{ titre: 'Test', description: 'Test', duree: '30 min', distance: '0 km' }]),
+            statut: 'en_ligne'
           };
         }
         return null;
       }),
-      run: vi.fn(() => ({ changes: 1 }))
+      run: vi.fn(() => ({ changes: 1, lastInsertRowid: 1 }))
     }))
   }
 }));
@@ -56,6 +58,7 @@ describe('BaladesService', () => {
       expect(balades).toHaveLength(1);
       expect(balades[0].id).toBe(1);
       expect(balades[0].theme).toBe('Architecture médiévale');
+      expect(balades[0].statut).toBe('en_ligne');
     });
   });
 
@@ -64,11 +67,20 @@ describe('BaladesService', () => {
       const balade = baladesService.getBaladeById(1);
       expect(balade).toBeDefined();
       expect(balade?.theme).toBe('Architecture médiévale');
+      expect(balade?.statut).toBe('en_ligne');
     });
 
     it('devrait retourner null pour un ID inexistant', () => {
       const balade = baladesService.getBaladeById(999);
       expect(balade).toBeNull();
+    });
+  });
+
+  describe('getBaladesEnLigne', () => {
+    it('devrait retourner seulement les balades en ligne', () => {
+      const balades = baladesService.getBaladesEnLigne();
+      expect(balades).toHaveLength(1);
+      expect(balades[0].statut).toBe('en_ligne');
     });
   });
 
@@ -84,40 +96,20 @@ describe('BaladesService', () => {
     });
   });
 
-  describe('getBaladeStatus', () => {
-    it('devrait retourner le bon statut', () => {
-      const status = baladesService.getBaladeStatus(1);
-      expect(status).toBe('disponible');
-    });
-  });
-
-  describe('modifierBalade', () => {
-    it('devrait retourner null pour une balade inexistante', () => {
-      const baladeData = {
-        theme: 'Balade inexistante',
-        date: '2024-04-01',
-        heure: '10:00',
-        lieu: 'Lieu',
-        prix: '60€',
-        placesDisponibles: 5,
-        description: 'Description'
-      };
-
-      const result = baladesService.modifierBalade(999, baladeData);
-      expect(result).toBeNull();
-    });
-  });
-
   describe('creerBalade', () => {
-    it('devrait créer une nouvelle balade', () => {
+    it('devrait créer une balade', () => {
       const baladeData = {
-        theme: 'Nouvelle balade',
-        date: '2024-04-01',
+        theme: 'Nouvelle Balade',
+        date: '2024-12-25',
         heure: '10:00',
-        lieu: 'Nouveau lieu',
-        prix: '60€',
+        lieu: 'Test Location',
+        prix: '50€',
         placesDisponibles: 5,
-        description: 'Description de la nouvelle balade'
+        description: 'Description test',
+        consignes: ['Test consigne'],
+        materiel: ['Test materiel'],
+        coordonnees: [{ lat: 47.2138, lng: -1.5561, name: 'Test' }],
+        parcours: [{ titre: 'Test', description: 'Test', duree: '30 min', distance: '0 km' }]
       };
 
       const result = baladesService.creerBalade(baladeData);
@@ -125,9 +117,48 @@ describe('BaladesService', () => {
     });
   });
 
+  describe('modifierBalade', () => {
+    it('devrait modifier une balade', () => {
+      const baladeData = {
+        theme: 'Architecture médiévale',
+        date: '2024-02-15',
+        heure: '14:00',
+        lieu: 'Quartier du Bouffay',
+        prix: '45€',
+        placesDisponibles: 3,
+        description: 'Test description'
+      };
+
+      const result = baladesService.modifierBalade(1, baladeData);
+      expect(result).toBeDefined();
+    });
+
+    it('devrait retourner null pour une balade inexistante', () => {
+      const baladeData = {
+        theme: 'Balade inexistante',
+        date: '2024-04-01',
+        heure: '10:00',
+        lieu: 'Lieu',
+        prix: '50€',
+        placesDisponibles: 5,
+        description: 'Description test'
+      };
+
+      const result = baladesService.modifierBalade(999, baladeData);
+      expect(result).toBeNull();
+    });
+  });
+
   describe('supprimerBalade', () => {
     it('devrait supprimer une balade existante', () => {
       const result = baladesService.supprimerBalade(1);
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('supprimerReservation', () => {
+    it('devrait supprimer une réservation', () => {
+      const result = baladesService.supprimerReservation(1);
       expect(result).toBe(true);
     });
   });
