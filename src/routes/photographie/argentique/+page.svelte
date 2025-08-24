@@ -5,6 +5,7 @@
   // Balades programmées depuis l'API
   let baladesFutures: Balade[] = [];
   let baladesArchivees: Balade[] = [];
+  let baladesParAnnee: { [annee: string]: Balade[] } = {};
 
   let isVisible = false;
 
@@ -18,6 +19,34 @@
   function voirRetrospective(balade: any) {
     // Rediriger vers la page de rétrospective
     window.location.href = `/photographie/argentique/retrospective/${balade.id}`;
+  }
+
+  // Fonction pour classer les balades par années
+  function trierEtSeparerBalades() {
+    // Classer par années
+    baladesParAnnee = {};
+    
+    // Balades futures par année
+    baladesFutures.forEach(balade => {
+      const annee = new Date(balade.date).getFullYear().toString();
+      if (!baladesParAnnee[annee]) {
+        baladesParAnnee[annee] = [];
+      }
+      baladesParAnnee[annee].push(balade);
+    });
+
+    // Balades passées par année
+    baladesArchivees.forEach(balade => {
+      const annee = new Date(balade.date).getFullYear().toString();
+      if (!baladesParAnnee[annee]) {
+        baladesParAnnee[annee] = [];
+      }
+      baladesParAnnee[annee].push(balade);
+    });
+  }
+
+  function getAnneeLabel(annee: string): string {
+    return annee;
   }
 
   onMount(async () => {
@@ -41,6 +70,9 @@
       } else {
         console.error('Erreur lors du chargement des balades archivées:', dataArchivees.error);
       }
+
+      // Classer les balades par années
+      trierEtSeparerBalades();
     } catch (error) {
       console.error('Erreur lors du chargement des balades:', error);
     }
@@ -99,38 +131,45 @@
         <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
         
         {#if baladesFutures.length > 0}
-          <div class="balades-grid">
-            {#each baladesFutures as balade}
-              <div class="balade-card">
-                <div class="balade-header">
-                  <div class="balade-date">
-                    <span class="date-day">{new Date(balade.date).getDate()}</span>
-                    <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
-                  </div>
-                  <div class="balade-info">
-                    <h3>{balade.theme}</h3>
-                    <p class="balade-lieu">📍 {balade.lieu}</p>
-                    <p class="balade-heure">🕐 {balade.heure}</p>
-                  </div>
-                  <div class="balade-status">
-                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
-                      {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
-                    </span>
-                    <span class="prix">{balade.prix}</span>
-                  </div>
-                </div>
-                <p class="balade-description">{balade.description}</p>
-                <div class="balade-actions">
-                  <button 
-                    class="btn-reserver" 
-                    on:click={() => reserverBalade(balade)}
-                    disabled={balade.placesDisponibles === 0}
-                  >
-                    {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
-                  </button>
-                  <span class="inscription-info">
-                    {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
-                  </span>
+          <div class="balades-annees">
+            {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) >= new Date().getFullYear()).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [annee, baladesAnnee]}
+              <div class="annee-section">
+                <h3 class="annee-title">{getAnneeLabel(annee)}</h3>
+                <div class="balades-grid">
+                  {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0]) as balade}
+                    <div class="balade-card">
+                      <div class="balade-header">
+                        <div class="balade-date">
+                          <span class="date-day">{new Date(balade.date).getDate()}</span>
+                          <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                        </div>
+                        <div class="balade-info">
+                          <h3>{balade.theme}</h3>
+                          <p class="balade-lieu">📍 {balade.lieu}</p>
+                          <p class="balade-heure">🕐 {balade.heure}</p>
+                        </div>
+                        <div class="balade-status">
+                          <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
+                            {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                          </span>
+                          <span class="prix">{balade.prix}</span>
+                        </div>
+                      </div>
+                      <p class="balade-description">{balade.description}</p>
+                      <div class="balade-actions">
+                        <button 
+                          class="btn-reserver" 
+                          on:click={() => reserverBalade(balade)}
+                          disabled={balade.placesDisponibles === 0}
+                        >
+                          {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
+                        </button>
+                        <span class="inscription-info">
+                          {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
+                        </span>
+                      </div>
+                    </div>
+                  {/each}
                 </div>
               </div>
             {/each}
@@ -151,35 +190,42 @@
         <p class="section-subtitle">Revivez nos balades précédentes à travers les photos et témoignages des participants</p>
         
         {#if baladesArchivees.length > 0}
-          <div class="balades-grid balades-archivees">
-            {#each baladesArchivees as balade}
-              <div class="balade-card balade-archivee">
-                <div class="balade-header">
-                  <div class="balade-date archivee">
-                    <span class="date-day">{new Date(balade.date).getDate()}</span>
-                    <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
-                  </div>
-                  <div class="balade-info">
-                    <h3>{balade.theme}</h3>
-                    <p class="balade-lieu">📍 {balade.lieu}</p>
-                    <p class="balade-heure">🕐 {balade.heure}</p>
-                  </div>
-                  <div class="balade-status">
-                    <span class="status-archivee">Balade terminée</span>
-                    <span class="prix">{balade.prix}</span>
-                  </div>
-                </div>
-                <p class="balade-description">{balade.description}</p>
-                <div class="balade-actions">
-                  <button 
-                    class="btn-retrospective" 
-                    on:click={() => voirRetrospective(balade)}
-                  >
-                    📸 Voir la rétrospective
-                  </button>
-                  <span class="retrospective-info">
-                    Photos et témoignages disponibles
-                  </span>
+          <div class="balades-annees balades-archivees">
+            {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) < new Date().getFullYear()).sort(([a], [b]) => parseInt(b) - parseInt(a)) as [annee, baladesAnnee]}
+              <div class="annee-section">
+                <h3 class="annee-title archivee">{getAnneeLabel(annee)}</h3>
+                <div class="balades-grid">
+                  {#each baladesAnnee.filter(b => b.date < new Date().toISOString().split('T')[0]) as balade}
+                    <div class="balade-card balade-archivee">
+                      <div class="balade-header">
+                        <div class="balade-date archivee">
+                          <span class="date-day">{new Date(balade.date).getDate()}</span>
+                          <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                        </div>
+                        <div class="balade-info">
+                          <h3>{balade.theme}</h3>
+                          <p class="balade-lieu">📍 {balade.lieu}</p>
+                          <p class="balade-heure">🕐 {balade.heure}</p>
+                        </div>
+                        <div class="balade-status">
+                          <span class="status-archivee">Balade terminée</span>
+                          <span class="prix">{balade.prix}</span>
+                        </div>
+                      </div>
+                      <p class="balade-description">{balade.description}</p>
+                      <div class="balade-actions">
+                        <button 
+                          class="btn-retrospective" 
+                          on:click={() => voirRetrospective(balade)}
+                        >
+                          📸 Voir la rétrospective
+                        </button>
+                        <span class="retrospective-info">
+                          Photos et témoignages disponibles
+                        </span>
+                      </div>
+                    </div>
+                  {/each}
                 </div>
               </div>
             {/each}
@@ -354,6 +400,38 @@
     color: rgba(255,255,255,0.8);
     font-size: 1.1rem;
     margin-bottom: 3rem;
+  }
+
+  .balades-annees {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .annee-section {
+    margin-bottom: 2rem;
+  }
+
+  .annee-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .annee-title {
+    font-size: 1.8rem;
+    color: #ffd700;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+    border: 2px solid rgba(255, 215, 0, 0.2);
+  }
+
+  .annee-title.archivee {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(156, 39, 176, 0.05));
+    border: 2px solid rgba(156, 39, 176, 0.2);
+    color: #9C27B0;
   }
 
   .balades-grid {

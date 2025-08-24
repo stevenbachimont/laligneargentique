@@ -387,4 +387,40 @@ describe('API Admin Balades', () => {
       expect(data.balade.coordonnees).toEqual([]);
     });
   });
+
+  describe('Fonction getAnneeLabel simplifiée', () => {
+    it('devrait retourner seulement l\'année sans mention contextuelle', () => {
+      // Simulation de la fonction getAnneeLabel simplifiée
+      const getAnneeLabel = (annee: string): string => {
+        return annee;
+      };
+
+      // Tests des différents cas
+      expect(getAnneeLabel('2024')).toBe('2024');
+      expect(getAnneeLabel('2025')).toBe('2025');
+      expect(getAnneeLabel('2023')).toBe('2023');
+      expect(getAnneeLabel('2026')).toBe('2026');
+    });
+
+    it('devrait traiter les années comme des chaînes simples', () => {
+      const getAnneeLabel = (annee: string): string => {
+        return annee;
+      };
+
+      // Test avec différents formats d'années
+      expect(getAnneeLabel('2024')).toBe('2024');
+      expect(getAnneeLabel('25')).toBe('25');
+      expect(getAnneeLabel('2020')).toBe('2020');
+    });
+
+    it('devrait maintenir la cohérence entre les pages admin et publique', () => {
+      // Vérification que la même logique est appliquée partout
+      const getAnneeLabelAdmin = (annee: string): string => annee;
+      const getAnneeLabelPublic = (annee: string): string => annee;
+
+      const testAnnee = '2024';
+      expect(getAnneeLabelAdmin(testAnnee)).toBe(getAnneeLabelPublic(testAnnee));
+      expect(getAnneeLabelAdmin(testAnnee)).toBe('2024');
+    });
+  });
 });

@@ -156,7 +156,7 @@
     
     // Copier les données de la balade existante
     baladeForm = {
-      theme: `${balade.theme} (Copie)`,
+      theme: balade.theme,
       date: '', // Laisser vide pour que l'utilisateur choisisse une nouvelle date
       heure: balade.heure,
       lieu: balade.lieu,
@@ -593,20 +593,7 @@
   }
 
   function getAnneeLabel(annee: string): string {
-    const anneeInt = parseInt(annee);
-    const anneeActuelle = new Date().getFullYear();
-    
-    if (anneeInt === anneeActuelle) {
-      return `${annee} (Cette année)`;
-    } else if (anneeInt === anneeActuelle + 1) {
-      return `${annee} (L'année prochaine)`;
-    } else if (anneeInt === anneeActuelle - 1) {
-      return `${annee} (L'année dernière)`;
-    } else if (anneeInt > anneeActuelle) {
-      return `${annee} (Dans ${anneeInt - anneeActuelle} an${anneeInt - anneeActuelle > 1 ? 's' : ''})`;
-    } else {
-      return `${annee} (Il y a ${anneeActuelle - anneeInt} an${anneeActuelle - anneeInt > 1 ? 's' : ''})`;
-    }
+    return annee;
   }
 
   function retourAdmin() {
