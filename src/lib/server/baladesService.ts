@@ -50,10 +50,10 @@ class BaladesService {
       placesDisponibles: row.places_disponibles,
       prix: row.prix,
       description: row.description,
-      consignes: JSON.parse(row.consignes),
-      materiel: JSON.parse(row.materiel),
-      coordonnees: JSON.parse(row.coordonnees),
-      parcours: JSON.parse(row.parcours),
+      consignes: row.consignes ? JSON.parse(row.consignes) : [],
+      materiel: row.materiel ? JSON.parse(row.materiel) : [],
+      coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
+      parcours: row.parcours ? JSON.parse(row.parcours) : [],
       statut: row.statut || 'en_ligne'
     }));
   }
@@ -72,10 +72,56 @@ class BaladesService {
       placesDisponibles: row.places_disponibles,
       prix: row.prix,
       description: row.description,
-      consignes: JSON.parse(row.consignes),
-      materiel: JSON.parse(row.materiel),
-      coordonnees: JSON.parse(row.coordonnees),
-      parcours: JSON.parse(row.parcours),
+      consignes: row.consignes ? JSON.parse(row.consignes) : [],
+      materiel: row.materiel ? JSON.parse(row.materiel) : [],
+      coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
+      parcours: row.parcours ? JSON.parse(row.parcours) : [],
+      statut: row.statut || 'en_ligne'
+    }));
+  }
+
+  // Récupérer les balades passées (archivées) - date < aujourd'hui
+  getBaladesArchivees(): Balade[] {
+    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const stmt = db.prepare('SELECT * FROM balades WHERE date < ? ORDER BY date DESC, heure DESC');
+    const rows = stmt.all(today) as any[];
+    
+    return rows.map(row => ({
+      id: row.id,
+      date: row.date,
+      heure: row.heure,
+      lieu: row.lieu,
+      theme: row.theme,
+      placesDisponibles: row.places_disponibles,
+      prix: row.prix,
+      description: row.description,
+      consignes: row.consignes ? JSON.parse(row.consignes) : [],
+      materiel: row.materiel ? JSON.parse(row.materiel) : [],
+      coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
+      parcours: row.parcours ? JSON.parse(row.parcours) : [],
+      statut: row.statut || 'en_ligne'
+    }));
+  }
+
+  // Récupérer les balades futures (non archivées) - date >= aujourd'hui
+  getBaladesFutures(): Balade[] {
+    const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const stmt = db.prepare('SELECT * FROM balades WHERE date >= ? AND statut = ? ORDER BY date, heure');
+    const rows = stmt.all(today, 'en_ligne') as any[];
+    
+    return rows.map(row => ({
+      id: row.id,
+      date: row.date,
+      heure: row.heure,
+      lieu: row.lieu,
+      theme: row.theme,
+      placesDisponibles: row.places_disponibles,
+      prix: row.prix,
+      description: row.description,
+      consignes: row.consignes ? JSON.parse(row.consignes) : [],
+      materiel: row.materiel ? JSON.parse(row.materiel) : [],
+      coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
+      parcours: row.parcours ? JSON.parse(row.parcours) : [],
       statut: row.statut || 'en_ligne'
     }));
   }

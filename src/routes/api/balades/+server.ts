@@ -6,16 +6,27 @@ export const GET: RequestHandler = async ({ url }) => {
   try {
     const searchParams = url.searchParams;
     const admin = searchParams.get('admin');
+    const type = searchParams.get('type'); // 'futures', 'archivees', ou undefined pour toutes
     
-    // Si c'est un appel admin, retourner toutes les balades
-    // Sinon, retourner seulement les balades en ligne
-    const balades = admin === 'true' 
-      ? baladesService.getAllBalades()
-      : baladesService.getBaladesEnLigne();
+    let balades;
+    
+    if (admin === 'true') {
+      // Admin : toutes les balades
+      balades = baladesService.getAllBalades();
+    } else if (type === 'futures') {
+      // Balades futures (non archivées)
+      balades = baladesService.getBaladesFutures();
+    } else if (type === 'archivees') {
+      // Balades passées (archivées)
+      balades = baladesService.getBaladesArchivees();
+    } else {
+      // Par défaut : balades en ligne (comportement existant)
+      balades = baladesService.getBaladesEnLigne();
+    }
     
     return json({
       success: true,
-      balades
+      balades: balades
     });
   } catch (error) {
     console.error('Erreur lors de la récupération des balades:', error);

@@ -3,30 +3,43 @@
   import type { Balade } from '$lib/server/baladesService';
 
   // Balades programmées depuis l'API
-  let baladesProgrammees: Balade[] = [];
+  let baladesFutures: Balade[] = [];
+  let baladesArchivees: Balade[] = [];
 
   let isVisible = false;
 
   // Fonction pour rediriger vers la page de réservation
   function reserverBalade(balade: any) {
-    // Encoder les données de la balade pour l'URL
-    const baladeData = encodeURIComponent(JSON.stringify(balade));
-    // Rediriger vers la page de réservation avec les données dans le même onglet
-    window.location.href = `/photographie/argentique/reservation?id=${balade.id}&data=${baladeData}`;
+    // Rediriger vers la page de réservation avec l'ID de la balade
+    window.location.href = `/photographie/argentique/reservation?baladeId=${balade.id}`;
   }
 
-
+  // Fonction pour rediriger vers la page de rétrospective
+  function voirRetrospective(balade: any) {
+    // Rediriger vers la page de rétrospective
+    window.location.href = `/photographie/argentique/retrospective/${balade.id}`;
+  }
 
   onMount(async () => {
     try {
-      // Charger les balades depuis l'API
-      const response = await fetch('/api/balades');
-      const data = await response.json();
+      // Charger les balades futures depuis l'API
+      const responseFutures = await fetch('/api/balades?type=futures');
+      const dataFutures = await responseFutures.json();
       
-      if (data.success) {
-        baladesProgrammees = data.balades;
+      if (dataFutures.success) {
+        baladesFutures = dataFutures.balades;
       } else {
-        console.error('Erreur lors du chargement des balades:', data.error);
+        console.error('Erreur lors du chargement des balades futures:', dataFutures.error);
+      }
+
+      // Charger les balades archivées depuis l'API
+      const responseArchivees = await fetch('/api/balades?type=archivees');
+      const dataArchivees = await responseArchivees.json();
+      
+      if (dataArchivees.success) {
+        baladesArchivees = dataArchivees.balades;
+      } else {
+        console.error('Erreur lors du chargement des balades archivées:', dataArchivees.error);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des balades:', error);
@@ -54,79 +67,131 @@
           Nantes sous un angle différent, à travers le prisme de l'argentique.
         </p>
         
-        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📷</div>
+            <h3>Appareils fournis</h3>
+            <p>Appareils photo argentiques restaurés et pellicules incluses. Chaque participant dispose de son propre appareil pendant la balade.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Techniques enseignées</h3>
+            <p>Composition, exposition, développement au caffénol. Apprenez les bases et les subtilités de la photographie argentique.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🏛️</div>
+            <h3>Lieux insolites</h3>
+            <p>Découverte des quartiers historiques et contemporains de Nantes, des endroits méconnus et des perspectives uniques.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Groupe limité</h3>
+            <p>Maximum 5 participants par balade pour un accompagnement personnalisé et une expérience conviviale.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <!-- Section Balades Programmées -->
+    <!-- Section Balades Programmées (Futures) -->
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
       <div class="container">
         <h2>Balades programmées</h2>
         <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
         
-        <div class="balades-grid">
-          {#each baladesProgrammees as balade}
-            <div class="balade-card">
-              <div class="balade-header">
-                <div class="balade-date">
-                  <span class="date-day">{new Date(balade.date).getDate()}</span>
-                  <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+        {#if baladesFutures.length > 0}
+          <div class="balades-grid">
+            {#each baladesFutures as balade}
+              <div class="balade-card">
+                <div class="balade-header">
+                  <div class="balade-date">
+                    <span class="date-day">{new Date(balade.date).getDate()}</span>
+                    <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                  </div>
+                  <div class="balade-info">
+                    <h3>{balade.theme}</h3>
+                    <p class="balade-lieu">📍 {balade.lieu}</p>
+                    <p class="balade-heure">🕐 {balade.heure}</p>
+                  </div>
+                  <div class="balade-status">
+                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
+                      {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                    </span>
+                    <span class="prix">{balade.prix}</span>
+                  </div>
                 </div>
-                <div class="balade-info">
-                  <h3>{balade.theme}</h3>
-                  <p class="balade-lieu">📍 {balade.lieu}</p>
-                  <p class="balade-heure">🕐 {balade.heure}</p>
-                </div>
-                <div class="balade-status">
-                  <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
-                    {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                <p class="balade-description">{balade.description}</p>
+                <div class="balade-actions">
+                  <button 
+                    class="btn-reserver" 
+                    on:click={() => reserverBalade(balade)}
+                    disabled={balade.placesDisponibles === 0}
+                  >
+                    {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
+                  </button>
+                  <span class="inscription-info">
+                    {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
                   </span>
-                  <span class="prix">{balade.prix}</span>
                 </div>
               </div>
-              <p class="balade-description">{balade.description}</p>
-              <div class="balade-actions">
-                <button 
-                  class="btn-reserver" 
-                  on:click={() => reserverBalade(balade)}
-                  disabled={balade.placesDisponibles === 0}
-                >
-                  {balade.placesDisponibles === 0 ? 'Complet' : 'Réserver'}
-                </button>
-                <span class="inscription-info">
-                  {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Inscriptions ouvertes'}
-                </span>
-              </div>
-            </div>
-          {/each}
-        </div>
+            {/each}
+          </div>
+        {:else}
+          <div class="no-balades">
+            <p>Aucune balade programmée pour le moment.</p>
+            <p>Revenez bientôt pour découvrir nos nouvelles balades !</p>
+          </div>
+        {/if}
       </div>
     </section>
 
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">📷</div>
-        <h3>Appareils fournis</h3>
-        <p>Appareils photo argentiques restaurés et pellicules incluses. Chaque participant dispose de son propre appareil pendant la balade.</p>
+    <!-- Section Balades Archivées (Passées) -->
+    <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
+      <div class="container">
+        <h2>Balades passées</h2>
+        <p class="section-subtitle">Revivez nos balades précédentes à travers les photos et témoignages des participants</p>
+        
+        {#if baladesArchivees.length > 0}
+          <div class="balades-grid balades-archivees">
+            {#each baladesArchivees as balade}
+              <div class="balade-card balade-archivee">
+                <div class="balade-header">
+                  <div class="balade-date archivee">
+                    <span class="date-day">{new Date(balade.date).getDate()}</span>
+                    <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                  </div>
+                  <div class="balade-info">
+                    <h3>{balade.theme}</h3>
+                    <p class="balade-lieu">📍 {balade.lieu}</p>
+                    <p class="balade-heure">🕐 {balade.heure}</p>
+                  </div>
+                  <div class="balade-status">
+                    <span class="status-archivee">Balade terminée</span>
+                    <span class="prix">{balade.prix}</span>
+                  </div>
+                </div>
+                <p class="balade-description">{balade.description}</p>
+                <div class="balade-actions">
+                  <button 
+                    class="btn-retrospective" 
+                    on:click={() => voirRetrospective(balade)}
+                  >
+                    📸 Voir la rétrospective
+                  </button>
+                  <span class="retrospective-info">
+                    Photos et témoignages disponibles
+                  </span>
+                </div>
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <div class="no-balades">
+            <p>Aucune balade passée pour le moment.</p>
+            <p>Nos premières balades auront lieu bientôt !</p>
+          </div>
+        {/if}
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎯</div>
-        <h3>Techniques enseignées</h3>
-        <p>Composition, exposition, développement au caffénol. Apprenez les bases et les subtilités de la photographie argentique.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🏛️</div>
-        <h3>Lieux insolites</h3>
-        <p>Découverte des quartiers historiques et contemporains de Nantes, des endroits méconnus et des perspectives uniques.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">👥</div>
-        <h3>Groupe limité</h3>
-        <p>Maximum 5 participants par balade pour un accompagnement personnalisé et une expérience conviviale.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-
+    </section>
 
     <!-- Section Informations Pratiques -->
     <section class="infos-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.8s">
@@ -325,6 +390,12 @@
     min-width: 60px;
   }
 
+  .balade-date.archivee {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
   .date-day {
     display: block;
     font-size: 1.5rem;
@@ -360,12 +431,6 @@
   .places {
     display: block;
     font-size: 0.8rem;
-    color: #00ff00;
-    margin-bottom: 0.5rem;
-  }
-
-  .places {
-    font-size: 0.8rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
   }
@@ -384,6 +449,14 @@
 
   .places.complete {
     color: #ff6b6b;
+  }
+
+  .status-archivee {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.5rem;
+    font-style: italic;
   }
 
   .prix {
@@ -427,141 +500,50 @@
     transform: none;
   }
 
+  .btn-retrospective {
+    background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .btn-retrospective:hover {
+    transform: translateY(-2px);
+  }
+
   .inscription-info {
     font-size: 0.8rem;
     color: #00ff00;
   }
 
-  .reservation-section {
-    margin-bottom: 5rem;
-    opacity: 0;
-    transform: translateY(40px);
+  .retrospective-info {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
   }
 
-  .reservation-section h2 {
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 1rem;
-    color: #ffd700;
-  }
-
-  .success-container {
+  .no-balades {
     text-align: center;
     padding: 3rem;
-  }
-
-  .success-message {
-    background: rgba(0,255,0,0.1);
-    border: 1px solid rgba(0,255,0,0.3);
-    border-radius: 15px;
-    padding: 2rem;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .success-message h3 {
-    color: #00ff00;
-    margin-bottom: 1rem;
-  }
-
-  .success-message p {
-    color: rgba(255,255,255,0.9);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-  }
-
-  .reservation-form {
     background: rgba(255,255,255,0.05);
-    padding: 2rem;
     border-radius: 15px;
     border: 1px solid rgba(255,255,255,0.1);
-    max-width: 800px;
-    margin: 0 auto;
   }
 
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .form-group.full-width {
-    grid-column: 1 / -1;
-  }
-
-  .form-group label {
-    color: rgba(255,255,255,0.9);
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px;
-    padding: 0.75rem;
-    color: #fff;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-  }
-
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #ffd700;
-    background: rgba(255,255,255,0.15);
-  }
-
-  .form-group input::placeholder,
-  .form-group textarea::placeholder {
-    color: rgba(255,255,255,0.5);
-  }
-
-  .form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  .form-actions {
-    text-align: center;
-    margin-top: 2rem;
-  }
-
-  .btn-submit {
-    background: linear-gradient(45deg, #ffd700, #ffed4e);
-    color: #000;
-    border: none;
-    padding: 1rem 2rem;
+  .no-balades p {
+    color: rgba(255,255,255,0.7);
     font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
   }
 
-  .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-  }
-
-  .error-message {
-    background: rgba(255,0,0,0.1);
-    border: 1px solid rgba(255,0,0,0.3);
-    color: #ff6b6b;
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 1rem;
+  .no-balades p:last-child {
+    margin-bottom: 0;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
   }
 
   .infos-section {
@@ -729,7 +711,8 @@
       margin-top: 1rem;
     }
 
-    .btn-reserver {
+    .btn-reserver,
+    .btn-retrospective {
       width: 100%;
       padding: 1rem 2rem;
       font-size: 1rem;
