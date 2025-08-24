@@ -35,7 +35,8 @@
     lieu: '',
     prix: '',
     placesDisponibles: 5,
-    description: ''
+    description: '',
+    statut: 'brouillon' // 'brouillon' ou 'en_ligne'
   };
 
   // Gestion du parcours
@@ -59,7 +60,7 @@
   async function loadBalades() {
     try {
       isLoading = true;
-      const response = await fetch('/api/balades');
+      const response = await fetch('/api/balades?admin=true');
       const data = await response.json();
       
       if (data.success) {
@@ -92,7 +93,8 @@
       lieu: balade.lieu,
       prix: balade.prix,
       placesDisponibles: balade.placesDisponibles,
-      description: balade.description
+      description: balade.description,
+      statut: balade.statut || 'brouillon'
     };
   }
 
@@ -111,7 +113,8 @@
       lieu: '',
       prix: '',
       placesDisponibles: 5,
-      description: ''
+      description: '',
+      statut: 'brouillon'
     };
   }
 
@@ -369,6 +372,43 @@
     }
   }
 
+  async function toggleStatut(balade: Balade) {
+    const newStatut = balade.statut === 'en_ligne' ? 'brouillon' : 'en_ligne';
+    const action = newStatut === 'en_ligne' ? 'mise en ligne' : 'mise en brouillon';
+    
+    if (!confirm(`Êtes-vous sûr de vouloir ${action} cette balade ?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/balades/${balade.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...balade,
+          statut: newStatut
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        successMessage = `Balade ${action} avec succès !`;
+        await loadBalades();
+        
+        setTimeout(() => {
+          successMessage = '';
+        }, 3000);
+      } else {
+        errorMessage = data.error || `Erreur lors de la ${action}`;
+      }
+    } catch (error) {
+      errorMessage = `Erreur lors de la ${action}`;
+    }
+  }
+
   async function deleteBalade(baladeId: number) {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette balade ? Cette action est irréversible.')) {
       return;
@@ -523,6 +563,18 @@
               ></textarea>
             </div>
 
+            <div class="form-group">
+              <label for="statut">Statut de la balade</label>
+              <select 
+                id="statut"
+                bind:value={baladeForm.statut}
+                required
+              >
+                <option value="brouillon">📝 Brouillon (non visible au public)</option>
+                <option value="en_ligne">🌐 En ligne (visible au public)</option>
+              </select>
+            </div>
+
             <div class="form-actions">
               <button type="submit" class="btn-save">
                 {isEditing ? 'Modifier la balade' : 'Ajouter la balade'}
@@ -569,9 +621,12 @@
                     <p class="balade-prix">💰 {balade.prix}</p>
                   </div>
                   <div class="balade-status">
-                                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
-                  {balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''}
-                </span>
+                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
+                      {balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''}
+                    </span>
+                    <span class="balade-statut {balade.statut === 'en_ligne' ? 'statut-en-ligne' : 'statut-brouillon'}">
+                      {balade.statut === 'en_ligne' ? '🌐 En ligne' : '📝 Brouillon'}
+                    </span>
                   </div>
                 </div>
                 
@@ -583,6 +638,13 @@
                   </button>
                   <button class="btn-parcours" on:click={() => editParcours(balade)}>
                     🗺️ Parcours
+                  </button>
+                  <button 
+                    class="btn-toggle-statut {balade.statut === 'en_ligne' ? 'btn-mettre-brouillon' : 'btn-mettre-en-ligne'}"
+                    on:click={() => toggleStatut(balade)}
+                    title={balade.statut === 'en_ligne' ? 'Mettre en brouillon' : 'Mettre en ligne'}
+                  >
+                    {balade.statut === 'en_ligne' ? '📝 Brouillon' : '🌐 En ligne'}
                   </button>
                   <button class="btn-delete" on:click={() => deleteBalade(balade.id)}>
                     🗑️ Supprimer
@@ -1057,6 +1119,28 @@
     color: #ff6b6b;
   }
 
+  .balade-statut {
+    display: block;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .statut-en-ligne {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    border: 1px solid rgba(0, 255, 0, 0.3);
+  }
+
+  .statut-brouillon {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+
   .balade-description {
     color: rgba(255,255,255,0.8);
     line-height: 1.5;
@@ -1116,6 +1200,36 @@
   .btn-parcours:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  }
+
+  .btn-toggle-statut {
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .btn-mettre-en-ligne {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
+  }
+
+  .btn-mettre-en-ligne:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+  }
+
+  .btn-mettre-brouillon {
+    background: linear-gradient(45deg, #ffc107, #ff9800);
+    color: #000;
+  }
+
+  .btn-mettre-brouillon:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
   }
 
   /* Styles pour l'édition du parcours */

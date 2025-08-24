@@ -23,6 +23,7 @@ export const POST: RequestHandler = async ({ request }) => {
       prix: baladeData.prix,
       placesDisponibles: baladeData.placesDisponibles || 5,
       description: baladeData.description,
+      statut: baladeData.statut || 'en_ligne',
       consignes: [
         'Appareil photo argentique requis',
         'Pellicule 400 ISO recommandée',
