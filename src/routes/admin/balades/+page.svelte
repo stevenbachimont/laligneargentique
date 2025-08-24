@@ -27,6 +27,11 @@
   let isAdding = false;
   let isEditingParcours = false;
 
+  // Variables pour le tri et la séparation
+  let baladesFutures: Balade[] = [];
+  let baladesPassees: Balade[] = [];
+  let baladesParAnnee: { [annee: string]: Balade[] } = {};
+
   // Formulaire pour ajouter/modifier une balade
   let baladeForm = {
     theme: '',
@@ -65,6 +70,7 @@
       
       if (data.success) {
         balades = data.balades;
+        trierEtSeparerBalades();
       } else {
         errorMessage = 'Erreur lors du chargement des balades';
       }
@@ -75,6 +81,40 @@
     }
   }
 
+  function trierEtSeparerBalades() {
+    const aujourdhui = new Date();
+    const aujourdhuiStr = aujourdhui.toISOString().split('T')[0];
+
+    // Séparer les balades futures et passées
+    baladesFutures = balades.filter(balade => balade.date >= aujourdhuiStr)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    baladesPassees = balades.filter(balade => balade.date < aujourdhuiStr)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // Classer par années
+    baladesParAnnee = {};
+    
+    // Balades futures par année
+    baladesFutures.forEach(balade => {
+      const annee = new Date(balade.date).getFullYear().toString();
+      if (!baladesParAnnee[annee]) {
+        baladesParAnnee[annee] = [];
+      }
+      baladesParAnnee[annee].push(balade);
+    });
+
+    // Balades passées par année
+    baladesPassees.forEach(balade => {
+      const annee = new Date(balade.date).getFullYear().toString();
+      if (!baladesParAnnee[annee]) {
+        baladesParAnnee[annee] = [];
+      }
+      baladesParAnnee[annee].push(balade);
+    });
+  }
+
+  // Fonctions pour la gestion des balades
   function addBalade() {
     isAdding = true;
     isEditing = false;
@@ -83,9 +123,20 @@
   }
 
   function editBalade(balade: Balade) {
+    // Empêcher la modification des balades passées
+    const aujourdhui = new Date();
+    const baladeDate = new Date(balade.date);
+    
+    if (baladeDate < aujourdhui) {
+      errorMessage = 'Impossible de modifier une balade passée. Utilisez la fonction "Copier" pour créer une nouvelle balade basée sur celle-ci.';
+      setTimeout(() => { errorMessage = ''; }, 5000);
+      return;
+    }
+
     isEditing = true;
     isAdding = false;
     selectedBalade = balade;
+    
     baladeForm = {
       theme: balade.theme,
       date: balade.date,
@@ -94,8 +145,93 @@
       prix: balade.prix,
       placesDisponibles: balade.placesDisponibles,
       description: balade.description,
-      statut: balade.statut || 'brouillon'
+      statut: balade.statut
     };
+  }
+
+  function copyBalade(balade: Balade) {
+    isAdding = true;
+    isEditing = false;
+    selectedBalade = null;
+    
+    // Copier les données de la balade existante
+    baladeForm = {
+      theme: balade.theme,
+      date: '', // Laisser vide pour que l'utilisateur choisisse une nouvelle date
+      heure: balade.heure,
+      lieu: balade.lieu,
+      prix: balade.prix,
+      placesDisponibles: balade.placesDisponibles,
+      description: balade.description,
+      statut: 'brouillon' // Toujours en brouillon par défaut
+    };
+
+    // Copier aussi le parcours et les coordonnées pour les réutiliser
+    if (balade.parcours && Array.isArray(balade.parcours)) {
+      parcoursEtapes = balade.parcours.map((etape: any, index: number) => {
+        let latitude = 0;
+        let longitude = 0;
+        
+        if (balade.coordonnees && Array.isArray(balade.coordonnees) && balade.coordonnees[index]) {
+          const coord = balade.coordonnees[index] as any;
+          if (coord.lat !== undefined && coord.lng !== undefined) {
+            latitude = coord.lat;
+            longitude = coord.lng;
+          } else if (coord.latitude !== undefined && coord.longitude !== undefined) {
+            latitude = coord.latitude;
+            longitude = coord.longitude;
+          }
+        }
+        
+        return {
+          id: index + 1,
+          titre: etape.titre || '',
+          description: etape.description || '',
+          latitude: latitude,
+          longitude: longitude,
+          ordre: index + 1
+        };
+      });
+    }
+
+    successMessage = `Balade "${balade.theme}" copiée avec succès ! Vous pouvez maintenant modifier les détails et choisir une nouvelle date.`;
+    setTimeout(() => { successMessage = ''; }, 5000);
+  }
+
+  function viewBaladeDetails(balade: Balade) {
+    // Afficher les détails de la balade passée en lecture seule
+    selectedBalade = balade;
+    isEditingParcours = true; // Réutiliser l'interface de parcours en mode lecture seule
+    
+    // Charger le parcours existant
+    if (balade.parcours && Array.isArray(balade.parcours)) {
+      parcoursEtapes = balade.parcours.map((etape: any, index: number) => {
+        let latitude = 0;
+        let longitude = 0;
+        
+        if (balade.coordonnees && Array.isArray(balade.coordonnees) && balade.coordonnees[index]) {
+          const coord = balade.coordonnees[index] as any;
+          if (coord.lat !== undefined && coord.lng !== undefined) {
+            latitude = coord.lat;
+            longitude = coord.lng;
+          } else if (coord.latitude !== undefined && coord.longitude !== undefined) {
+            latitude = coord.latitude;
+            longitude = coord.longitude;
+          }
+        }
+        
+        return {
+          id: index + 1,
+          titre: etape.titre || '',
+          description: etape.description || '',
+          latitude: latitude,
+          longitude: longitude,
+          ordre: index + 1
+        };
+      });
+    } else {
+      parcoursEtapes = [];
+    }
   }
 
   function cancelEdit() {
@@ -120,6 +256,16 @@
 
   // Fonctions pour la gestion du parcours
   function editParcours(balade: Balade) {
+    // Empêcher la modification du parcours des balades passées
+    const aujourdhui = new Date();
+    const baladeDate = new Date(balade.date);
+    
+    if (baladeDate < aujourdhui) {
+      errorMessage = 'Impossible de modifier le parcours d\'une balade passée. Utilisez la fonction "Copier" pour créer une nouvelle balade basée sur celle-ci.';
+      setTimeout(() => { errorMessage = ''; }, 5000);
+      return;
+    }
+
     isEditingParcours = true;
     selectedBalade = balade;
     
@@ -446,6 +592,10 @@
     });
   }
 
+  function getAnneeLabel(annee: string): string {
+    return annee;
+  }
+
   function retourAdmin() {
     window.location.href = '/admin';
   }
@@ -606,53 +756,116 @@
             </button>
           </div>
         {:else}
-          <div class="balades-grid">
-            {#each balades as balade}
-              <div class="balade-card">
-                <div class="balade-header">
-                  <div class="balade-date">
-                    <span class="date-day">{new Date(balade.date).getDate()}</span>
-                    <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+          <!-- Balades futures -->
+          {#if baladesFutures.length > 0}
+            <div class="balades-category">
+              <h3 class="category-title future">🚀 Balades à venir ({baladesFutures.length})</h3>
+              <div class="balades-grid">
+                {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) >= new Date().getFullYear()).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [annee, baladesAnnee]}
+                  <div class="annee-section">
+                    <h4 class="annee-title">{getAnneeLabel(annee)}</h4>
+                    {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0]) as balade}
+                      <div class="balade-card future">
+                        <div class="balade-header">
+                          <div class="balade-date">
+                            <span class="date-day">{new Date(balade.date).getDate()}</span>
+                            <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                          </div>
+                          <div class="balade-info">
+                            <h3>{balade.theme}</h3>
+                            <p class="balade-lieu">📍 {balade.lieu}</p>
+                            <p class="balade-heure">🕐 {balade.heure}</p>
+                            <p class="balade-prix">💰 {balade.prix}</p>
+                          </div>
+                          <div class="balade-status">
+                            <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
+                              {balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''}
+                            </span>
+                            <span class="balade-statut {balade.statut === 'en_ligne' ? 'statut-en-ligne' : 'statut-brouillon'}">
+                              {balade.statut === 'en_ligne' ? '🌐 En ligne' : '📝 Brouillon'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <p class="balade-description">{balade.description}</p>
+                        
+                        <div class="balade-actions">
+                          <button class="btn-edit" on:click={() => editBalade(balade)}>
+                            ✏️ Modifier
+                          </button>
+                          <button class="btn-parcours" on:click={() => editParcours(balade)}>
+                            🗺️ Parcours
+                          </button>
+                          <button 
+                            class="btn-toggle-statut {balade.statut === 'en_ligne' ? 'btn-mettre-brouillon' : 'btn-mettre-en-ligne'}"
+                            on:click={() => toggleStatut(balade)}
+                            title={balade.statut === 'en_ligne' ? 'Mettre en brouillon' : 'Mettre en ligne'}
+                          >
+                            {balade.statut === 'en_ligne' ? '📝 Brouillon' : '🌐 En ligne'}
+                          </button>
+                          <button class="btn-delete" on:click={() => deleteBalade(balade.id)}>
+                            🗑️ Supprimer
+                          </button>
+                        </div>
+                      </div>
+                    {/each}
                   </div>
-                  <div class="balade-info">
-                    <h3>{balade.theme}</h3>
-                    <p class="balade-lieu">📍 {balade.lieu}</p>
-                    <p class="balade-heure">🕐 {balade.heure}</p>
-                    <p class="balade-prix">💰 {balade.prix}</p>
-                  </div>
-                  <div class="balade-status">
-                    <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
-                      {balade.placesDisponibles} place{balade.placesDisponibles > 1 ? 's' : ''}
-                    </span>
-                    <span class="balade-statut {balade.statut === 'en_ligne' ? 'statut-en-ligne' : 'statut-brouillon'}">
-                      {balade.statut === 'en_ligne' ? '🌐 En ligne' : '📝 Brouillon'}
-                    </span>
-                  </div>
-                </div>
-                
-                <p class="balade-description">{balade.description}</p>
-                
-                <div class="balade-actions">
-                  <button class="btn-edit" on:click={() => editBalade(balade)}>
-                    ✏️ Modifier
-                  </button>
-                  <button class="btn-parcours" on:click={() => editParcours(balade)}>
-                    🗺️ Parcours
-                  </button>
-                  <button 
-                    class="btn-toggle-statut {balade.statut === 'en_ligne' ? 'btn-mettre-brouillon' : 'btn-mettre-en-ligne'}"
-                    on:click={() => toggleStatut(balade)}
-                    title={balade.statut === 'en_ligne' ? 'Mettre en brouillon' : 'Mettre en ligne'}
-                  >
-                    {balade.statut === 'en_ligne' ? '📝 Brouillon' : '🌐 En ligne'}
-                  </button>
-                  <button class="btn-delete" on:click={() => deleteBalade(balade.id)}>
-                    🗑️ Supprimer
-                  </button>
-                </div>
+                {/each}
               </div>
-            {/each}
-          </div>
+            </div>
+          {/if}
+
+          <!-- Balades passées -->
+          {#if baladesPassees.length > 0}
+            <div class="balades-category">
+              <h3 class="category-title past">📚 Balades passées ({baladesPassees.length})</h3>
+              <div class="balades-grid">
+                {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) < new Date().getFullYear()).sort(([a], [b]) => parseInt(b) - parseInt(a)) as [annee, baladesAnnee]}
+                  <div class="annee-section">
+                    <h4 class="annee-title">{getAnneeLabel(annee)}</h4>
+                    {#each baladesAnnee.filter(b => b.date < new Date().toISOString().split('T')[0]) as balade}
+                      <div class="balade-card past">
+                        <div class="balade-header">
+                          <div class="balade-date past">
+                            <span class="date-day">{new Date(balade.date).getDate()}</span>
+                            <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                          </div>
+                          <div class="balade-info">
+                            <h3>{balade.theme}</h3>
+                            <p class="balade-lieu">📍 {balade.lieu}</p>
+                            <p class="balade-heure">🕐 {balade.heure}</p>
+                            <p class="balade-prix">💰 {balade.prix}</p>
+                          </div>
+                          <div class="balade-status">
+                            <span class="places complete">
+                              Terminée
+                            </span>
+                            <span class="balade-statut statut-passee">
+                              📚 Passée
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <p class="balade-description">{balade.description}</p>
+                        
+                        <div class="balade-actions">
+                          <button class="btn-copy" on:click={() => copyBalade(balade)} title="Copier cette balade pour créer une nouvelle version">
+                            📋 Copier
+                          </button>
+                          <button class="btn-view" on:click={() => viewBaladeDetails(balade)} title="Voir les détails de cette balade passée">
+                            👁️ Voir
+                          </button>
+                          <button class="btn-delete" on:click={() => deleteBalade(balade.id)}>
+                            🗑️ Supprimer
+                          </button>
+                        </div>
+                      </div>
+                    {/each}
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
         {/if}
       </div>
     {/if}
@@ -661,22 +874,30 @@
     {#if isEditingParcours && selectedBalade}
       <div class="parcours-section">
         <div class="parcours-header">
-          <h2>🗺️ Édition du parcours - {selectedBalade.theme}</h2>
+          <h2>🗺️ {selectedBalade && selectedBalade.date < new Date().toISOString().split('T')[0] ? 'Consultation' : 'Édition'} du parcours - {selectedBalade.theme}</h2>
           <div class="parcours-actions">
-            <button class="btn-add-etape" on:click={addEtape}>
-              ➕ Ajouter une étape
-            </button>
-            <button class="btn-save-parcours" on:click={saveParcours}>
-              💾 Sauvegarder le parcours
-            </button>
+                          {#if selectedBalade && selectedBalade.date >= new Date().toISOString().split('T')[0]}
+                <!-- Boutons d'édition pour les balades futures -->
+                <button class="btn-add-etape" on:click={addEtape}>
+                  ➕ Ajouter une étape
+                </button>
+                <button class="btn-save-parcours" on:click={saveParcours}>
+                  💾 Sauvegarder le parcours
+                </button>
+              {:else if selectedBalade}
+                <!-- Boutons de consultation pour les balades passées -->
+                <button class="btn-copy" on:click={() => selectedBalade && copyBalade(selectedBalade)}>
+                  📋 Copier cette balade
+                </button>
+              {/if}
             <button class="btn-cancel-parcours" on:click={cancelParcoursEdit}>
-              ❌ Annuler
+              ❌ Fermer
             </button>
           </div>
         </div>
 
         <!-- Formulaire d'ajout/modification d'étape -->
-        {#if isAddingEtape || isEditingEtape}
+        {#if (isAddingEtape || isEditingEtape) && selectedBalade && selectedBalade.date >= new Date().toISOString().split('T')[0]}
           <div class="etape-form-section">
             <h3>{isAddingEtape ? 'Ajouter une étape' : 'Modifier l\'étape'}</h3>
             
@@ -829,6 +1050,7 @@
     text-decoration: none;
     font-weight: 600;
     font-size: 0.95rem;
+    white-space: nowrap;
   }
 
   .btn-retour:hover {
@@ -959,6 +1181,7 @@
     display: flex;
     gap: 1rem;
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .btn-save {
@@ -970,6 +1193,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
+    white-space: nowrap;
   }
 
   .btn-save:hover {
@@ -985,6 +1209,7 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    white-space: nowrap;
   }
 
   .btn-cancel:hover {
@@ -1004,6 +1229,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .section-header h2 {
@@ -1021,6 +1248,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
+    white-space: nowrap;
   }
 
   .btn-add:hover {
@@ -1034,9 +1262,58 @@
     color: rgba(255,255,255,0.7);
   }
 
+  /* Styles pour les catégories de balades */
+  .balades-category {
+    margin-bottom: 3rem;
+  }
+
+  .balades-category:last-child {
+    margin-bottom: 0;
+  }
+
+  .category-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .category-title.future {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1));
+    color: #4CAF50;
+    border: 2px solid rgba(76, 175, 80, 0.3);
+  }
+
+  .category-title.past {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.2), rgba(156, 39, 176, 0.1));
+    color: #9C27B0;
+    border: 2px solid rgba(156, 39, 176, 0.3);
+  }
+
+  .annee-section {
+    margin-bottom: 2rem;
+  }
+
+  .annee-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .annee-title {
+    font-size: 1.3rem;
+    color: #ffd700;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;
+    border-left: 4px solid #ffd700;
+    font-weight: 600;
+  }
+
   .balades-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1.5rem;
   }
 
@@ -1046,10 +1323,26 @@
     padding: 1.5rem;
     border: 1px solid rgba(255,255,255,0.1);
     transition: transform 0.3s ease;
+    overflow: hidden;
+    word-wrap: break-word;
+    word-break: break-word;
   }
 
   .balade-card:hover {
     transform: translateY(-2px);
+  }
+
+  .balade-card.future {
+    border-left: 4px solid #4CAF50;
+  }
+
+  .balade-card.past {
+    border-left: 4px solid #9C27B0;
+    opacity: 0.8;
+  }
+
+  .balade-card.past:hover {
+    opacity: 1;
   }
 
   .balade-header {
@@ -1057,6 +1350,7 @@
     align-items: flex-start;
     gap: 1rem;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
   }
 
   .balade-date {
@@ -1066,6 +1360,12 @@
     border-radius: 8px;
     text-align: center;
     min-width: 60px;
+    flex-shrink: 0;
+  }
+
+  .balade-date.past {
+    background: #9C27B0;
+    color: #fff;
   }
 
   .date-day {
@@ -1082,29 +1382,45 @@
 
   .balade-info {
     flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 140px);
   }
 
   .balade-info h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 0.5rem;
     color: #ffd700;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   .balade-lieu, .balade-heure, .balade-prix {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: rgba(255,255,255,0.7);
     margin-bottom: 0.2rem;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   .balade-status {
     text-align: right;
+    flex-shrink: 0;
+    min-width: 80px;
+    max-width: 80px;
   }
 
   .places {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #00ff00;
     margin-bottom: 0.5rem;
+    white-space: nowrap;
   }
 
   .places.orange {
@@ -1121,12 +1437,15 @@
 
   .balade-statut {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     margin-top: 0.25rem;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     text-align: center;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .statut-en-ligne {
@@ -1141,28 +1460,54 @@
     border: 1px solid rgba(255, 193, 7, 0.3);
   }
 
+  .statut-passee {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9C27B0;
+    border: 1px solid rgba(156, 39, 176, 0.3);
+  }
+
   .balade-description {
     color: rgba(255,255,255,0.8);
-    line-height: 1.5;
+    line-height: 1.4;
     margin-bottom: 1rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .balade-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .btn-edit, .btn-delete, .btn-parcours, .btn-toggle-statut {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+    max-width: 110px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .btn-edit {
     background: linear-gradient(45deg, #ffd700, #ffed4e);
     color: #000;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    font-weight: 600;
   }
 
   .btn-edit:hover {
@@ -1173,11 +1518,6 @@
     background: rgba(255,0,0,0.2);
     color: #ff6b6b;
     border: 1px solid rgba(255,0,0,0.3);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
   }
 
   .btn-delete:hover {
@@ -1188,13 +1528,6 @@
   .btn-parcours {
     background: linear-gradient(45deg, #4CAF50, #45a049);
     color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    font-weight: 600;
   }
 
   .btn-parcours:hover {
@@ -1203,13 +1536,7 @@
   }
 
   .btn-toggle-statut {
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.2);
   }
 
   .btn-mettre-en-ligne {
@@ -1230,6 +1557,54 @@
   .btn-mettre-brouillon:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+  }
+
+  .btn-copy {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+    max-width: 110px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-copy:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  }
+
+  .btn-view {
+    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+    max-width: 110px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-view:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
   }
 
   /* Styles pour l'édition du parcours */
@@ -1254,6 +1629,8 @@
     color: #4CAF50;
     margin: 0;
     font-size: 1.5rem;
+    word-wrap: break-word;
+    word-break: break-word;
   }
 
   .parcours-actions {
@@ -1262,15 +1639,20 @@
     flex-wrap: wrap;
   }
 
-  .btn-add-etape {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: #fff;
+  .btn-add-etape, .btn-save-parcours, .btn-cancel-parcours {
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
+    white-space: nowrap;
+    font-size: 0.9rem;
+  }
+
+  .btn-add-etape {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: #fff;
   }
 
   .btn-add-etape:hover {
@@ -1281,12 +1663,6 @@
   .btn-save-parcours {
     background: linear-gradient(45deg, #2196F3, #1976D2);
     color: #fff;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
   }
 
   .btn-save-parcours:hover {
@@ -1298,10 +1674,6 @@
     background: rgba(255,255,255,0.1);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.2);
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
   }
 
   .btn-cancel-parcours:hover {
@@ -1360,6 +1732,8 @@
     padding: 1rem;
     border: 1px solid rgba(255,255,255,0.1);
     transition: transform 0.3s ease;
+    word-wrap: break-word;
+    word-break: break-word;
   }
 
   .etape-card:hover {
@@ -1371,6 +1745,7 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .etape-ordre {
@@ -1384,27 +1759,42 @@
     justify-content: center;
     font-weight: bold;
     font-size: 1.1rem;
+    flex-shrink: 0;
   }
 
   .etape-info {
     flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 120px);
   }
 
   .etape-info h4 {
     color: #4CAF50;
     margin: 0 0 0.25rem 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   .etape-coords {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: rgba(255,255,255,0.7);
     margin: 0;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.1;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   .etape-actions {
     display: flex;
     gap: 0.25rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
   }
 
   .btn-move-up, .btn-move-down, .btn-edit-etape, .btn-delete-etape {
@@ -1416,6 +1806,11 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.8rem;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .btn-move-up:hover, .btn-move-down:hover {
@@ -1440,12 +1835,18 @@
 
   .etape-description {
     color: rgba(255,255,255,0.8);
-    font-size: 0.9rem;
-    line-height: 1.4;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   .etape-description p {
     margin: 0;
+    word-wrap: break-word;
+    word-break: break-word;
   }
 
   /* Animations */
@@ -1506,8 +1907,37 @@
       text-align: center;
     }
 
+    .balade-info {
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .balade-status {
+      max-width: 100%;
+      text-align: center;
+    }
+
     .balade-actions {
       justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .btn-edit, .btn-delete, .btn-parcours, .btn-toggle-statut {
+      flex: 1;
+      max-width: none;
+      min-width: 80px;
+      font-size: 0.7rem;
+      padding: 0.4rem 0.6rem;
+    }
+
+    .category-title {
+      font-size: 1.5rem;
+      padding: 0.75rem;
+    }
+
+    .annee-title {
+      font-size: 1.1rem;
+      padding: 0.4rem 0.8rem;
     }
 
     .parcours-header {
@@ -1517,6 +1947,12 @@
 
     .parcours-actions {
       justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-add-etape, .btn-save-parcours, .btn-cancel-parcours {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
     }
 
     .etape-header {
@@ -1525,8 +1961,65 @@
       text-align: center;
     }
 
+    .etape-info {
+      max-width: 100%;
+      text-align: center;
+    }
+
     .etape-actions {
       justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-move-up, .btn-move-down, .btn-edit-etape, .btn-delete-etape {
+      min-width: 40px;
+      height: 40px;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .balade-actions {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .btn-edit, .btn-delete, .btn-parcours, .btn-toggle-statut {
+      max-width: none;
+      width: 100%;
+      font-size: 0.75rem;
+    }
+
+    .parcours-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .btn-add-etape, .btn-save-parcours, .btn-cancel-parcours {
+      width: 100%;
+    }
+
+    .balade-info h3 {
+      font-size: 1rem;
+    }
+
+    .balade-lieu, .balade-heure, .balade-prix {
+      font-size: 0.8rem;
+    }
+
+    .balade-description {
+      font-size: 0.8rem;
+      -webkit-line-clamp: 2;
+    }
+
+    .category-title {
+      font-size: 1.3rem;
+      padding: 0.5rem;
+    }
+
+    .annee-title {
+      font-size: 1rem;
+      padding: 0.3rem 0.6rem;
     }
   }
 </style>
