@@ -40,23 +40,8 @@ db.exec(`
     email TEXT NOT NULL,
     nombre_personnes INTEGER NOT NULL,
     message TEXT,
-    statut TEXT NOT NULL DEFAULT 'en_attente_paiement',
-    montant_total DECIMAL(10,2) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (balade_id) REFERENCES balades (id)
-  );
-
-  CREATE TABLE IF NOT EXISTS paiements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    reservation_id INTEGER NOT NULL,
-    montant DECIMAL(10,2) NOT NULL,
-    devise TEXT NOT NULL DEFAULT 'EUR',
-    statut TEXT NOT NULL DEFAULT 'en_attente',
-    methode_paiement TEXT NOT NULL,
-    reference_paiement TEXT,
-    date_paiement DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (reservation_id) REFERENCES reservations (id)
   );
 `);
 
