@@ -33,6 +33,9 @@ export interface Reservation {
   theme?: string;
   date?: string;
   heure?: string;
+  statut?: 'en_attente' | 'confirmee' | 'annulee';
+  paymentIntentId?: string;
+  montant?: number;
 }
 
 class BaladesService {
@@ -172,38 +175,45 @@ class BaladesService {
   // Créer une réservation
   creerReservation(reservationData: {
     baladeId: number;
-    prenom: string;
     nom: string;
     email: string;
-    nombrePersonnes: number;
+    statut?: 'en_attente' | 'confirmee' | 'annulee';
+    paymentIntentId?: string;
+    montant?: number;
+    prenom?: string;
+    nombrePersonnes?: number;
     message?: string;
-  }): boolean {
-    // Vérifier la disponibilité
-    if (!this.hasPlacesAvailable(reservationData.baladeId, reservationData.nombrePersonnes)) {
-      return false;
+  }): Reservation | null {
+    try {
+      const stmt = db.prepare(`
+        INSERT INTO reservations (
+          balade_id, prenom, nom, email, nombre_personnes, message, 
+          statut, payment_intent_id, montant, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const result = stmt.run(
+        reservationData.baladeId,
+        reservationData.prenom || '',
+        reservationData.nom,
+        reservationData.email,
+        reservationData.nombrePersonnes || 1,
+        reservationData.message || '',
+        reservationData.statut || 'en_attente',
+        reservationData.paymentIntentId || null,
+        reservationData.montant || null,
+        new Date().toISOString()
+      );
+
+      if (result.changes > 0) {
+        return this.getReservationById(result.lastInsertRowid as number);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Erreur lors de la création de la réservation:', error);
+      return null;
     }
-
-    // Insérer la réservation
-    const stmt = db.prepare(`
-      INSERT INTO reservations (balade_id, prenom, nom, email, nombre_personnes, message)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    
-    const result = stmt.run(
-      reservationData.baladeId,
-      reservationData.prenom,
-      reservationData.nom,
-      reservationData.email,
-      reservationData.nombrePersonnes,
-      reservationData.message || null
-    );
-
-    if (result.changes > 0) {
-      // Mettre à jour les places disponibles
-      return this.reserverPlaces(reservationData.baladeId, reservationData.nombrePersonnes);
-    }
-
-    return false;
   }
 
   // Récupérer toutes les réservations
@@ -392,6 +402,219 @@ class BaladesService {
       return result.changes > 0;
     } catch (error) {
       console.error('Erreur lors de la suppression de la réservation:', error);
+      return false;
+    }
+  }
+
+  // Récupérer une réservation par ID
+  getReservationById(reservationId: number): Reservation | null {
+    try {
+      const stmt = db.prepare(`
+        SELECT r.*, b.theme, b.date, b.heure 
+        FROM reservations r 
+        JOIN balades b ON r.balade_id = b.id 
+        WHERE r.id = ?
+      `);
+      
+      const row = stmt.get(reservationId) as any;
+      
+      if (!row) return null;
+
+      return {
+        id: row.id,
+        baladeId: row.balade_id,
+        prenom: row.prenom,
+        nom: row.nom,
+        email: row.email,
+        nombrePersonnes: row.nombre_personnes,
+        message: row.message,
+        createdAt: row.created_at,
+        theme: row.theme,
+        date: row.date,
+        heure: row.heure,
+        statut: row.statut,
+        paymentIntentId: row.payment_intent_id,
+        montant: row.montant,
+      };
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la réservation:', error);
+      return null;
+    }
+  }
+
+  // Décrémenter le nombre de places disponibles
+  decrementerPlacesDisponibles(baladeId: number): boolean {
+    try {
+      const stmt = db.prepare(`
+        UPDATE balades 
+        SET places_disponibles = places_disponibles - 1 
+        WHERE id = ? AND places_disponibles > 0
+      `);
+      
+      const result = stmt.run(baladeId);
+      
+      if (result.changes > 0) {
+        console.log(`✅ Place décrémentée pour la balade ${baladeId}`);
+        return true;
+      } else {
+        console.log(`❌ Impossible de décrémenter les places pour la balade ${baladeId} (places insuffisantes ou balade inexistante)`);
+        return false;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la décrémentation des places:', error);
+      return false;
+    }
+  }
+
+  // Décrémenter plusieurs places d'un coup
+  decrementerPlacesDisponiblesMultiple(baladeId: number, nombrePlaces: number): boolean {
+    try {
+      const stmt = db.prepare(`
+        UPDATE balades 
+        SET places_disponibles = places_disponibles - ? 
+        WHERE id = ? AND places_disponibles >= ?
+      `);
+      
+      const result = stmt.run(nombrePlaces, baladeId, nombrePlaces);
+      
+      if (result.changes > 0) {
+        console.log(`✅ ${nombrePlaces} place(s) décrémentée(s) pour la balade ${baladeId}`);
+        return true;
+      } else {
+        console.log(`❌ Impossible de décrémenter ${nombrePlaces} place(s) pour la balade ${baladeId} (places insuffisantes)`);
+        return false;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la décrémentation multiple des places:', error);
+      return false;
+    }
+  }
+
+  // Corriger les places disponibles basées sur les réservations confirmées
+  corrigerPlacesDisponibles(): { baladesCorrigees: number; placesCorrigees: number } {
+    try {
+      console.log('🔧 Début de la correction des places disponibles...');
+      
+      // Récupérer toutes les balades
+      const balades = db.prepare('SELECT id, places_disponibles FROM balades').all() as any[];
+      let baladesCorrigees = 0;
+      let placesCorrigees = 0;
+      
+      balades.forEach(balade => {
+        // Compter les places réservées confirmées pour cette balade
+        const stmt = db.prepare(`
+          SELECT SUM(nombre_personnes) as total_reservees
+          FROM reservations 
+          WHERE balade_id = ? AND statut = 'confirmee'
+        `);
+        
+        const result = stmt.get(balade.id) as any;
+        const placesReservees = result?.total_reservees || 0;
+        
+        // Calculer les places qui devraient être disponibles
+        // On suppose que chaque balade avait initialement 5 places (à ajuster selon vos besoins)
+        const placesInitiales = 5; // Vous pouvez ajuster cette valeur
+        const placesDevraientEtre = Math.max(0, placesInitiales - placesReservees);
+        
+        if (balade.places_disponibles !== placesDevraientEtre) {
+          console.log(`   Balade ${balade.id}: ${balade.places_disponibles} → ${placesDevraientEtre} places (${placesReservees} réservées)`);
+          
+          const updateStmt = db.prepare('UPDATE balades SET places_disponibles = ? WHERE id = ?');
+          const updateResult = updateStmt.run(placesDevraientEtre, balade.id);
+          
+          if (updateResult.changes > 0) {
+            baladesCorrigees++;
+            placesCorrigees += Math.abs(balade.places_disponibles - placesDevraientEtre);
+          }
+        }
+      });
+      
+      console.log(`✅ Correction terminée: ${baladesCorrigees} balade(s) corrigée(s), ${placesCorrigees} place(s) ajustée(s)`);
+      
+      return { baladesCorrigees, placesCorrigees };
+    } catch (error) {
+      console.error('Erreur lors de la correction des places:', error);
+      return { baladesCorrigees: 0, placesCorrigees: 0 };
+    }
+  }
+
+  // Récupérer les réservations d'une balade
+  getReservationsByBalade(baladeId: number): Reservation[] {
+    try {
+      const stmt = db.prepare(`
+        SELECT r.*, b.theme, b.date, b.heure 
+        FROM reservations r 
+        JOIN balades b ON r.balade_id = b.id 
+        WHERE r.balade_id = ? 
+        ORDER BY r.created_at DESC
+      `);
+      
+      const rows = stmt.all(baladeId) as any[];
+      
+      return rows.map(row => ({
+        id: row.id,
+        baladeId: row.balade_id,
+        prenom: row.prenom,
+        nom: row.nom,
+        email: row.email,
+        nombrePersonnes: row.nombre_personnes,
+        message: row.message,
+        createdAt: row.created_at,
+        theme: row.theme,
+        date: row.date,
+        heure: row.heure,
+        statut: row.statut,
+        paymentIntentId: row.payment_intent_id,
+        montant: row.montant,
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la récupération des réservations:', error);
+      return [];
+    }
+  }
+
+  // Modifier une réservation
+  modifierReservation(reservationId: number, updates: {
+    statut?: 'en_attente' | 'confirmee' | 'annulee';
+    paymentIntentId?: string;
+    montant?: number;
+  }): boolean {
+    try {
+      const updateFields: string[] = [];
+      const updateValues: any[] = [];
+
+      if (updates.statut !== undefined) {
+        updateFields.push('statut = ?');
+        updateValues.push(updates.statut);
+      }
+
+      if (updates.paymentIntentId !== undefined) {
+        updateFields.push('payment_intent_id = ?');
+        updateValues.push(updates.paymentIntentId);
+      }
+
+      if (updates.montant !== undefined) {
+        updateFields.push('montant = ?');
+        updateValues.push(updates.montant);
+      }
+
+      if (updateFields.length === 0) {
+        return false;
+      }
+
+      updateValues.push(reservationId);
+
+      const stmt = db.prepare(`
+        UPDATE reservations 
+        SET ${updateFields.join(', ')} 
+        WHERE id = ?
+      `);
+      
+      const result = stmt.run(...updateValues);
+      
+      return result.changes > 0;
+    } catch (error) {
+      console.error('Erreur lors de la modification de la réservation:', error);
       return false;
     }
   }

@@ -15,6 +15,8 @@
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run && npm run test:e2e",
 		"test:e2e": "playwright test",
+		"test:stripe": "node test-stripe-complet.js",
+		"test:all": "npm run test:unit -- --run && npm run test:stripe",
 		"manage-balades": "node scripts/manage-balades.js"
 	},
 	"devDependencies": {
@@ -43,11 +45,12 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "^2.0.0",
+		"@stripe/stripe-js": "^7.9.0",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/nodemailer": "^7.0.0",
 		"better-sqlite3": "^12.2.0",
 		"dotenv": "^17.2.1",
 		"nodemailer": "^7.0.5",
-		"stripe": "^18.4.0"
+		"stripe": "^18.5.0"
 	}
 }

@@ -9,10 +9,10 @@
 
   let isVisible = false;
 
-  // Fonction pour rediriger vers la page de réservation
+  // Fonction pour rediriger vers la page de réservation avec paiement
   function reserverBalade(balade: any) {
-    // Rediriger vers la page de réservation avec l'ID de la balade
-    window.location.href = `/photographie/argentique/reservation?baladeId=${balade.id}`;
+    // Rediriger vers la page de réservation avec paiement Stripe
+    window.location.href = `/photographie/argentique/reservation/paiement?baladeId=${balade.id}`;
   }
 
   // Fonction pour rediriger vers la page de rétrospective
