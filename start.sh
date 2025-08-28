@@ -13,26 +13,10 @@ if [ -z "$EMAIL_APP_PASSWORD" ]; then
     exit 1
 fi
 
-# Vérifier les variables Stripe
-if [ -z "$STRIPE_SECRET_KEY" ]; then
-    echo "⚠️  AVERTISSEMENT: STRIPE_SECRET_KEY n'est pas défini - les paiements ne fonctionneront pas"
-fi
-
-if [ -z "$STRIPE_PUBLISHABLE_KEY" ]; then
-    echo "⚠️  AVERTISSEMENT: STRIPE_PUBLISHABLE_KEY n'est pas défini - les paiements ne fonctionneront pas"
-fi
-
-if [ -z "$STRIPE_WEBHOOK_SECRET" ]; then
-    echo "⚠️  AVERTISSEMENT: STRIPE_WEBHOOK_SECRET n'est pas défini - les webhooks ne fonctionneront pas"
-fi
-
 echo "✅ Variables d'environnement détectées:"
 echo "   EMAIL_USER: $EMAIL_USER"
 echo "   EMAIL_APP_PASSWORD: [MASQUÉ]"
 echo "   ADMIN_EMAIL: $ADMIN_EMAIL"
-echo "   STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:+[CONFIGURÉ]}"
-echo "   STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:+[CONFIGURÉ]}"
-echo "   STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:+[CONFIGURÉ]}"
 
 # Générer le fichier .env au runtime avec les variables pour SvelteKit
 echo "📝 Génération du fichier .env..."
