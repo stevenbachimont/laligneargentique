@@ -7,6 +7,7 @@ Site web portfolio présentant des travaux photographiques et de développement 
 - **Portfolio Photographique** : Séries Street, Portraits, Paysages et Quotidien
 - **Portfolio Web** : Projets de développement web
 - **Balades Argentique** : Système de réservation automatique avec gestion des places
+- **💳 Paiements Stripe** : Système de paiement sécurisé pour les réservations
 - **Formulaire de Contact** : Envoi d'emails automatique
 - **Interface Responsive** : Optimisé pour tous les appareils
 
@@ -20,6 +21,8 @@ Le site inclut un système de gestion des balades argentique avec base de donné
 - ✅ **Validation des réservations** côté serveur
 - ✅ **Interface utilisateur réactive** avec statuts visuels
 - ✅ **API REST simple** pour les opérations CRUD
+- ✅ **💳 Paiements Stripe** pour les réservations sécurisées
+- ✅ **📧 Emails de confirmation** automatiques
 
 ### Statuts des Balades
 - 🟢 **Disponible** : 4-5 places disponibles (vert)
@@ -104,6 +107,33 @@ ADMIN_EMAIL=votre-email-admin@gmail.com
 # SMTP_USER=votre-email@votre-fournisseur.com
 # SMTP_PASS=votre-mot-de-passe
 ```
+
+## 💳 Configuration Stripe (Paiements)
+
+**⚠️ IMPORTANT** : Pour que les paiements fonctionnent, vous devez configurer Stripe.
+
+### 1. Créer un compte Stripe
+- Allez sur [stripe.com](https://stripe.com) et créez un compte
+- Obtenez vos clés API sur le [dashboard Stripe](https://dashboard.stripe.com/apikeys)
+
+### 2. Configurer les variables Stripe
+Ajoutez ces variables dans votre fichier `.env` :
+
+```bash
+# Configuration Stripe (OBLIGATOIRE pour les paiements)
+STRIPE_SECRET_KEY=sk_test_votre_cle_secrete_stripe
+STRIPE_PUBLISHABLE_KEY=pk_test_votre_cle_publique_stripe
+STRIPE_WEBHOOK_SECRET=whsec_votre_webhook_secret
+PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_votre_cle_publique_stripe
+```
+
+### 3. Configurer le webhook Stripe
+1. Allez sur [dashboard.stripe.com/webhooks](https://dashboard.stripe.com/webhooks)
+2. Ajoutez un endpoint : `https://votre-domaine.com/api/payment/webhook`
+3. Sélectionnez les événements : `payment_intent.succeeded`, `payment_intent.payment_failed`
+
+### 4. Guide complet
+Consultez le [Guide de Déploiement Stripe](GUIDE_DEPLOIEMENT_STRIPE.md) pour plus de détails.
 
 ## Déploiement Docker
 
@@ -192,6 +222,7 @@ npm test
 # Tests spécifiques
 npm run test:unit    # Tests unitaires
 npm run test:e2e     # Tests end-to-end
+npm run test:stripe  # Tests Stripe
 ```
 
 ### Couverture des Tests
@@ -200,3 +231,4 @@ npm run test:e2e     # Tests end-to-end
 - ✅ **Interface utilisateur**
 - ✅ **API endpoints**
 - ✅ **Intégration des composants**
+- ✅ **💳 Tests Stripe** (paiements, webhooks, emails)
