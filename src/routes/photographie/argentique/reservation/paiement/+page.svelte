@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import StripePaymentForm from '$lib/components/StripePaymentForm.svelte';
+  import Captcha from '$lib/components/Captcha.svelte';
   import StripeClientService from '$lib/client/stripeClient';
   import type { PaymentIntentResponse } from '$lib/client/stripeClient';
 
@@ -26,6 +27,7 @@
   let showPaymentForm = false;
   let errorMessage = '';
   let successMessage = '';
+  let captchaValidated = false;
 
   // Validation côté client
   let errors: Record<string, string> = {};
@@ -133,6 +135,12 @@
         isValid = false;
       }
     });
+    
+    // Vérifier que le captcha est validé
+    if (!captchaValidated) {
+      errorMessage = 'Veuillez valider le captcha avant de continuer';
+      isValid = false;
+    }
     
     return isValid;
   }
@@ -351,10 +359,18 @@
               <p><strong>Paiement sécurisé</strong> par Stripe</p>
             </div>
 
-            <button type="submit" disabled={isCreatingPayment} class="btn-primary">
+            <!-- Captcha -->
+            <Captcha 
+              onValidated={(valid) => captchaValidated = valid}
+              disabled={isCreatingPayment}
+            />
+
+            <button type="submit" disabled={isCreatingPayment || !captchaValidated} class="btn-primary">
               {#if isCreatingPayment}
                 <span class="spinner"></span>
                 Préparation du paiement...
+              {:else if !captchaValidated}
+                Validez le captcha pour continuer
               {:else}
                 Continuer vers le paiement
               {/if}
