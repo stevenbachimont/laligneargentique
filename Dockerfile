@@ -8,6 +8,9 @@ RUN npm ci
 # Créer le dossier data pour la base SQLite
 RUN mkdir -p data
 
+# Copier le fichier .env s'il existe (pour le build)
+COPY .env* ./
+
 COPY . .
 
 RUN npm run build
