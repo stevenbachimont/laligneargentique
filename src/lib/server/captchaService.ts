@@ -1,4 +1,6 @@
 import { randomBytes } from 'crypto';
+import { readdirSync } from 'fs';
+import { join } from 'path';
 
 export interface SharpnessChallenge {
   id: string;
@@ -10,14 +12,52 @@ export interface SharpnessChallenge {
 
 class CaptchaService {
   private challenges: Map<string, SharpnessChallenge> = new Map();
+  private photoImages: { imageUrl: string; description: string }[] = [];
   
-  // Images disponibles pour le captcha
-  private photoImages = [
-    { imageUrl: "/images/captcha/IMG_8176.png", description: "Photo de test" }
-  ];
+  constructor() {
+    this.loadCaptchaImages();
+  }
+
+  // Charger automatiquement les images disponibles
+  private loadCaptchaImages() {
+    try {
+      const captchaDir = join(process.cwd(), 'static', 'images', 'captcha');
+      const files = readdirSync(captchaDir);
+      
+      // Filtrer les fichiers d'images supportés
+      const imageFiles = files.filter(file => 
+        /\.(jpg|jpeg|png|gif|webp)$/i.test(file) && 
+        !file.startsWith('.') && 
+        !file.toLowerCase().includes('readme')
+      );
+      
+      this.photoImages = imageFiles.map(file => ({
+        imageUrl: `/images/captcha/${file}`,
+        description: `Image captcha: ${file}`
+      }));
+      
+      console.log(`📸 Captcha: ${this.photoImages.length} images chargées:`, 
+        this.photoImages.map(img => img.imageUrl));
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des images captcha:', error);
+      // Fallback avec une image par défaut
+      this.photoImages = [
+        { imageUrl: "/images/captcha/IMG_8176.jpg", description: "Image par défaut" }
+      ];
+    }
+  }
+
+  // Recharger les images (utile pour le développement)
+  reloadImages() {
+    this.loadCaptchaImages();
+  }
 
   generateCaptcha(): SharpnessChallenge {
     this.cleanupExpiredChallenges();
+    
+    if (this.photoImages.length === 0) {
+      throw new Error('Aucune image captcha disponible');
+    }
     
     const id = randomBytes(16).toString('hex');
     const imageData = this.photoImages[Math.floor(Math.random() * this.photoImages.length)];
@@ -77,6 +117,11 @@ class CaptchaService {
 
   getChallenge(captchaId: string): SharpnessChallenge | undefined {
     return this.challenges.get(captchaId);
+  }
+
+  // Obtenir la liste des images disponibles
+  getAvailableImages() {
+    return this.photoImages;
   }
 
   private cleanupExpiredChallenges(): void {
