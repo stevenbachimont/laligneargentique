@@ -96,6 +96,50 @@ export class EmailService {
     }
   }
 
+  // Envoyer un email de confirmation de réservation Stripe
+  async sendStripeReservationConfirmation(reservation: any, balade: any): Promise<boolean> {
+    try {
+      const { nom, prenom, email, nombrePersonnes, montant } = reservation;
+      const montantFormatted = montant ? `${(montant / 100).toFixed(2)}€` : '0.00€';
+
+      // Email pour le client (confirmation de paiement)
+      const clientEmail = {
+        from: `"La Ligne Argentique" <${env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Confirmation de réservation et paiement - La Ligne Argentique',
+        html: this.generateStripeClientEmailHTML(reservation, balade),
+        text: this.generateStripeClientEmailText(reservation, balade)
+      };
+
+      // Email pour vous (notification de réservation confirmée)
+      const adminEmail = {
+        from: `"La Ligne Argentique" <${env.EMAIL_USER}>`,
+        to: env.ADMIN_EMAIL || env.EMAIL_USER,
+        subject: `Nouvelle réservation confirmée - ${prenom} ${nom} (${balade.theme})`,
+        html: this.generateStripeAdminEmailHTML(reservation, balade),
+        text: this.generateStripeAdminEmailText(reservation, balade)
+      };
+
+      // Envoyer les deux emails
+      await Promise.all([
+        this.transporter.sendMail(clientEmail),
+        this.transporter.sendMail(adminEmail)
+      ]);
+
+      console.log(`Emails de confirmation envoyés pour la réservation ${reservation.id}`);
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi des emails de confirmation Stripe:', error);
+      console.error('Détails de l\'erreur:', {
+        message: error instanceof Error ? error.message : 'Erreur inconnue',
+        stack: error instanceof Error ? error.stack : undefined,
+        code: (error as any)?.code,
+        response: (error as any)?.response
+      });
+      throw new Error(`Erreur lors de l'envoi des emails: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  }
+
   // Envoyer un email de contact
   async sendContactMessage(data: { nom: string; prenom: string; email: string; message: string }): Promise<boolean> {
     try {
@@ -652,5 +696,239 @@ Cet email a été envoyé automatiquement. Merci de ne pas y répondre directeme
       console.error('Erreur de vérification de la connexion email:', error);
       return false;
     }
+  }
+
+  // Générer le HTML pour l'email client Stripe
+  private generateStripeClientEmailHTML(reservation: any, balade: any): string {
+    const { nom, prenom, nombrePersonnes, montant } = reservation;
+    const montantFormatted = montant ? `${(montant / 100).toFixed(2)}€` : '0.00€';
+    const formattedDate = new Date(balade.date).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirmation de réservation</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #000000, #1a1a1a); color: #ffd700; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 10px 10px; }
+          .highlight { background: #ffd700; color: #000; padding: 10px; border-radius: 5px; margin: 15px 0; }
+          .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin: 15px 0; }
+          .details { background: #e8f4fd; border-left: 4px solid #2196F3; padding: 15px; margin: 15px 0; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 0.9em; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎞️ La Ligne Argentique</h1>
+            <p>Confirmation de votre réservation</p>
+          </div>
+          <div class="content">
+            <div class="success">
+              <h2>✅ Réservation confirmée !</h2>
+              <p>Votre paiement a été traité avec succès et votre réservation est confirmée.</p>
+            </div>
+            
+            <p>Bonjour ${prenom} ${nom},</p>
+            
+            <p>Nous vous remercions pour votre réservation et confirmons que votre paiement a été traité avec succès.</p>
+            
+            <div class="details">
+              <h3>📋 Détails de votre réservation</h3>
+              <p><strong>Balade :</strong> ${balade.theme}</p>
+              <p><strong>Date :</strong> ${formattedDate}</p>
+              <p><strong>Heure :</strong> ${balade.heure}</p>
+              <p><strong>Lieu :</strong> ${balade.lieu}</p>
+              <p><strong>Nombre de personnes :</strong> ${nombrePersonnes}</p>
+              <p><strong>Montant payé :</strong> ${montantFormatted}</p>
+            </div>
+            
+            <div class="highlight">
+              <h3>📍 Informations pratiques</h3>
+              <ul>
+                <li>Rendez-vous 10 minutes avant l'heure de départ</li>
+                <li>N'oubliez pas votre appareil photo argentique</li>
+                <li>Prévoyez des pellicules (400 ISO recommandé)</li>
+                <li>Vêtements confortables et chaussures de marche</li>
+              </ul>
+            </div>
+            
+            <p>Si vous avez des questions ou besoin d'informations supplémentaires, n'hésitez pas à nous contacter.</p>
+            
+            <p>Nous vous souhaitons une excellente balade photographique !</p>
+            
+            <p>Cordialement,<br>
+            <strong>La Ligne Argentique</strong></p>
+          </div>
+          <div class="footer">
+            <p>Cet email confirme votre réservation et votre paiement. Merci de le conserver.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Générer le texte pour l'email client Stripe
+  private generateStripeClientEmailText(reservation: any, balade: any): string {
+    const { nom, prenom, nombrePersonnes, montant } = reservation;
+    const montantFormatted = montant ? `${(montant / 100).toFixed(2)}€` : '0.00€';
+    const formattedDate = new Date(balade.date).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    return `
+La Ligne Argentique - Confirmation de réservation
+
+✅ RÉSERVATION CONFIRMÉE !
+
+Bonjour ${prenom} ${nom},
+
+Nous vous remercions pour votre réservation et confirmons que votre paiement a été traité avec succès.
+
+DÉTAILS DE VOTRE RÉSERVATION :
+- Balade : ${balade.theme}
+- Date : ${formattedDate}
+- Heure : ${balade.heure}
+- Lieu : ${balade.lieu}
+- Nombre de personnes : ${nombrePersonnes}
+- Montant payé : ${montantFormatted}
+
+INFORMATIONS PRATIQUES :
+- Rendez-vous 10 minutes avant l'heure de départ
+- N'oubliez pas votre appareil photo argentique
+- Prévoyez des pellicules (400 ISO recommandé)
+- Vêtements confortables et chaussures de marche
+
+Si vous avez des questions ou besoin d'informations supplémentaires, n'hésitez pas à nous contacter.
+
+Nous vous souhaitons une excellente balade photographique !
+
+Cordialement,
+La Ligne Argentique
+
+---
+Cet email confirme votre réservation et votre paiement. Merci de le conserver.
+    `;
+  }
+
+  // Générer le HTML pour l'email admin Stripe
+  private generateStripeAdminEmailHTML(reservation: any, balade: any): string {
+    const { nom, prenom, email, nombrePersonnes, montant, paymentIntentId } = reservation;
+    const montantFormatted = montant ? `${(montant / 100).toFixed(2)}€` : '0.00€';
+    const formattedDate = new Date(balade.date).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Nouvelle réservation confirmée</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #000000, #1a1a1a); color: #ffd700; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 10px 10px; }
+          .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin: 15px 0; }
+          .info-box { background: #e8f4fd; border-left: 4px solid #2196F3; padding: 15px; margin: 15px 0; }
+          .contact-info { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; }
+          .payment-info { background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 15px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎞️ Nouvelle réservation confirmée</h1>
+            <p>La Ligne Argentique</p>
+          </div>
+          <div class="content">
+            <div class="success">
+              <h2>✅ Paiement reçu et réservation confirmée</h2>
+              <p>Une nouvelle réservation a été confirmée avec paiement en ligne.</p>
+            </div>
+            
+            <div class="info-box">
+              <h3>Détails de la balade</h3>
+              <p><strong>Thème :</strong> ${balade.theme}</p>
+              <p><strong>Date :</strong> ${formattedDate}</p>
+              <p><strong>Heure :</strong> ${balade.heure}</p>
+              <p><strong>Lieu :</strong> ${balade.lieu}</p>
+            </div>
+            
+            <div class="contact-info">
+              <h3>Informations du client</h3>
+              <p><strong>Nom :</strong> ${prenom} ${nom}</p>
+              <p><strong>Email :</strong> <a href="mailto:${email}">${email}</a></p>
+              <p><strong>Nombre de personnes :</strong> ${nombrePersonnes}</p>
+            </div>
+            
+            <div class="payment-info">
+              <h3>Détails du paiement</h3>
+              <p><strong>Montant :</strong> ${montantFormatted}</p>
+              <p><strong>ID de paiement :</strong> ${paymentIntentId}</p>
+              <p><strong>Statut :</strong> Confirmé</p>
+            </div>
+            
+            <p><strong>Action requise :</strong> Aucune action requise - la réservation est confirmée et le paiement reçu.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Générer le texte pour l'email admin Stripe
+  private generateStripeAdminEmailText(reservation: any, balade: any): string {
+    const { nom, prenom, email, nombrePersonnes, montant, paymentIntentId } = reservation;
+    const montantFormatted = montant ? `${(montant / 100).toFixed(2)}€` : '0.00€';
+    const formattedDate = new Date(balade.date).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    return `
+Nouvelle réservation confirmée - La Ligne Argentique
+
+✅ PAIEMENT REÇU ET RÉSERVATION CONFIRMÉE
+
+Détails de la balade :
+- Thème : ${balade.theme}
+- Date : ${formattedDate}
+- Heure : ${balade.heure}
+- Lieu : ${balade.lieu}
+
+Informations du client :
+- Nom : ${prenom} ${nom}
+- Email : ${email}
+- Nombre de personnes : ${nombrePersonnes}
+
+Détails du paiement :
+- Montant : ${montantFormatted}
+- ID de paiement : ${paymentIntentId}
+- Statut : Confirmé
+
+Action requise : Aucune action requise - la réservation est confirmée et le paiement reçu.
+    `;
   }
 }
