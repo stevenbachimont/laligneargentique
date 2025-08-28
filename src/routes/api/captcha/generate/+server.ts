@@ -8,13 +8,15 @@ export async function POST() {
     return json({
       success: true,
       captchaId: challenge.id,
-      imageUrl: challenge.imageUrl
+      imageUrl: challenge.imageUrl,
+      targetPosition: challenge.targetPosition
     });
   } catch (error) {
     console.error('Erreur lors de la génération du captcha:', error);
+    
     return json({
       success: false,
-      error: 'Erreur lors de la génération du captcha'
+      error: 'Erreur interne du serveur lors de la génération du captcha'
     }, { status: 500 });
   }
 }

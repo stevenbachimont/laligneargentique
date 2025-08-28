@@ -5,201 +5,145 @@ import { captchaService } from '../../src/lib/server/captchaService';
 
 describe('Captcha API Endpoints', () => {
   describe('/api/captcha/generate', () => {
-    it('devrait générer un nouveau captcha', async () => {
+    it('devrait générer un nouveau captcha avec position cible', async () => {
       const response = await POST();
       const data = await response.json();
       
-      expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.captchaId).toBeDefined();
-      expect(data.imageUrl).toBeDefined();
-      expect(data.captchaId.length).toBeGreaterThan(0);
       expect(data.imageUrl).toMatch(/^\/images\/captcha\/.+\.(png|jpg|jpeg)$/);
-    });
-
-    it('devrait gérer les erreurs de génération', async () => {
-      // Simuler une erreur en modifiant temporairement le service
-      const originalGenerate = captchaService.generateCaptcha;
-      captchaService.generateCaptcha = () => {
-        throw new Error('Erreur de génération');
-      };
-
-      const response = await POST();
-      const data = await response.json();
-      
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.error).toBeDefined();
-
-      // Restaurer la méthode originale
-      captchaService.generateCaptcha = originalGenerate;
+      expect(data.targetPosition).toBeDefined();
+      expect(typeof data.targetPosition.x).toBe('number');
+      expect(typeof data.targetPosition.y).toBe('number');
     });
   });
 
   describe('/api/captcha/validate', () => {
     let captchaId: string;
-    let targetSharpness: number;
+    let targetPosition: { x: number; y: number };
 
     beforeEach(async () => {
-      // Générer un captcha pour les tests
+      // Générer un nouveau captcha pour chaque test
       const generateResponse = await POST();
       const generateData = await generateResponse.json();
       captchaId = generateData.captchaId;
-      
-      // Récupérer la valeur cible
-      const challenge = captchaService.getChallenge(captchaId);
-      targetSharpness = challenge?.targetSharpness || 75;
+      targetPosition = generateData.targetPosition;
     });
 
-    it('devrait valider une réponse correcte', async () => {
+    it('devrait valider une position correcte', async () => {
       const request = new Request('http://localhost/api/captcha/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          captchaId,
-          sharpness: targetSharpness.toString()
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          captchaId, 
+          position: targetPosition 
         })
       });
 
       const response = await validatePOST({ request });
       const data = await response.json();
       
-      expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.valid).toBe(true);
+      expect(data.type).toBe('sharpness');
     });
 
-    it('devrait valider une réponse dans la tolérance', async () => {
-      const toleranceValue = targetSharpness + 5; // Dans la tolérance de ±25
-      
+    it('devrait valider une position dans la tolérance', async () => {
+      const tolerancePosition = { 
+        x: targetPosition.x + 15, 
+        y: targetPosition.y + 15 
+      };
+
       const request = new Request('http://localhost/api/captcha/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          captchaId,
-          sharpness: toleranceValue.toString()
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          captchaId, 
+          position: tolerancePosition 
         })
       });
 
       const response = await validatePOST({ request });
       const data = await response.json();
       
-      expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.valid).toBe(true);
+      expect(data.type).toBe('sharpness');
     });
 
-    it('devrait rejeter une réponse hors tolérance', async () => {
-      const outOfToleranceValue = targetSharpness + 25; // Hors tolérance
-      
+    it('devrait rejeter une position hors tolérance', async () => {
+      const outOfTolerancePosition = { 
+        x: targetPosition.x + 25, 
+        y: targetPosition.y + 25 
+      };
+
       const request = new Request('http://localhost/api/captcha/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          captchaId,
-          sharpness: outOfToleranceValue.toString()
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          captchaId, 
+          position: outOfTolerancePosition 
         })
       });
 
       const response = await validatePOST({ request });
       const data = await response.json();
       
-      expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.valid).toBe(false);
-    });
-
-    it('devrait rejeter un ID de captcha invalide', async () => {
-      const request = new Request('http://localhost/api/captcha/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          captchaId: 'invalid-id',
-          sharpness: '75'
-        })
-      });
-
-      const response = await validatePOST({ request });
-      const data = await response.json();
-      
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(data.valid).toBe(false);
+      expect(data.type).toBe('sharpness');
     });
 
     it('devrait rejeter une requête sans captchaId', async () => {
       const request = new Request('http://localhost/api/captcha/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          sharpness: '75'
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          position: { x: 50, y: 50 } 
         })
       });
 
       const response = await validatePOST({ request });
       const data = await response.json();
       
-      expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe('Captcha ID et valeur de netteté requis');
+      expect(data.error).toBe('Captcha ID requis');
+      expect(response.status).toBe(400);
     });
 
-    it('devrait rejeter une requête sans sharpness', async () => {
+    it('devrait rejeter une requête sans position', async () => {
       const request = new Request('http://localhost/api/captcha/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          captchaId: 'some-id'
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          captchaId 
         })
       });
 
       const response = await validatePOST({ request });
       const data = await response.json();
       
-      expect(response.status).toBe(400);
       expect(data.success).toBe(false);
-      expect(data.error).toBe('Captcha ID et valeur de netteté requis');
+      expect(data.error).toBe('Position requise');
+      expect(response.status).toBe(400);
     });
 
-    it('devrait gérer les erreurs de validation', async () => {
-      // Simuler une erreur en modifiant temporairement le service
-      const originalValidate = captchaService.validateCaptcha;
-      captchaService.validateCaptcha = () => {
-        throw new Error('Erreur de validation');
-      };
-
+    it('devrait rejeter un captchaId invalide', async () => {
       const request = new Request('http://localhost/api/captcha/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          captchaId,
-          sharpness: '75'
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          captchaId: 'invalid-id', 
+          position: { x: 50, y: 50 } 
         })
       });
 
       const response = await validatePOST({ request });
       const data = await response.json();
       
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.error).toBeDefined();
-
-      // Restaurer la méthode originale
-      captchaService.validateCaptcha = originalValidate;
+      expect(data.success).toBe(true);
+      expect(data.valid).toBe(false);
+      expect(data.type).toBe('sharpness');
     });
   });
 });

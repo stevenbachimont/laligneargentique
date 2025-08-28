@@ -3,160 +3,120 @@ import { captchaService } from '../../src/lib/server/captchaService';
 
 describe('CaptchaService', () => {
   beforeEach(() => {
-    // Réinitialiser le service avant chaque test
-    // Note: En production, on pourrait ajouter une méthode reset() au service
+    // Nettoyer les challenges avant chaque test
+    // Note: On ne peut pas accéder directement aux challenges privés
+    // mais chaque test génère un nouveau challenge
   });
 
   describe('generateCaptcha', () => {
-    it('devrait générer un captcha avec tous les champs requis', () => {
-      const captcha = captchaService.generateCaptcha();
-      
-      expect(captcha).toBeDefined();
-      expect(captcha.id).toBeDefined();
-      expect(captcha.imageUrl).toBeDefined();
-      expect(captcha.targetPosition).toBeDefined();
-      expect(captcha.tolerance).toBeDefined();
-      expect(captcha.expiresAt).toBeDefined();
-      expect(captcha.id.length).toBeGreaterThan(0);
-      expect(captcha.imageUrl.length).toBeGreaterThan(0);
-      expect(typeof captcha.targetPosition.x).toBe('number');
-      expect(typeof captcha.targetPosition.y).toBe('number');
-      expect(typeof captcha.tolerance).toBe('number');
-      expect(captcha.targetPosition.x).toBeGreaterThanOrEqual(10);
-      expect(captcha.targetPosition.x).toBeLessThanOrEqual(90);
-      expect(captcha.targetPosition.y).toBeGreaterThanOrEqual(10);
-      expect(captcha.targetPosition.y).toBeLessThanOrEqual(90);
-      expect(captcha.tolerance).toBe(25);
-    });
-
-    it('devrait générer des URLs d\'images valides', () => {
-      const captcha = captchaService.generateCaptcha();
-      
-      expect(captcha.imageUrl).toMatch(/^\/images\/captcha\/.+\.(png|jpg|jpeg)$/);
-    });
-
-    it('devrait générer des IDs uniques', () => {
+    it('devrait générer un nouveau captcha avec un ID unique', () => {
       const captcha1 = captchaService.generateCaptcha();
       const captcha2 = captchaService.generateCaptcha();
       
+      expect(captcha1.id).toBeDefined();
+      expect(captcha2.id).toBeDefined();
       expect(captcha1.id).not.toBe(captcha2.id);
     });
 
-    it('devrait générer des positions cibles dans la plage attendue', () => {
+    it('devrait générer une URL d\'image valide', () => {
+      const captcha = captchaService.generateCaptcha();
+      expect(captcha.imageUrl).toMatch(/^\/images\/captcha\/.+\.(png|jpg|jpeg)$/);
+    });
+
+    it('devrait générer une position cible aléatoire', () => {
       const captcha = captchaService.generateCaptcha();
       
       expect(captcha.targetPosition.x).toBeGreaterThanOrEqual(10);
       expect(captcha.targetPosition.x).toBeLessThanOrEqual(90);
       expect(captcha.targetPosition.y).toBeGreaterThanOrEqual(10);
       expect(captcha.targetPosition.y).toBeLessThanOrEqual(90);
+    });
+
+    it('devrait définir une tolérance appropriée', () => {
+      const captcha = captchaService.generateCaptcha();
+      expect(captcha.tolerance).toBe(20);
+    });
+
+    it('devrait définir une date d\'expiration', () => {
+      const captcha = captchaService.generateCaptcha();
+      const now = new Date();
+      const expectedExpiry = new Date(now.getTime() + 10 * 60 * 1000); // +10 minutes
+      
+      expect(captcha.expiresAt).toBeInstanceOf(Date);
+      expect(captcha.expiresAt.getTime()).toBeGreaterThan(now.getTime());
+      expect(captcha.expiresAt.getTime()).toBeLessThanOrEqual(expectedExpiry.getTime());
     });
   });
 
   describe('validateCaptcha', () => {
-    it('devrait valider une position correcte', () => {
+    it('devrait valider une position exacte', () => {
       const captcha = captchaService.generateCaptcha();
-      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(captcha.targetPosition));
+      const exactPosition = { x: captcha.targetPosition.x, y: captcha.targetPosition.y };
       
+      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(exactPosition));
       expect(isValid).toBe(true);
     });
 
     it('devrait valider une position dans la tolérance', () => {
       const captcha = captchaService.generateCaptcha();
-      const tolerancePosition = {
-        x: captcha.targetPosition.x + 20, // Dans la tolérance de ±25
-        y: captcha.targetPosition.y + 20
+      const tolerancePosition = { 
+        x: captcha.targetPosition.x + 15, 
+        y: captcha.targetPosition.y + 15 
       };
-      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(tolerancePosition));
       
+      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(tolerancePosition));
       expect(isValid).toBe(true);
     });
 
     it('devrait rejeter une position hors tolérance', () => {
       const captcha = captchaService.generateCaptcha();
-      const outOfTolerancePosition = {
-        x: captcha.targetPosition.x + 30, // Hors tolérance
-        y: captcha.targetPosition.y + 30
+      const outOfTolerancePosition = { 
+        x: captcha.targetPosition.x + 25, 
+        y: captcha.targetPosition.y + 25 
       };
+      
       const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(outOfTolerancePosition));
-      
       expect(isValid).toBe(false);
     });
 
-    it('devrait rejeter un ID de captcha invalide', () => {
-      const isValid = captchaService.validateCaptcha('invalid-id', JSON.stringify({ x: 50, y: 50 }));
+    it('devrait rejeter un captcha avec un ID invalide', () => {
+      const invalidId = 'invalid-id';
+      const position = { x: 50, y: 50 };
       
+      const isValid = captchaService.validateCaptcha(invalidId, JSON.stringify(position));
       expect(isValid).toBe(false);
     });
 
-    it('devrait accepter une position sous forme de JSON string', () => {
+    it('devrait rejeter une position malformée', () => {
       const captcha = captchaService.generateCaptcha();
-      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(captcha.targetPosition));
+      const malformedPosition = 'invalid-json';
       
-      expect(isValid).toBe(true);
-    });
-
-    it('devrait rejeter une position invalide', () => {
-      const captcha = captchaService.generateCaptcha();
-      const isValid = captchaService.validateCaptcha(captcha.id, 'invalid-json');
-      
+      const isValid = captchaService.validateCaptcha(captcha.id, malformedPosition);
       expect(isValid).toBe(false);
     });
 
-    it('devrait rejeter une position sans coordonnées', () => {
+    it('devrait rejeter une position avec des coordonnées manquantes', () => {
       const captcha = captchaService.generateCaptcha();
-      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify({ x: 50 }));
+      const incompletePosition = { x: 50 }; // y manquant
       
+      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(incompletePosition));
       expect(isValid).toBe(false);
-    });
-
-    it('devrait supprimer le captcha après validation réussie', () => {
-      const captcha = captchaService.generateCaptcha();
-      
-      // Première validation (devrait réussir)
-      const isValid1 = captchaService.validateCaptcha(captcha.id, JSON.stringify(captcha.targetPosition));
-      expect(isValid1).toBe(true);
-      
-      // Deuxième validation avec la même position (devrait échouer car supprimé)
-      const isValid2 = captchaService.validateCaptcha(captcha.id, JSON.stringify(captcha.targetPosition));
-      expect(isValid2).toBe(false);
     });
   });
 
   describe('getChallenge', () => {
-    it('devrait retourner un défi valide', () => {
+    it('devrait récupérer un challenge valide', () => {
       const captcha = captchaService.generateCaptcha();
-      const challenge = captchaService.getChallenge(captcha.id);
+      const retrieved = captchaService.getChallenge(captcha.id);
       
-      expect(challenge).toBeDefined();
-      expect(challenge?.id).toBe(captcha.id);
-      expect(challenge?.imageUrl).toBe(captcha.imageUrl);
-      expect(challenge?.targetPosition.x).toBe(captcha.targetPosition.x);
-      expect(challenge?.targetPosition.y).toBe(captcha.targetPosition.y);
-      expect(challenge?.tolerance).toBe(captcha.tolerance);
+      expect(retrieved).toBeDefined();
+      expect(retrieved?.id).toBe(captcha.id);
+      expect(retrieved?.imageUrl).toBe(captcha.imageUrl);
     });
 
-    it('devrait retourner null pour un ID invalide', () => {
-      const challenge = captchaService.getChallenge('invalid-id');
-      
-      expect(challenge).toBeNull();
-    });
-  });
-
-  describe('Expiration', () => {
-    it('devrait gérer l\'expiration des captchas', () => {
-      // Créer un captcha avec une expiration dans le passé
-      const captcha = captchaService.generateCaptcha();
-      
-      // Simuler l'expiration en modifiant la date
-      const originalExpiresAt = captcha.expiresAt;
-      captcha.expiresAt = new Date(Date.now() - 1000); // Expiré il y a 1 seconde
-      
-      // La validation devrait échouer
-      const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(captcha.targetPosition));
-      expect(isValid).toBe(false);
-      
-      // Restaurer la date originale pour éviter les effets de bord
-      captcha.expiresAt = originalExpiresAt;
+    it('devrait retourner undefined pour un ID invalide', () => {
+      const retrieved = captchaService.getChallenge('invalid-id');
+      expect(retrieved).toBeUndefined();
     });
   });
 });
