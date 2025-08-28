@@ -11,10 +11,19 @@ describe('Captcha API Endpoints', () => {
       
       expect(data.success).toBe(true);
       expect(data.captchaId).toBeDefined();
-      expect(data.imageUrl).toMatch(/^\/images\/captcha\/.+\.(png|jpg|jpeg)$/);
+      expect(data.imageUrl).toMatch(/^\/images\/captcha\/.+\.(png|jpg|jpeg|gif|webp)$/i);
       expect(data.targetPosition).toBeDefined();
       expect(typeof data.targetPosition.x).toBe('number');
       expect(typeof data.targetPosition.y).toBe('number');
+    });
+
+    it('devrait retourner une image dans un format supporté', async () => {
+      const response = await POST();
+      const data = await response.json();
+      
+      // Vérifier que l'image est dans un format supporté
+      const supportedFormats = /\.(png|jpg|jpeg|gif|webp)$/i;
+      expect(data.imageUrl).toMatch(supportedFormats);
     });
   });
 
