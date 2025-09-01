@@ -46,7 +46,7 @@ describe('Mentions Légales Page', () => {
     it('should have proper page title', () => {
       render(MentionsLegales);
       
-      expect(document.title).toBe('Mentions Légales - Balades Argentiques');
+      expect(document.title).toBe('Mentions Légales - stevenbachimont.com');
     });
 
     it('should have proper meta description', () => {
