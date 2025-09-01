@@ -37,14 +37,14 @@
             <div class="info-item">
               <h3>Éditeur du site</h3>
               <p>Steven Bachimont<br>
-              Photographe professionnel<br>
+              Photographe & Développeur Web<br>
               Email : contact@stevenbachimont.com</p>
             </div>
             <div class="info-item">
               <h3>Activité</h3>
               <p>Organisation de balades photographiques argentiques<br>
               Animation d'ateliers photo<br>
-              Services de photographie</p>
+              Médiation artistique</p>
             </div>
           </div>
         </section>
