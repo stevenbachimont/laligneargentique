@@ -46,7 +46,7 @@ describe('Politique de Confidentialité Page', () => {
     it('should have proper page title', () => {
       render(PolitiqueConfidentialite);
       
-      expect(document.title).toBe('Politique de Confidentialité - Balades Argentiques');
+      expect(document.title).toBe('Politique de Confidentialité - La Ligne Argentiques');
     });
 
     it('should have proper meta description', () => {
