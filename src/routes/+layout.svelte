@@ -98,19 +98,11 @@
         <h3>Partenaires</h3>
         <div class="partners">
           <div class="partner">
-            <h4>Technologies</h4>
-            <div class="partner-logos">
-              <span class="partner-logo">SvelteKit</span>
-              <span class="partner-logo">TypeScript</span>
-              <span class="partner-logo">Vercel</span>
-            </div>
-          </div>
-          <div class="partner">
             <h4>Photographie</h4>
             <div class="partner-logos">
-              <span class="partner-logo">Leica</span>
-              <span class="partner-logo">Kodak</span>
-              <span class="partner-logo">Ilford</span>
+              <span class="partner-logo"></span>
+              <span class="partner-logo"></span>
+              <span class="partner-logo"></span>
             </div>
           </div>
           <div class="partner">
@@ -158,7 +150,7 @@
     <div class="footer-bottom">
       <div class="footer-bottom-content">
         <p>© 2025 - Steven Bachimont. Tous droits réservés.</p>
-        <p>Photographe professionnel & Développeur Web</p>
+        <p>Photographe & Développeur Web</p>
       </div>
     </div>
   </footer>
@@ -284,10 +276,7 @@
   }
 
   .nav-link:hover {
-    background: var(--color-accent-2);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--color-accent-2);
   }
 
   .dropdown {
@@ -332,11 +321,7 @@
   }
 
   nav a:not(.nav-link):hover {
-    transition: all 0.5s ease;
-    background: var(--color-accent-2);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--color-accent-2);
   }
 
   main {

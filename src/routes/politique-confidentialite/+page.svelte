@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-  <title>Politique de Confidentialité - Balades Argentiques</title>
+  <title>Politique de Confidentialité - La Ligne Argentiques</title>
   <meta name="description" content="Politique de confidentialité et protection des données personnelles" />
 </svelte:head>
 
@@ -51,7 +51,7 @@
               <h3>Activité</h3>
               <p>Organisation de balades photographiques argentiques<br>
               Animation d'ateliers photo<br>
-              Services de photographie professionnelle</p>
+              Médiation artistique</p>
             </div>
           </div>
         </section>

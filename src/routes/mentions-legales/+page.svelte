@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-  <title>Mentions Légales - Balades Argentiques</title>
+  <title>Mentions Légales - stevenbachimont.com</title>
   <meta name="description" content="Mentions légales du site stevenbachimont.com - Balades photographiques argentiques" />
 </svelte:head>
 
@@ -38,7 +38,7 @@
               <h3>Identité</h3>
               <p>
                 <strong>Nom :</strong> Steven Bachimont<br>
-                <strong>Profession :</strong> Photographe professionnel<br>
+                <strong>Profession :</strong> Photographe & Développeur Web<br>
                 <strong>Email :</strong> contact@stevenbachimont.com<br>
                 <strong>Site web :</strong> stevenbachimont.com
               </p>
@@ -49,7 +49,7 @@
               <p>
                 Organisation de balades photographiques argentiques<br>
                 Animation d'ateliers photo<br>
-                Services de photographie professionnelle
+                Médiation artistique
               </p>
             </div>
           </div>
@@ -62,7 +62,7 @@
             <p>
               Ce site est hébergé par Vercel Inc.<br>
               <strong>Adresse :</strong> 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis<br>
-              <strong>Site web :</strong> vercel.com
+              <strong>Site web :</strong> ionos.com
             </p>
           </div>
         </section>
