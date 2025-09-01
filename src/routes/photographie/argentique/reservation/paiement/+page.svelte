@@ -28,6 +28,10 @@
   let errorMessage = '';
   let successMessage = '';
   let captchaValidated = false;
+  
+  // Cases à cocher pour les conditions
+  let conditionsAccepted = false;
+  let politiqueAccepted = false;
 
   // Validation côté client
   let errors: Record<string, string> = {};
@@ -142,6 +146,17 @@
       isValid = false;
     }
     
+    // Vérifier les cases à cocher
+    if (!conditionsAccepted) {
+      errors['conditions'] = 'Vous devez accepter les conditions générales de vente';
+      isValid = false;
+    }
+    
+    if (!politiqueAccepted) {
+      errors['politique'] = 'Vous devez accepter la politique de confidentialité';
+      isValid = false;
+    }
+    
     return isValid;
   }
 
@@ -207,6 +222,11 @@
 
   function goBack() {
     goto('/photographie/argentique');
+  }
+  
+  // Fonction pour ouvrir les liens dans un nouvel onglet
+  function openLink(url: string) {
+    window.open(url, '_blank');
   }
 </script>
 
@@ -359,18 +379,60 @@
               <p><strong>Paiement sécurisé</strong> par Stripe</p>
             </div>
 
+            <!-- Section Conditions et Politique -->
+            <div class="conditions-section">
+              <h3>📋 Conditions et Politique</h3>
+              <div class="conditions-grid">
+                <div class="condition-item {errors.conditions ? 'error' : ''}">
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      bind:checked={conditionsAccepted}
+                      class="checkbox-input"
+                    />
+                    <span class="checkbox-custom"></span>
+                    <span class="checkbox-text">
+                      J'accepte les <button type="button" class="link-button" on:click={() => openLink('/conditions-generales')}>conditions générales de vente</button>
+                    </span>
+                  </label>
+                  {#if errors.conditions}
+                    <p class="error-text">{errors.conditions}</p>
+                  {/if}
+                </div>
+                
+                <div class="condition-item {errors.politique ? 'error' : ''}">
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      bind:checked={politiqueAccepted}
+                      class="checkbox-input"
+                    />
+                    <span class="checkbox-custom"></span>
+                    <span class="checkbox-text">
+                      J'accepte la <button type="button" class="link-button" on:click={() => openLink('/politique-confidentialite')}>politique de confidentialité</button>
+                    </span>
+                  </label>
+                  {#if errors.politique}
+                    <p class="error-text">{errors.politique}</p>
+                  {/if}
+                </div>
+              </div>
+            </div>
+
             <!-- Captcha -->
             <Captcha 
               onValidated={(valid) => captchaValidated = valid}
               disabled={isCreatingPayment}
             />
 
-            <button type="submit" disabled={isCreatingPayment || !captchaValidated} class="btn-primary">
+            <button type="submit" disabled={isCreatingPayment || !captchaValidated || !conditionsAccepted || !politiqueAccepted} class="btn-primary">
               {#if isCreatingPayment}
                 <span class="spinner"></span>
                 Préparation du paiement...
               {:else if !captchaValidated}
                 Validez le captcha pour continuer
+              {:else if !conditionsAccepted || !politiqueAccepted}
+                Acceptez les conditions pour continuer
               {:else}
                 Continuer vers le paiement
               {/if}
@@ -558,6 +620,114 @@
     color: #666;
   }
 
+  .conditions-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+  }
+
+  .conditions-section h3 {
+    color: #1a1a1a;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .conditions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .condition-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .condition-item.error {
+    border: 1px solid #dc3545;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background: #fee;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    cursor: pointer;
+    padding: 0.5rem 0;
+  }
+
+  .checkbox-input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkbox-custom {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    background: white;
+    border: 2px solid #e1e5e9;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .checkbox-custom:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-input:checked ~ .checkbox-custom {
+    background: #667eea;
+    border-color: #667eea;
+  }
+
+  .checkbox-input:checked ~ .checkbox-custom:after {
+    display: block;
+    border-color: white;
+  }
+
+  .checkbox-text {
+    color: #1a1a1a;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .link-button {
+    background: none;
+    border: none;
+    color: #667eea;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+    margin: 0;
+    transition: color 0.3s ease;
+  }
+
+  .link-button:hover {
+    color: #764ba2;
+    text-decoration: none;
+  }
+
   .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -619,6 +789,24 @@
 
     .btn-primary {
       padding: 0.875rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .conditions-section {
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+    }
+
+    .conditions-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .checkbox-text {
+      font-size: 0.9rem;
+    }
+
+    .link-button {
       font-size: 0.9rem;
     }
   }
