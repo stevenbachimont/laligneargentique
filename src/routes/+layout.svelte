@@ -2,9 +2,22 @@
   import '../app.css';
   
   let isMenuOpen = false;
+  let activeDropdown = null;
   
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
+  }
+  
+  function toggleDropdown(dropdown) {
+    if (activeDropdown === dropdown) {
+      activeDropdown = null;
+    } else {
+      activeDropdown = dropdown;
+    }
+  }
+  
+  function closeDropdown() {
+    activeDropdown = null;
   }
 </script>
 
@@ -17,8 +30,30 @@
       <span class="hamburger" class:open={isMenuOpen}></span>
     </button>
     <nav class:open={isMenuOpen}>
-      <a href="/web" on:click={() => isMenuOpen = false}>Web</a>
-      <a href="/photographie" on:click={() => isMenuOpen = false}>Photographie</a>
+      <!-- Menu Web -->
+      <div class="dropdown-container">
+        <a href="/web" class="nav-link" on:mouseenter={() => toggleDropdown('web')} on:mouseleave={closeDropdown}>
+          Web
+        </a>
+        <div class="dropdown" class:active={activeDropdown === 'web'} on:mouseenter={() => toggleDropdown('web')} on:mouseleave={closeDropdown}>
+          <a href="/web/portfolioWeb" on:click={() => isMenuOpen = false}>Portfolio Web</a>
+          <a href="/web/outils" on:click={() => isMenuOpen = false}>Outils & Technologies</a>
+        </div>
+      </div>
+
+      <!-- Menu Photographie -->
+      <div class="dropdown-container">
+        <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
+          Photographie
+        </a>
+        <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
+          <a href="/photographie/argentique" on:click={() => isMenuOpen = false}>La Ligne Argentiques</a>
+          <a href="/photographie/portfolioPhoto" on:click={() => isMenuOpen = false}>Galerie Photos</a>
+        </div>
+      </div>
+
+
+
       <a href="/#about-section" on:click={() => isMenuOpen = false}>A propos</a>
       <a href="/contact" on:click={() => isMenuOpen = false}>Contact</a>
     </nav>
@@ -29,6 +64,9 @@
   </main>
 
   <footer>
+    <a href="/conditions-generales" on:click={() => isMenuOpen = false}>Conditions Générales</a>
+    <a href="/mentions-legales" on:click={() => isMenuOpen = false}>Mentions Légales</a>
+    <a href="/politique-confidentialite" on:click={() => isMenuOpen = false}>Politique de Confidentialité</a>
     <p>© 2025 - StevenBACHIMONT</p>
   </footer>
 </div>
@@ -137,7 +175,70 @@
     align-items: center;
   }
 
-  nav a:hover {
+  .dropdown-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .nav-link {
+    text-decoration: none;
+    color: var(--color-text);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: block;
+    cursor: pointer;
+  }
+
+  .nav-link:hover {
+    background: var(--color-accent-2);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .dropdown a:last-child {
+    border-bottom: none;
+  }
+
+  .dropdown a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-accent-2);
+  }
+
+  nav a:not(.nav-link):hover {
     transition: all 0.5s ease;
     background: var(--color-accent-2);
     background-clip: text;
@@ -182,11 +283,43 @@
       right: 0;
     }
 
-    nav a {
+    .dropdown-container {
+      width: 100%;
+    }
+
+    .nav-link {
       font-size: 1.5rem;
       padding: 1rem;
       width: 100%;
       text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dropdown {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      background: rgba(255, 255, 255, 0.05);
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      margin-left: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .dropdown a {
+      font-size: 1.2rem;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    nav a:not(.nav-link) {
+      font-size: 1.5rem;
+      padding: 1rem;
+      width: 100%;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     :global(body) {

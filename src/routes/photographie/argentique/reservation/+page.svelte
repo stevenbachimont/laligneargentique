@@ -6,120 +6,11 @@
   $: baladeId = $page.url.searchParams.get('baladeId') || $page.url.searchParams.get('id');
   $: baladeData = $page.url.searchParams.get('data');
 
-  // Variables pour le formulaire
-  let argentiqueForm = {
-    nom: '',
-    prenom: '',
-    email: '',
-    telephone: '',
-    dateSouhaitee: '',
-    nombrePersonnes: 1,
-    message: ''
-  };
-  let argentiqueError = '';
-  let placesDisponibles = 5;
   let balade: any = null;
   let isVisible = false;
   let isLoading = true;
 
-  // Validation côté client
-  let errors: Record<string, string> = {};
-  let isSubmitting = false;
 
-  // Validation en temps réel
-  $: if (argentiqueForm.prenom) validateField('prenom', argentiqueForm.prenom);
-  $: if (argentiqueForm.nom) validateField('nom', argentiqueForm.nom);
-  $: if (argentiqueForm.email) validateField('email', argentiqueForm.email);
-  $: if (argentiqueForm.telephone) validateField('telephone', argentiqueForm.telephone);
-  $: if (argentiqueForm.message) validateField('message', argentiqueForm.message);
-
-  function validateField(field: string, value: string): boolean {
-    errors[field] = '';
-    
-    switch (field) {
-      case 'prenom':
-        if (value.length < 2) {
-          errors[field] = 'Le prénom doit contenir au moins 2 caractères';
-          return false;
-        }
-        if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(value)) {
-          errors[field] = 'Le prénom ne peut contenir que des lettres, espaces, tirets et apostrophes';
-          return false;
-        }
-        break;
-        
-      case 'nom':
-        if (value.length < 2) {
-          errors[field] = 'Le nom doit contenir au moins 2 caractères';
-          return false;
-        }
-        if (!/^[a-zA-ZÀ-ÿ\s'-]+$/.test(value)) {
-          errors[field] = 'Le nom ne peut contenir que des lettres, espaces, tirets et apostrophes';
-          return false;
-        }
-        break;
-        
-      case 'email':
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-          errors[field] = 'Veuillez entrer une adresse email valide';
-          return false;
-        }
-        break;
-        
-      case 'telephone':
-        if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
-          errors[field] = 'Le numéro de téléphone ne peut contenir que des chiffres, espaces, tirets, plus et parenthèses';
-          return false;
-        }
-        break;
-        
-      case 'message':
-        if (value.length < 10) {
-          errors[field] = 'Le message doit contenir au moins 10 caractères';
-          return false;
-        }
-        if (value.length > 1000) {
-          errors[field] = 'Le message ne peut pas dépasser 1000 caractères';
-          return false;
-        }
-        break;
-    }
-    
-    return true;
-  }
-
-  function validateForm(): boolean {
-    const fields = ['prenom', 'nom', 'email', 'message'];
-    let isValid = true;
-    
-    fields.forEach(field => {
-      if (!validateField(field, argentiqueForm[field as keyof typeof argentiqueForm] as string)) {
-        isValid = false;
-      }
-    });
-    
-    return isValid;
-  }
-
-  function clearErrors() {
-    errors = {};
-    argentiqueError = '';
-  }
-
-  function resetForm() {
-    argentiqueForm = {
-      nom: '',
-      prenom: '',
-      email: '',
-      telephone: '',
-      dateSouhaitee: '',
-      nombrePersonnes: 1,
-      message: ''
-    };
-    clearErrors();
-    placesDisponibles = 5;
-  }
 
   onMount(async () => {
     console.log('🔍 Chargement de la page de réservation');
@@ -142,13 +33,7 @@
           
           balade = data.balades.find((b: any) => b.id === baladeIdInt);
           
-          if (balade) {
-            // Pré-remplir le formulaire avec les données de la balade
-            argentiqueForm.dateSouhaitee = balade.date;
-            placesDisponibles = balade.placesDisponibles;
-            argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
-            argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
-          } else {
+          if (!balade) {
             console.error('❌ Balade non trouvée avec ID:', baladeIdInt);
           }
         }
@@ -163,84 +48,15 @@
       }
     }
 
-    if (balade) {
-      // Pré-remplir le formulaire avec les données de la balade
-      argentiqueForm.dateSouhaitee = balade.date;
-      placesDisponibles = balade.placesDisponibles;
-      argentiqueForm.nombrePersonnes = Math.min(balade.placesDisponibles, 5);
-      argentiqueForm.message = `Je souhaite réserver pour la balade "${balade.theme}" le ${formatDate(balade.date)} à ${balade.heure} au ${balade.lieu}. ${balade.description}`;
-    }
+
 
     isLoading = false;
     setTimeout(() => { isVisible = true; }, 100);
   });
 
-  async function handleArgentiqueSubmit(e: Event) {
-    e.preventDefault();
-    clearErrors(); // Clear previous errors
-
-    console.log('🔍 Début de la soumission du formulaire');
-    console.log('📝 Données du formulaire:', argentiqueForm);
-
-    if (!validateForm()) {
-      console.log('❌ Validation échouée');
-      argentiqueError = 'Veuillez corriger les erreurs dans le formulaire.';
-      return;
-    }
-
-    console.log('✅ Validation réussie, envoi à l\'API...');
-    isSubmitting = true;
-    
-    try {
-              // Ajouter l'ID de la balade aux données
-        const requestData = {
-          ...argentiqueForm,
-          baladeId: parseInt(balade?.id?.toString() || '0')
-        };
-      
-      const requestBody = JSON.stringify(requestData);
-      console.log('📤 Corps de la requête:', requestBody);
-      
-      const response = await fetch('/api/balades/reservation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: requestBody
-      });
-
-      console.log('📥 Réponse reçue:', response.status, response.statusText);
-
-      const data = await response.json();
-      console.log('📋 Données de réponse:', data);
-
-      if (response.ok) {
-        console.log('✅ Succès !');
-        // Rediriger vers la page de confirmation avec les données
-        const confirmationData = encodeURIComponent(JSON.stringify({
-          ...argentiqueForm,
-          theme: balade?.theme || 'Balade Argentique',
-          heure: balade?.heure || '',
-          lieu: balade?.lieu || '',
-          prix: balade?.prix || '',
-          date: balade?.date || argentiqueForm.dateSouhaitee
-        }));
-        
-        window.location.href = `/photographie/argentique/reservation/confirmation?data=${confirmationData}`;
-      } else {
-        console.log('❌ Erreur API:', data.error);
-        if (data.details && data.details.length > 0) {
-          console.log('📋 Détails des erreurs:', data.details);
-          argentiqueError = `Erreur de validation: ${data.details.join(', ')}`;
-        } else {
-          argentiqueError = data.error || 'Erreur lors de l\'envoi de la demande.';
-        }
-      }
-    } catch (err) {
-      console.error('💥 Erreur lors de la requête:', err);
-      argentiqueError = 'Erreur lors de l\'envoi de la demande.';
-    } finally {
-      isSubmitting = false;
+  function allerAuPaiement() {
+    if (balade && balade.id) {
+      window.location.href = `/photographie/argentique/reservation/paiement?baladeId=${balade.id}`;
     }
   }
 
@@ -497,118 +313,52 @@
       </section>
       {/if}
 
-      <!-- Section Formulaire de Réservation -->
+      <!-- Section Réservation -->
       <section class="reservation-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
         <div class="container">
           <h2>Réserver votre place</h2>
-          <p class="section-subtitle">Remplissez le formulaire ci-dessous pour confirmer votre réservation</p>
+          <p class="section-subtitle">Cliquez sur le bouton ci-dessous pour procéder à la réservation et au paiement</p>
           
-          <form on:submit={handleArgentiqueSubmit} class="reservation-form">
-            <div class="form-grid">
-              <div class="form-group {errors.prenom ? 'error' : ''}">
-                <label for="prenom">Prénom *</label>
-                <input 
-                  type="text" 
-                  id="prenom" 
-                  bind:value={argentiqueForm.prenom} 
-                  required 
-                  placeholder="Votre prénom"
-                  class={errors.prenom ? 'error' : ''}
-                />
-                {#if errors.prenom}
-                  <p class="error-text">{errors.prenom}</p>
-                {/if}
-              </div>
-              <div class="form-group {errors.nom ? 'error' : ''}">
-                <label for="nom">Nom *</label>
-                <input 
-                  type="text" 
-                  id="nom" 
-                  bind:value={argentiqueForm.nom} 
-                  required 
-                  placeholder="Votre nom"
-                  class={errors.nom ? 'error' : ''}
-                />
-                {#if errors.nom}
-                  <p class="error-text">{errors.nom}</p>
-                {/if}
-              </div>
-              <div class="form-group {errors.email ? 'error' : ''}">
-                <label for="email">Email *</label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  bind:value={argentiqueForm.email} 
-                  required 
-                  placeholder="votre.email@exemple.com"
-                  class={errors.email ? 'error' : ''}
-                />
-                {#if errors.email}
-                  <p class="error-text">{errors.email}</p>
-                {/if}
-              </div>
-              <div class="form-group {errors.telephone ? 'error' : ''}">
-                <label for="telephone">Téléphone</label>
-                <input 
-                  type="tel" 
-                  id="telephone" 
-                  bind:value={argentiqueForm.telephone} 
-                  placeholder="06 12 34 56 78"
-                  class={errors.telephone ? 'error' : ''}
-                />
-                {#if errors.telephone}
-                  <p class="error-text">{errors.telephone}</p>
-                {/if}
-              </div>
-              <div class="form-group">
-                <label>Date et heure de la balade</label>
-                <div class="balade-datetime-display">
-                  <span class="datetime-info">
-                    📅 {formatDate(balade?.date || '')} à 🕐 {balade?.heure || ''}
-                  </span>
+          <div class="reservation-summary">
+            <div class="summary-card">
+              <h3>📋 Récapitulatif de votre réservation</h3>
+              <div class="summary-details">
+                <div class="summary-item">
+                  <span class="summary-label">Balade :</span>
+                  <span class="summary-value">{balade.theme}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Date :</span>
+                  <span class="summary-value">{formatDate(balade.date)}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Heure :</span>
+                  <span class="summary-value">{balade.heure}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Lieu :</span>
+                  <span class="summary-value">{balade.lieu}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Prix :</span>
+                  <span class="summary-value">{balade.prix}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Places disponibles :</span>
+                  <span class="summary-value">{balade.placesDisponibles}</span>
                 </div>
               </div>
-              <div class="form-group">
-                <label for="nombrePersonnes">Nombre de personnes *</label>
-                <select id="nombrePersonnes" bind:value={argentiqueForm.nombrePersonnes} required>
-                  {#each Array.from({length: placesDisponibles}, (_, i) => i + 1) as nombre}
-                    <option value={nombre}>{nombre} personne{nombre > 1 ? 's' : ''}</option>
-                  {/each}
-                </select>
-              </div>
             </div>
             
-            <div class="form-group full-width {errors.message ? 'error' : ''}">
-              <label for="message">Message (préférences, questions...)</label>
-              <textarea 
-                id="message" 
-                bind:value={argentiqueForm.message} 
-                rows="4"
-                placeholder="Décrivez vos attentes, vos préférences de lieux, ou posez vos questions..."
-                class={errors.message ? 'error' : ''}
-              ></textarea>
-              <div class="message-info">
-                <span class="char-count {argentiqueForm.message.length > 900 ? 'warning' : ''}">
-                  {argentiqueForm.message.length}/1000 caractères
-                </span>
-                {#if errors.message}
-                  <p class="error-text">{errors.message}</p>
-                {/if}
-              </div>
-            </div>
-            
-            {#if argentiqueError}
-              <div class="error-message">
-                {argentiqueError}
-              </div>
-            {/if}
-            
-            <div class="form-actions">
-              <button type="submit" class="btn-submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Envoi en cours...' : 'Confirmer ma réservation'}
+            <div class="reservation-actions">
+              <button class="btn-reserver" on:click={allerAuPaiement}>
+                🎯 Réserver et Payer
               </button>
+              <p class="reservation-note">
+                Vous serez redirigé vers une page sécurisée pour saisir vos informations et effectuer le paiement.
+              </p>
             </div>
-          </form>
+          </div>
         </div>
       </section>
     {:else}
@@ -1099,159 +849,97 @@
     margin-bottom: 3rem;
   }
 
-  .success-container {
-    text-align: center;
-    padding: 3rem;
-  }
-
-  .success-message {
-    background: rgba(0,255,0,0.1);
-    border: 1px solid rgba(0,255,0,0.3);
-    border-radius: 15px;
-    padding: 2rem;
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .success-message h3 {
-    color: #00ff00;
-    margin-bottom: 1rem;
-  }
-
-  .success-message p {
-    color: rgba(255,255,255,0.9);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-  }
-
-  .reservation-form {
-    background: rgba(255,255,255,0.05);
-    padding: 2rem;
-    border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
+  .reservation-summary {
     max-width: 800px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .summary-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.1);
     width: 100%;
     box-sizing: border-box;
   }
 
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+  .summary-card h3 {
+    color: #ffd700;
     margin-bottom: 1.5rem;
-    width: 100%;
+    font-size: 1.5rem;
+    text-align: center;
   }
 
-  .form-group {
+  .summary-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .summary-item {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
   }
 
-  .form-group.full-width {
-    grid-column: 1 / -1;
-  }
-
-  .form-group label {
-    color: rgba(255,255,255,0.9);
-    font-size: 0.9rem;
+  .summary-label {
+    color: rgba(255,255,255,0.8);
     font-weight: 500;
   }
 
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px;
-    padding: 0.75rem;
-    color: #fff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    width: 100%;
-    box-sizing: border-box;
+  .summary-value {
+    color: #ffd700;
+    font-weight: 600;
   }
 
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #ffd700;
-    background: rgba(255,255,255,0.15);
-  }
-
-  .form-group input.error,
-  .form-group select.error,
-  .form-group textarea.error {
-    border-color: #ff6b6b;
-    background: rgba(255, 107, 107, 0.1);
-  }
-
-  .form-group input.error:focus,
-  .form-group select.error:focus,
-  .form-group textarea.error:focus {
-    border-color: #ff6b6b;
-    background: rgba(255, 107, 107, 0.15);
-  }
-
-  .form-group input::placeholder,
-  .form-group textarea::placeholder {
-    color: rgba(255,255,255,0.5);
-  }
-
-  .form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  .form-actions {
+  .reservation-actions {
     text-align: center;
-    margin-top: 2rem;
-    width: 100%;
+    padding: 2rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
   }
 
-  .btn-submit {
+  .btn-reserver {
     background: linear-gradient(45deg, #ffd700, #ffed4e);
     color: #000;
     border: none;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 8px;
+    padding: 1.2rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: 100%;
-    max-width: 300px;
-    box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    margin-bottom: 1.5rem;
   }
 
-  .btn-submit:hover {
-    transform: translateY(-2px);
+  .btn-reserver:hover {
+    background: linear-gradient(45deg, #ffed4e, #ffd700);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  }
+
+  .btn-reserver:active {
+    transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
   }
 
-  .btn-submit:disabled {
-    background: rgba(255, 215, 0, 0.5);
-    cursor: not-allowed;
-    color: rgba(0, 0, 0, 0.7);
-    box-shadow: none;
+  .reservation-note {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
   }
 
-  .error-message {
-    background: rgba(255,0,0,0.1);
-    border: 1px solid rgba(255,0,0,0.3);
-    color: #ff6b6b;
-    padding: 1rem;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 1rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
+
 
   .error-container {
     text-align: center;
@@ -1260,20 +948,7 @@
     box-sizing: border-box;
   }
 
-  .balade-datetime-display {
-    background: rgba(255, 215, 0, 0.1);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
-    margin: 0.5rem 0;
-  }
 
-  .datetime-info {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #ffd700;
-  }
 
   .error-container h2 {
     color: #ff6b6b;
@@ -1285,55 +960,7 @@
     margin-bottom: 2rem;
   }
 
-  .success-message .btn-retour {
-    margin-top: 1.5rem;
-    background: linear-gradient(45deg, #00ff00, #00cc00);
-    color: #000;
-    font-weight: 600;
-  }
 
-  .success-message .btn-retour:hover {
-    background: linear-gradient(45deg, #00cc00, #00ff00);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
-  }
-
-  .error-text {
-    color: #ff6b6b;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(255, 107, 107, 0.1);
-    border-radius: 6px;
-    border-left: 3px solid #ff6b6b;
-  }
-
-  .message-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 0.5rem;
-    gap: 1rem;
-  }
-
-  .char-count {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    padding: 0.3rem 0.6rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .char-count.warning {
-    color: #ffd700;
-    background: rgba(255, 215, 0, 0.1);
-    border-color: rgba(255, 215, 0, 0.3);
-  }
-
-  .form-group.error label {
-    color: #ff6b6b;
-  }
 
   /* Animations */
   .fade-in {
@@ -1570,10 +1197,39 @@
       padding: 0 1rem;
     }
 
-    .reservation-form {
+    .reservation-summary {
+      gap: 1.5rem;
+    }
+
+    .summary-card {
       padding: 1.5rem;
-      margin: 0;
-      width: 100%;
+    }
+
+    .summary-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .summary-details {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+
+    .summary-item {
+      padding: 0.7rem 0.8rem;
+    }
+
+    .reservation-actions {
+      padding: 1.5rem;
+    }
+
+    .btn-reserver {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+
+    .reservation-note {
+      font-size: 0.9rem;
     }
   }
 
@@ -1765,28 +1421,46 @@
       padding: 0 0.8rem;
     }
 
-    .reservation-form {
+    .reservation-summary {
+      gap: 1.2rem;
+    }
+
+    .summary-card {
       padding: 1.2rem;
-      margin: 0;
-      width: 100%;
     }
 
-    .form-group label {
+    .summary-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-details {
+      gap: 0.6rem;
+    }
+
+    .summary-item {
+      padding: 0.6rem 0.7rem;
+    }
+
+    .summary-label {
       font-size: 0.9rem;
     }
 
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      padding: 0.8rem;
+    .summary-value {
       font-size: 0.9rem;
     }
 
-    .btn-submit {
+    .reservation-actions {
+      padding: 1.2rem;
+    }
+
+    .btn-reserver {
       padding: 0.9rem 1.8rem;
-      font-size: 0.95rem;
-      width: 100%;
-      max-width: 100%;
+      font-size: 1rem;
+    }
+
+    .reservation-note {
+      font-size: 0.85rem;
     }
   }
 
@@ -1970,28 +1644,46 @@
       padding: 0 0.4rem;
     }
 
-    .reservation-form {
+    .reservation-summary {
+      gap: 1rem;
+    }
+
+    .summary-card {
       padding: 1rem;
-      margin: 0;
-      width: 100%;
     }
 
-    .form-group label {
+    .summary-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .summary-details {
+      gap: 0.5rem;
+    }
+
+    .summary-item {
+      padding: 0.5rem 0.6rem;
+    }
+
+    .summary-label {
       font-size: 0.85rem;
     }
 
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      padding: 0.7rem;
+    .summary-value {
       font-size: 0.85rem;
     }
 
-    .btn-submit {
+    .reservation-actions {
+      padding: 1rem;
+    }
+
+    .btn-reserver {
       padding: 0.8rem 1.5rem;
-      font-size: 0.9rem;
-      width: 100%;
-      max-width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .reservation-note {
+      font-size: 0.8rem;
     }
 
     .btn-map {
@@ -2181,28 +1873,46 @@
       padding: 0 0.4rem;
     }
 
-    .reservation-form {
+    .reservation-summary {
+      gap: 0.8rem;
+    }
+
+    .summary-card {
       padding: 0.8rem;
-      margin: 0;
-      width: 100%;
     }
 
-    .form-group label {
+    .summary-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .summary-details {
+      gap: 0.4rem;
+    }
+
+    .summary-item {
+      padding: 0.4rem 0.5rem;
+    }
+
+    .summary-label {
       font-size: 0.8rem;
     }
 
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      padding: 0.6rem;
+    .summary-value {
       font-size: 0.8rem;
     }
 
-    .btn-submit {
+    .reservation-actions {
+      padding: 0.8rem;
+    }
+
+    .btn-reserver {
       padding: 0.7rem 1.3rem;
-      font-size: 0.85rem;
-      width: 100%;
-      max-width: 100%;
+      font-size: 0.9rem;
+    }
+
+    .reservation-note {
+      font-size: 0.75rem;
     }
 
     .btn-map {
