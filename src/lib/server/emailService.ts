@@ -183,6 +183,53 @@ export class EmailService {
     }
   }
 
+  // Envoyer un email d'invitation
+  async sendInvitationEmail(invitation: any, balade: any): Promise<boolean> {
+    try {
+      const formattedDate = new Date(balade.date).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      // Construire l'URL de réservation avec le code pré-rempli
+      const baseUrl = env.PUBLIC_BASE_URL || 'http://localhost:3000';
+      const reservationUrl = `${baseUrl}/photographie/argentique/reservation/invitation?baladeId=${balade.id}&code=${invitation.code}`;
+
+      // Variables pour le template
+      const variables = {
+        theme: balade.theme,
+        date: formattedDate,
+        heure: balade.heure,
+        lieu: balade.lieu,
+        nombrePersonnes: invitation.nombrePersonnes,
+        code: invitation.code,
+        reservationUrl: reservationUrl,
+        message: invitation.message || ''
+      };
+
+      // Récupérer le template
+      const template = this.templateService.getTemplate('invitation', 'client', variables);
+      const styles = this.templateService.getStyles();
+
+      const email = {
+        from: `"La Ligne Argentique" <${env.EMAIL_USER}>`,
+        to: invitation.email,
+        subject: template.subject,
+        html: this.templateService.generateEmailHTML(template, styles),
+        text: this.templateService.generateEmailText(template)
+      };
+
+      await this.transporter.sendMail(email);
+      console.log(`Email d'invitation envoyé à ${invitation.email} pour la balade ${balade.theme} avec le code ${invitation.code}`);
+      return true;
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'email d\'invitation:', error);
+      throw new Error(`Erreur lors de l'envoi de l'email d'invitation: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  }
+
   // Envoyer un email de contact
   async sendContactMessage(data: { nom: string; prenom: string; email: string; message: string }): Promise<boolean> {
     try {

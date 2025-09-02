@@ -157,6 +157,60 @@ export class EmailTemplateService {
       `;
     }
 
+    // Ajouter les détails de l'invitation
+    if (template.invitationTitle && template.invitationDetails) {
+      html += `
+        <div class="info-box">
+          <h3>${template.invitationTitle}</h3>
+          <p>${template.invitationDetails.replace(/\n/g, '<br>')}</p>
+        </div>
+      `;
+    }
+
+    // Ajouter le code d'invitation mis en évidence
+    if (template.codeHighlight) {
+      html += `
+        <div class="highlight">
+          <h3>${template.codeTitle || 'Code d\'invitation'}</h3>
+          <p style="font-size: 1.5em; font-weight: bold; text-align: center; background: #f0f0f0; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; letter-spacing: 0.1em;">
+            ${template.codeHighlight}
+          </p>
+        </div>
+      `;
+    }
+
+    // Ajouter le lien de réservation
+    if (template.reservationUrl && template.reservationLink) {
+      html += `
+        <div class="info-box" style="text-align: center; margin: 20px 0;">
+          <a href="${template.reservationUrl}" style="background: linear-gradient(45deg, #9C27B0, #7B1FA2); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 1.1em;">
+            🎁 ${template.reservationLink}
+          </a>
+        </div>
+      `;
+    }
+
+    // Ajouter les instructions
+    if (template.instructionsTitle && template.instructionsList) {
+      html += `
+        <div class="info-box">
+          <h3>${template.instructionsTitle}</h3>
+          <ol>
+            ${template.instructionsList.map(instruction => `<li>${instruction}</li>`).join('')}
+          </ol>
+        </div>
+      `;
+    }
+
+    // Ajouter les instructions alternatives
+    if (template.alternativeInstructions) {
+      html += `
+        <div class="contact-info">
+          <p><em>${template.alternativeInstructions}</em></p>
+        </div>
+      `;
+    }
+
     // Ajouter les détails du paiement
     if (template.paymentTitle && template.paymentFormat) {
       html += `
@@ -265,6 +319,30 @@ export class EmailTemplateService {
 
     if (template.baladeTitle && template.baladeFormat) {
       text += `${template.baladeTitle}\n${template.baladeFormat}\n\n`;
+    }
+
+    if (template.invitationTitle && template.invitationDetails) {
+      text += `${template.invitationTitle}\n${template.invitationDetails}\n\n`;
+    }
+
+    if (template.codeHighlight) {
+      text += `${template.codeTitle || 'Code d\'invitation'}\n${template.codeHighlight}\n\n`;
+    }
+
+    if (template.reservationUrl && template.reservationLink) {
+      text += `${template.reservationLink}\n${template.reservationUrl}\n\n`;
+    }
+
+    if (template.instructionsTitle && template.instructionsList) {
+      text += `${template.instructionsTitle}\n`;
+      template.instructionsList.forEach((item: string, index: number) => {
+        text += `${index + 1}. ${item}\n`;
+      });
+      text += '\n';
+    }
+
+    if (template.alternativeInstructions) {
+      text += `${template.alternativeInstructions}\n\n`;
     }
 
     if (template.paymentTitle && template.paymentFormat) {

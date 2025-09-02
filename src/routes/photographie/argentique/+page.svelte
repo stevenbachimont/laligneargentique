@@ -5,6 +5,8 @@
   // Balades programmées depuis l'API
   let baladesFutures: Balade[] = [];
   let baladesArchivees: Balade[] = [];
+  let baladesPayantes: Balade[] = [];
+  let baladesInvitations: Balade[] = [];
   let baladesParAnnee: { [annee: string]: Balade[] } = {};
 
   let isVisible = false;
@@ -15,10 +17,21 @@
     window.location.href = `/photographie/argentique/reservation/paiement?baladeId=${balade.id}`;
   }
 
+  // Fonction pour rediriger vers la page de réservation avec code d'invitation
+  function reserverAvecCode(balade: any) {
+    // Rediriger vers la page de réservation avec code d'invitation
+    window.location.href = `/photographie/argentique/reservation/invitation?baladeId=${balade.id}`;
+  }
+
   // Fonction pour rediriger vers la page de rétrospective
   function voirRetrospective(balade: any) {
     // Rediriger vers la page de rétrospective
     window.location.href = `/photographie/argentique/retrospective/${balade.id}`;
+  }
+
+  // Fonction pour aller à la page des invitations
+  function allerInvitations() {
+    window.location.href = '/photographie/argentique/invitations';
   }
 
   // Fonction pour classer les balades par années
@@ -51,14 +64,24 @@
 
   onMount(async () => {
     try {
-      // Charger les balades futures depuis l'API
-      const responseFutures = await fetch('/api/balades?type=futures');
-      const dataFutures = await responseFutures.json();
+      // Charger les balades payantes depuis l'API
+      const responsePayantes = await fetch('/api/balades?type=payantes');
+      const dataPayantes = await responsePayantes.json();
       
-      if (dataFutures.success) {
-        baladesFutures = dataFutures.balades;
+      if (dataPayantes.success) {
+        baladesPayantes = dataPayantes.balades;
       } else {
-        console.error('Erreur lors du chargement des balades futures:', dataFutures.error);
+        console.error('Erreur lors du chargement des balades payantes:', dataPayantes.error);
+      }
+
+      // Charger les balades sur invitation depuis l'API
+      const responseInvitations = await fetch('/api/balades?type=invitations');
+      const dataInvitations = await responseInvitations.json();
+      
+      if (dataInvitations.success) {
+        baladesInvitations = dataInvitations.balades;
+      } else {
+        console.error('Erreur lors du chargement des balades sur invitation:', dataInvitations.error);
       }
 
       // Charger les balades archivées depuis l'API
@@ -70,6 +93,9 @@
       } else {
         console.error('Erreur lors du chargement des balades archivées:', dataArchivees.error);
       }
+
+      // Combiner toutes les balades futures pour le tri
+      baladesFutures = [...baladesPayantes, ...baladesInvitations];
 
       // Classer les balades par années
       trierEtSeparerBalades();
@@ -124,20 +150,20 @@
       </div>
     </section>
 
-    <!-- Section Balades Programmées (Futures) -->
-    <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
-      <div class="container">
-        <h2>Prochaines balades</h2>
-        <p class="section-subtitle">Découvrez les prochaines balades à Nantes et réservez votre place</p>
-        
-        {#if baladesFutures.length > 0}
+    <!-- Section Balades Payantes -->
+    {#if baladesPayantes.length > 0}
+      <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
+        <div class="container">
+          <h2>💰 Balades payantes</h2>
+          <p class="section-subtitle">Découvrez nos balades photographiques argentiques et réservez votre place</p>
+          
           <div class="balades-annees">
             {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) >= new Date().getFullYear()).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [annee, baladesAnnee]}
               <div class="annee-section">
                 <h3 class="annee-title">{getAnneeLabel(annee)}</h3>
                 <div class="balades-grid">
-                  {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0]) as balade}
-                    <div class="balade-card">
+                  {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0] && b.type === 'payante') as balade}
+                    <div class="balade-card balade-payante">
                       <div class="balade-header">
                         <div class="balade-date">
                           <span class="date-day">{new Date(balade.date).getDate()}</span>
@@ -174,14 +200,83 @@
               </div>
             {/each}
           </div>
-        {:else}
+        </div>
+      </section>
+    {/if}
+
+    <!-- Section Balades sur Invitation -->
+    {#if baladesInvitations.length > 0}
+      <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.5s">
+        <div class="container">
+          <div class="section-header">
+            <div>
+              <h2>🎁 Balades sur invitation</h2>
+              <p class="section-subtitle">Balades gratuites accessibles uniquement avec un code d'invitation</p>
+            </div>
+            <button class="btn-voir-toutes" on:click={allerInvitations}>
+              Voir toutes les invitations
+            </button>
+          </div>
+          
+          <div class="balades-annees">
+            {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) >= new Date().getFullYear()).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [annee, baladesAnnee]}
+              <div class="annee-section">
+                <h3 class="annee-title">{getAnneeLabel(annee)}</h3>
+                <div class="balades-grid">
+                  {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0] && b.type === 'invitation') as balade}
+                    <div class="balade-card balade-invitation">
+                      <div class="balade-header">
+                        <div class="balade-date invitation">
+                          <span class="date-day">{new Date(balade.date).getDate()}</span>
+                          <span class="date-month">{new Date(balade.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                        </div>
+                        <div class="balade-info">
+                          <h3>{balade.theme}</h3>
+                          <p class="balade-lieu">📍 {balade.lieu}</p>
+                          <p class="balade-heure">🕐 {balade.heure}</p>
+                        </div>
+                        <div class="balade-status">
+                          <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
+                            {balade.placesDisponibles === 0 ? 'Complet' : `${balade.placesDisponibles} place${balade.placesDisponibles > 1 ? 's' : ''} disponible${balade.placesDisponibles > 1 ? 's' : ''}`}
+                          </span>
+                          <span class="prix invitation">Gratuit</span>
+                        </div>
+                      </div>
+                      <p class="balade-description">{balade.description}</p>
+                      <div class="balade-actions">
+                        <button 
+                          class="btn-invitation" 
+                          on:click={() => reserverAvecCode(balade)}
+                          disabled={balade.placesDisponibles === 0}
+                          title="Réserver avec un code d'invitation"
+                        >
+                          {balade.placesDisponibles === 0 ? 'Complet' : '🎁 Réserver avec code'}
+                        </button>
+                        <span class="inscription-info">
+                          {balade.placesDisponibles === 0 ? 'Places épuisées' : 'Code d\'invitation requis'}
+                        </span>
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/each}
+          </div>
+        </div>
+      </section>
+    {/if}
+
+    <!-- Message si aucune balade -->
+    {#if baladesPayantes.length === 0 && baladesInvitations.length === 0}
+      <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
+        <div class="container">
           <div class="no-balades">
             <p>Aucune balade programmée pour le moment.</p>
             <p>Revenez bientôt pour découvrir nos nouvelles balades !</p>
           </div>
-        {/if}
-      </div>
-    </section>
+        </div>
+      </section>
+    {/if}
 
     <!-- Section Balades Archivées (Passées) -->
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
@@ -404,6 +499,42 @@
     margin-bottom: 3rem;
   }
 
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .section-header h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header .section-subtitle {
+    margin-bottom: 0;
+    text-align: left;
+  }
+
+  .btn-voir-toutes {
+    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+
+  .btn-voir-toutes:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+  }
+
   .balades-annees {
     display: flex;
     flex-direction: column;
@@ -454,6 +585,15 @@
     transform: translateY(-5px);
   }
 
+  .balade-payante {
+    border-left: 4px solid #ffd700;
+  }
+
+  .balade-invitation {
+    border-left: 4px solid #9C27B0;
+    background: rgba(156, 39, 176, 0.05);
+  }
+
   .balade-header {
     display: flex;
     align-items: flex-start;
@@ -474,6 +614,11 @@
     background: rgba(255, 255, 255, 0.2);
     color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .balade-date.invitation {
+    background: #9C27B0;
+    color: #fff;
   }
 
   .date-day {
@@ -546,6 +691,10 @@
     color: #ffd700;
   }
 
+  .prix.invitation {
+    color: #9C27B0;
+  }
+
   .balade-description {
     color: rgba(255,255,255,0.8);
     line-height: 1.5;
@@ -593,6 +742,30 @@
 
   .btn-retrospective:hover {
     transform: translateY(-2px);
+  }
+
+  .btn-invitation {
+    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .btn-invitation:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-invitation:disabled {
+    background: rgba(156, 39, 176, 0.3);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    transform: none;
   }
 
   .inscription-info {

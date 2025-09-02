@@ -6,7 +6,8 @@ export const GET: RequestHandler = async ({ url }) => {
   try {
     const searchParams = url.searchParams;
     const admin = searchParams.get('admin');
-    const type = searchParams.get('type'); // 'futures', 'archivees', ou undefined pour toutes
+    const type = searchParams.get('type'); // 'futures', 'archivees', 'payantes', 'invitations', ou undefined pour toutes
+    const baladeType = searchParams.get('baladeType'); // 'payante' ou 'invitation'
     
     let balades;
     
@@ -19,6 +20,18 @@ export const GET: RequestHandler = async ({ url }) => {
     } else if (type === 'archivees') {
       // Balades passées (archivées)
       balades = baladesService.getBaladesArchivees();
+    } else if (type === 'payantes') {
+      // Balades payantes uniquement
+      balades = baladesService.getBaladesPayantes();
+    } else if (type === 'invitations') {
+      // Balades sur invitation uniquement
+      balades = baladesService.getBaladesInvitation();
+    } else if (baladeType === 'payante') {
+      // Balades payantes (futures)
+      balades = baladesService.getBaladesPayantes();
+    } else if (baladeType === 'invitation') {
+      // Balades sur invitation (futures)
+      balades = baladesService.getBaladesInvitation();
     } else {
       // Par défaut : balades en ligne (comportement existant)
       balades = baladesService.getBaladesEnLigne();
