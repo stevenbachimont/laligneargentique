@@ -62,7 +62,7 @@ describe('Page Argentique', () => {
     expect(screen.getByText('La ligne Argentique')).toBeInTheDocument();
     
     // Vérifier que les sections sont présentes
-    expect(screen.getByText('Balades programmées')).toBeInTheDocument();
+    expect(screen.getByText('Prochaines balades')).toBeInTheDocument();
     expect(screen.getByText('Balades passées')).toBeInTheDocument();
   });
 
@@ -117,6 +117,6 @@ describe('Page Argentique', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Vérifier que la section des balades programmées est présente
-    expect(screen.getByText('Balades programmées')).toBeInTheDocument();
+    expect(screen.getByText('Prochaines balades')).toBeInTheDocument();
   });
 });

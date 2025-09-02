@@ -2,11 +2,12 @@ import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vites
 import { baladesService } from '../../src/lib/server/baladesService';
 import StripeService from '../../src/lib/server/stripeService';
 import { EmailService } from '../../src/lib/server/emailService';
+import { setupEmailMocks, resetEmailMocks, expectEmailsSent, expectEmailToClient, expectEmailToAdmin } from '../utils/emailMocks';
 
 // Mocks pour les tests d'intégration
 vi.mock('better-sqlite3');
 vi.mock('stripe');
-vi.mock('nodemailer');
+setupEmailMocks();
 
 describe('Intégration Stripe - Flux complet', () => {
   let stripeService: StripeService;
@@ -18,14 +19,13 @@ describe('Intégration Stripe - Flux complet', () => {
       env: {
         STRIPE_SECRET_KEY: 'sk_test_integration',
         STRIPE_WEBHOOK_SECRET: 'whsec_integration',
-        EMAIL_USER: 'test@example.com',
-        EMAIL_APP_PASSWORD: 'test_password'
+        ...require('../utils/emailMocks').mockEnv
       }
     }));
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    resetEmailMocks();
     stripeService = new StripeService();
     emailService = new EmailService();
   });
@@ -122,6 +122,11 @@ describe('Intégration Stripe - Flux complet', () => {
             balade
           );
           expect(emailSuccess).toBe(true);
+          
+          // Vérification des emails envoyés
+          expectEmailsSent(2);
+          expectEmailToClient('test@integration.com');
+          expectEmailToAdmin();
         }
       }
 
