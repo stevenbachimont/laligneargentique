@@ -137,6 +137,16 @@ export class EmailTemplateService {
       `;
     }
 
+    // Ajouter les informations de l'expéditeur
+    if (template.senderTitle && template.senderFormat) {
+      html += `
+        <div class="contact-info">
+          <h3>${template.senderTitle}</h3>
+          <p>${template.senderFormat.replace(/\n/g, '<br>')}</p>
+        </div>
+      `;
+    }
+
     // Ajouter les détails de la balade
     if (template.baladeTitle && template.baladeFormat) {
       html += `
@@ -247,6 +257,10 @@ export class EmailTemplateService {
 
     if (template.contactTitle && template.contactFormat) {
       text += `${template.contactTitle}\n${template.contactFormat}\n\n`;
+    }
+
+    if (template.senderTitle && template.senderFormat) {
+      text += `${template.senderTitle}\n${template.senderFormat}\n\n`;
     }
 
     if (template.baladeTitle && template.baladeFormat) {
