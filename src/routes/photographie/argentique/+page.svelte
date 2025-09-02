@@ -103,22 +103,22 @@
           <div class="feature-card">
             <div class="feature-icon">📷</div>
             <h3>Appareils fournis</h3>
-            <p>Appareils photo argentiques restaurés et pellicules incluses. Chaque participant dispose de son propre appareil pendant la balade.</p>
+            <p>Appareils photo argentiques restaurés par mes soints. Découvrez les différents modèles et leurs caractéristiques.</p>
+            <img src="/background/appareils.jpg" alt="collection d'appareils" class="feature-image">
           </div>
           <div class="feature-card">
             <div class="feature-icon">🎯</div>
             <h3>Techniques enseignées</h3>
             <p>Composition, exposition, développement au caffénol. Apprenez les bases et les subtilités de la photographie argentique.</p>
+          <img src="/background/dinette.jpg" alt="matériel de developpement" class="feature-image">
+
           </div>
           <div class="feature-card">
             <div class="feature-icon">🏛️</div>
             <h3>Lieux insolites</h3>
             <p>Découverte des quartiers historiques et contemporains de Nantes, des endroits méconnus et des perspectives uniques.</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">👥</div>
-            <h3>Groupe limité</h3>
-            <p>Maximum 5 participants par balade pour un accompagnement personnalisé et une expérience conviviale.</p>
+            <img src="/background/grues.jpg" alt="grue portuaires" class="feature-image">
+
           </div>
         </div>
       </div>
@@ -127,8 +127,8 @@
     <!-- Section Balades Programmées (Futures) -->
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.4s">
       <div class="container">
-        <h2>Balades programmées</h2>
-        <p class="section-subtitle">Découvrez les prochaines balades et réservez votre place</p>
+        <h2>Prochaines balades</h2>
+        <p class="section-subtitle">Découvrez les prochaines balades à Nantes et réservez votre place</p>
         
         {#if baladesFutures.length > 0}
           <div class="balades-annees">
@@ -187,7 +187,7 @@
     <section class="balades-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.6s">
       <div class="container">
         <h2>Balades passées</h2>
-        <p class="section-subtitle">Revivez nos balades précédentes à travers les photos et témoignages des participants</p>
+        <p class="section-subtitle">Ils ont participés et on s'est éclatés !</p>
         
         {#if baladesArchivees.length > 0}
           <div class="balades-annees balades-archivees">
@@ -220,9 +220,6 @@
                         >
                           📸 Voir la rétrospective
                         </button>
-                        <span class="retrospective-info">
-                          Photos et témoignages disponibles
-                        </span>
                       </div>
                     </div>
                   {/each}
@@ -353,10 +350,8 @@
   }
 
   .feature-card {
-    background: rgba(255,255,255,0.05);
     padding: 2rem;
     border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.1);
     text-align: center;
     transition: transform 0.3s ease, background 0.3s ease;
   }
@@ -380,6 +375,13 @@
   .feature-card p {
     color: rgba(255,255,255,0.8);
     line-height: 1.6;
+  }
+
+  .feature-image {
+    width: 80%; 
+    object-fit: cover; 
+    border-radius: 15px;
+    margin-bottom: 1rem;
   }
 
   .balades-section {
