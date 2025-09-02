@@ -237,7 +237,7 @@ export class EmailService {
           <div class="content">
             <p>Bonjour ${prenom} ${nom},</p>
             
-            <p>Nous avons bien reçu votre demande de réservation pour une balade photographique argentique.</p>
+            <p>Nous avons bien reçu votre réservation pour une balade photographique argentique.</p>
             
             <div class="highlight">
               <strong>Détails de votre demande :</strong><br>
@@ -246,11 +246,10 @@ export class EmailService {
               💬 Message : ${message || 'Aucun message'}
             </div>
             
-            <p>Je vais examiner votre demande et vous recontacter dans les plus brefs délais pour :</p>
+            <p>Voici ce que vous devez savoir pour passer le meilleur des mements ensemble :</p>
             <ul>
-              <li>Confirmer la disponibilité pour la date demandée</li>
-              <li>Vous donner tous les détails pratiques</li>
-              <li>Répondre à vos questions éventuelles</li>
+              <li>Rendez-vous au point de départ 10 minutes avant l'heure</li>
+              <li>Vêtements confortables et chaussures de marche</li>
             </ul>
             
             <p>En attendant, n'hésitez pas à me contacter si vous avez des questions urgentes.</p>
