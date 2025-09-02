@@ -119,7 +119,7 @@ export class EmailService {
   // Envoyer un email de confirmation de réservation Stripe
   async sendStripeReservationConfirmation(reservation: any, balade: any): Promise<boolean> {
     try {
-      const { nom, prenom, email, nombrePersonnes, montant, paymentIntentId } = reservation;
+      const { nom, prenom, email, nombrePersonnes, montant, paymentIntentId, message } = reservation;
       const montantFormatted = montant ? `${(montant / 100).toFixed(2)}€` : '0.00€';
       const formattedDate = new Date(balade.date).toLocaleDateString('fr-FR', {
         weekday: 'long',
@@ -136,7 +136,8 @@ export class EmailService {
 
       const adminVariables = {
         nom, prenom, email, nombrePersonnes, montant: montantFormatted, paymentIntentId,
-        theme: balade.theme, date: formattedDate, heure: balade.heure, lieu: balade.lieu
+        theme: balade.theme, date: formattedDate, heure: balade.heure, lieu: balade.lieu,
+        message: message || 'Aucun message'
       };
 
       // Récupérer les templates

@@ -63,6 +63,8 @@
       "baladeFormat": "Thème : {theme}\nDate : {date}\nHeure : {heure}\nLieu : {lieu}",
       "clientTitle": "Informations du client",
       "clientFormat": "Nom : {prenom} {nom}\nEmail : {email}\nNombre de personnes : {nombrePersonnes}",
+      "messageTitle": "Message du client",
+      "message": "{message}",
       "paymentTitle": "Détails du paiement",
       "paymentFormat": "Montant : {montant}\nID de paiement : {paymentIntentId}\nStatut : Confirmé",
       "actionRequired": "Action requise : Aucune action requise - la réservation est confirmée et le paiement reçu."
@@ -76,6 +78,7 @@
       "senderTitle": "Coordonnées de l'expéditeur",
       "senderFormat": "Nom : {prenom} {nom}\nEmail : {email}",
       "messageTitle": "Message",
+      "message": "{message}",
       "actionRequired": "Action requise : Répondre au client dans les plus brefs délais."
     },
     "client": {
@@ -85,6 +88,7 @@
       "greeting": "Bonjour {prenom} {nom}",
       "mainMessage": "Nous avons bien reçu votre message et vous en remercions.",
       "messageTitle": "Votre message :",
+      "message": "{message}",
       "closing": "Je vais examiner votre message et vous répondre dans les plus brefs délais.",
       "signature": "Cordialement,\nLa Ligne Argentique",
       "footer": "Cet email a été envoyé automatiquement. Merci de ne pas y répondre directement."
