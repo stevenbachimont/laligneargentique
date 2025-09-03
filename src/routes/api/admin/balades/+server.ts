@@ -24,6 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
       placesDisponibles: baladeData.placesDisponibles || 5,
       description: baladeData.description,
       statut: baladeData.statut || 'en_ligne',
+      type: baladeData.type || 'payante',
       consignes: [
         'Appareil photo argentique requis',
         'Pellicule 400 ISO recommandée',
