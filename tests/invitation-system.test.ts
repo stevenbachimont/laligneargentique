@@ -51,8 +51,8 @@ describe('Système d\'invitation - Tests d\'intégration', () => {
       expect(existingReservation.hasReservation).toBe(false);
 
       // 4. Marquer l'invitation comme utilisée (simulation de réservation)
-      const markUsed = invitationService.markInvitationAsUsed(invitation.id);
-      expect(markUsed).toBe(true);
+      const markUsed = invitationService.markAsUsed(invitation.code);
+      expect(markUsed.success).toBe(true);
 
       // 5. Vérifier que l'invitation est maintenant utilisée
       const updatedInvitation = invitationService.getInvitationById(invitation.id);
@@ -80,7 +80,7 @@ describe('Système d\'invitation - Tests d\'intégration', () => {
       const invitation = createResult.invitations![0];
 
       // Marquer comme utilisée
-      invitationService.markInvitationAsUsed(invitation.id);
+      invitationService.markAsUsed(invitation.code);
 
       // Vérifier qu'une nouvelle réservation est détectée
       const existingReservation = invitationService.hasExistingReservation(
