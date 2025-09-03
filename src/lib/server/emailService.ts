@@ -194,7 +194,7 @@ export class EmailService {
       });
 
       // Construire l'URL de réservation avec le code pré-rempli
-      const baseUrl = env.PUBLIC_BASE_URL || 'http://localhost:3000';
+      const baseUrl = env.PUBLIC_BASE_URL || 'https://stevenbachimont.com';
       const reservationUrl = `${baseUrl}/photographie/argentique/reservation/invitation?baladeId=${balade.id}&code=${invitation.code}`;
 
       // Variables pour le template
