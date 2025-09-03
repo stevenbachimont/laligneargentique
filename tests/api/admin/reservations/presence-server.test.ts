@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from './+server';
+import { POST } from '../../../../src/routes/api/admin/reservations/presence/+server';
 import { baladesService } from '$lib/server/baladesService';
 
 // Mock du service balades
