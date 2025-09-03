@@ -19,6 +19,7 @@ export interface Balade {
     distance: string;
   }>;
   statut: 'brouillon' | 'en_ligne';
+  type: 'payante' | 'invitation';
 }
 
 export interface Reservation {
@@ -57,7 +58,8 @@ class BaladesService {
       materiel: row.materiel ? JSON.parse(row.materiel) : [],
       coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
       parcours: row.parcours ? JSON.parse(row.parcours) : [],
-      statut: row.statut || 'en_ligne'
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
     }));
   }
 
@@ -79,7 +81,8 @@ class BaladesService {
       materiel: row.materiel ? JSON.parse(row.materiel) : [],
       coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
       parcours: row.parcours ? JSON.parse(row.parcours) : [],
-      statut: row.statut || 'en_ligne'
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
     }));
   }
 
@@ -102,7 +105,8 @@ class BaladesService {
       materiel: row.materiel ? JSON.parse(row.materiel) : [],
       coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
       parcours: row.parcours ? JSON.parse(row.parcours) : [],
-      statut: row.statut || 'en_ligne'
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
     }));
   }
 
@@ -125,7 +129,56 @@ class BaladesService {
       materiel: row.materiel ? JSON.parse(row.materiel) : [],
       coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
       parcours: row.parcours ? JSON.parse(row.parcours) : [],
-      statut: row.statut || 'en_ligne'
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
+    }));
+  }
+
+  // Récupérer les balades payantes (pour l'affichage public)
+  getBaladesPayantes(): Balade[] {
+    const today = new Date().toISOString().split('T')[0];
+    const stmt = db.prepare('SELECT * FROM balades WHERE date >= ? AND statut = ? AND type = ? ORDER BY date, heure');
+    const rows = stmt.all(today, 'en_ligne', 'payante') as any[];
+    
+    return rows.map(row => ({
+      id: row.id,
+      date: row.date,
+      heure: row.heure,
+      lieu: row.lieu,
+      theme: row.theme,
+      placesDisponibles: row.places_disponibles,
+      prix: row.prix,
+      description: row.description,
+      consignes: row.consignes ? JSON.parse(row.consignes) : [],
+      materiel: row.materiel ? JSON.parse(row.materiel) : [],
+      coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
+      parcours: row.parcours ? JSON.parse(row.parcours) : [],
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
+    }));
+  }
+
+  // Récupérer les balades sur invitation (pour l'affichage public)
+  getBaladesInvitation(): Balade[] {
+    const today = new Date().toISOString().split('T')[0];
+    const stmt = db.prepare('SELECT * FROM balades WHERE date >= ? AND statut = ? AND type = ? ORDER BY date, heure');
+    const rows = stmt.all(today, 'en_ligne', 'invitation') as any[];
+    
+    return rows.map(row => ({
+      id: row.id,
+      date: row.date,
+      heure: row.heure,
+      lieu: row.lieu,
+      theme: row.theme,
+      placesDisponibles: row.places_disponibles,
+      prix: row.prix,
+      description: row.description,
+      consignes: row.consignes ? JSON.parse(row.consignes) : [],
+      materiel: row.materiel ? JSON.parse(row.materiel) : [],
+      coordonnees: row.coordonnees ? JSON.parse(row.coordonnees) : [],
+      parcours: row.parcours ? JSON.parse(row.parcours) : [],
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
     }));
   }
 
@@ -149,7 +202,8 @@ class BaladesService {
       materiel: JSON.parse(row.materiel),
       coordonnees: JSON.parse(row.coordonnees),
       parcours: JSON.parse(row.parcours),
-      statut: row.statut || 'en_ligne'
+      statut: row.statut || 'en_ligne',
+      type: row.type || 'payante'
     };
   }
 
@@ -273,6 +327,7 @@ class BaladesService {
     placesDisponibles: number;
     description: string;
     statut?: 'brouillon' | 'en_ligne';
+    type?: 'payante' | 'invitation';
     consignes: string[];
     materiel: string[];
     coordonnees: Array<{lat: number, lng: number, name: string}>;
@@ -286,9 +341,9 @@ class BaladesService {
     try {
       const stmt = db.prepare(`
         INSERT INTO balades (
-          theme, date, heure, lieu, prix, places_disponibles, description, statut,
+          theme, date, heure, lieu, prix, places_disponibles, description, statut, type,
           consignes, materiel, coordonnees, parcours
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
       const result = stmt.run(
@@ -300,6 +355,7 @@ class BaladesService {
         baladeData.placesDisponibles,
         baladeData.description,
         baladeData.statut || 'en_ligne',
+        baladeData.type || 'payante',
         JSON.stringify(baladeData.consignes),
         JSON.stringify(baladeData.materiel),
         JSON.stringify(baladeData.coordonnees),
@@ -327,6 +383,7 @@ class BaladesService {
     placesDisponibles: number;
     description: string;
     statut?: 'brouillon' | 'en_ligne';
+    type?: 'payante' | 'invitation';
     parcours?: Array<{
       titre: string;
       description: string;
@@ -345,7 +402,7 @@ class BaladesService {
 
       const stmt = db.prepare(`
         UPDATE balades 
-        SET theme = ?, date = ?, heure = ?, lieu = ?, prix = ?, places_disponibles = ?, description = ?, statut = ?,
+        SET theme = ?, date = ?, heure = ?, lieu = ?, prix = ?, places_disponibles = ?, description = ?, statut = ?, type = ?,
             parcours = ?, coordonnees = ?
         WHERE id = ?
       `);
@@ -359,6 +416,7 @@ class BaladesService {
         baladeData.placesDisponibles,
         baladeData.description,
         baladeData.statut || existingBalade.statut,
+        baladeData.type || existingBalade.type,
         JSON.stringify(baladeData.parcours || existingBalade.parcours),
         JSON.stringify(baladeData.coordonnees || existingBalade.coordonnees),
         baladeId

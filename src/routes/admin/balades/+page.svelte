@@ -41,7 +41,8 @@
     prix: '',
     placesDisponibles: 5,
     description: '',
-    statut: 'brouillon' // 'brouillon' ou 'en_ligne'
+    statut: 'brouillon', // 'brouillon' ou 'en_ligne'
+    type: 'payante' // 'payante' ou 'invitation'
   };
 
   // Gestion du parcours
@@ -145,7 +146,8 @@
       prix: balade.prix,
       placesDisponibles: balade.placesDisponibles,
       description: balade.description,
-      statut: balade.statut
+      statut: balade.statut,
+      type: balade.type || 'payante'
     };
   }
 
@@ -163,7 +165,8 @@
       prix: balade.prix,
       placesDisponibles: balade.placesDisponibles,
       description: balade.description,
-      statut: 'brouillon' // Toujours en brouillon par défaut
+      statut: 'brouillon', // Toujours en brouillon par défaut
+      type: balade.type || 'payante'
     };
 
     // Copier aussi le parcours et les coordonnées pour les réutiliser
@@ -250,7 +253,8 @@
       prix: '',
       placesDisponibles: 5,
       description: '',
-      statut: 'brouillon'
+      statut: 'brouillon',
+      type: 'payante'
     };
   }
 
@@ -599,6 +603,10 @@
   function retourAdmin() {
     window.location.href = '/admin';
   }
+
+  function allerInvitations() {
+    window.location.href = '/admin/invitations';
+  }
 </script>
 
 <div class="admin-balades-page">
@@ -607,6 +615,9 @@
       ← Retour à l'administration
     </button>
     <h1>📋 Gestion des Balades</h1>
+    <button class="btn-invitations" on:click={allerInvitations}>
+      🎁 Invitations
+    </button>
   </div>
 
   <div class="admin-content {isVisible ? 'fade-in' : ''}">
@@ -714,6 +725,18 @@
             </div>
 
             <div class="form-group">
+              <label for="type">Type de balade</label>
+              <select 
+                id="type"
+                bind:value={baladeForm.type}
+                required
+              >
+                <option value="payante">💰 Balade payante (réservation avec paiement)</option>
+                <option value="invitation">🎁 Balade sur invitation (gratuite avec code)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
               <label for="statut">Statut de la balade</label>
               <select 
                 id="statut"
@@ -776,6 +799,9 @@
                             <p class="balade-lieu">📍 {balade.lieu}</p>
                             <p class="balade-heure">🕐 {balade.heure}</p>
                             <p class="balade-prix">💰 {balade.prix}</p>
+                            <p class="balade-type {balade.type === 'invitation' ? 'type-invitation' : 'type-payante'}">
+                              {balade.type === 'invitation' ? '🎁 Sur invitation' : '💰 Payante'}
+                            </p>
                           </div>
                           <div class="balade-status">
                             <span class="places {balade.placesDisponibles === 0 ? 'complete' : balade.placesDisponibles === 1 ? 'limite' : balade.placesDisponibles <= 3 ? 'orange' : 'disponible'}">
@@ -835,6 +861,9 @@
                             <p class="balade-lieu">📍 {balade.lieu}</p>
                             <p class="balade-heure">🕐 {balade.heure}</p>
                             <p class="balade-prix">💰 {balade.prix}</p>
+                            <p class="balade-type {balade.type === 'invitation' ? 'type-invitation' : 'type-payante'}">
+                              {balade.type === 'invitation' ? '🎁 Sur invitation' : '💰 Payante'}
+                            </p>
                           </div>
                           <div class="balade-status">
                             <span class="places complete">
@@ -1056,6 +1085,25 @@
   .btn-retour:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  }
+
+  .btn-invitations {
+    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .btn-invitations:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
   }
 
   .admin-header h1 {
@@ -1397,7 +1445,7 @@
     overflow-wrap: break-word;
   }
 
-  .balade-lieu, .balade-heure, .balade-prix {
+  .balade-lieu, .balade-heure, .balade-prix, .balade-type {
     font-size: 0.85rem;
     color: rgba(255,255,255,0.7);
     margin-bottom: 0.2rem;
@@ -1406,6 +1454,26 @@
     line-height: 1.2;
     max-width: 100%;
     overflow-wrap: break-word;
+  }
+
+  .balade-type {
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 0.3rem;
+  }
+
+  .type-payante {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+
+  .type-invitation {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9C27B0;
+    border: 1px solid rgba(156, 39, 176, 0.3);
   }
 
   .balade-status {

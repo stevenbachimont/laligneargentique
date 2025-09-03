@@ -118,6 +118,35 @@
       "footer": "Cet email a été envoyé automatiquement. Merci de ne pas y répondre directement."
     }
   },
+  "invitation": {
+    "client": {
+      "subject": "🎁 Invitation spéciale - Balade gratuite La Ligne Argentique",
+      "title": "🎁 Invitation spéciale",
+      "subtitle": "La Ligne Argentique",
+      "greeting": "Bonjour",
+      "mainMessage": "Vous êtes invité(e) à participer gratuitement à une balade photographique argentique !",
+      "invitationTitle": "🎫 Votre invitation",
+      "invitationDetails": "Balade : {theme}\nDate : {date}\nHeure : {heure}\nLieu : {lieu}\nNombre de personnes : {nombrePersonnes}",
+      "codeTitle": "🔑 Votre code d'invitation",
+      "code": "{code}",
+      "codeHighlight": "Votre code d'invitation : {code}",
+      "reservationLink": "Réserver directement avec votre code",
+      "reservationUrl": "{reservationUrl}",
+      "instructionsTitle": "📋 Comment réserver",
+      "instructionsList": [
+        "Cliquez sur le lien de réservation ci-dessous",
+        "Votre code d'invitation sera automatiquement rempli",
+        "Complétez vos informations personnelles",
+        "Confirmez votre réservation gratuite"
+      ],
+      "alternativeInstructions": "Ou rendez-vous sur notre site, sélectionnez la balade \"{theme}\" et cliquez sur \"Réserver avec code d'invitation\"",
+      "messageTitle": "Message personnel",
+      "message": "{message}",
+      "closing": "Nous espérons vous voir bientôt pour cette expérience photographique unique !",
+      "signature": "Cordialement,\nLa Ligne Argentique",
+      "footer": "Cette invitation est personnelle et non transférable. Code valable uniquement pour la balade mentionnée."
+    }
+  },
   "styles": {
     "body": "font-family: Arial, sans-serif; line-height: 1.6; color: #333;",
     "container": "max-width: 600px; margin: 0 auto; padding: 20px;",

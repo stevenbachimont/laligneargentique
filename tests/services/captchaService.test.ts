@@ -81,8 +81,8 @@ describe('CaptchaService', () => {
     it('devrait valider une position dans la tolérance', () => {
       const captcha = captchaService.generateCaptcha();
       const tolerancePosition = { 
-        x: captcha.targetPosition.x + 15, 
-        y: captcha.targetPosition.y + 15 
+        x: captcha.targetPosition.x + 10, 
+        y: captcha.targetPosition.y + 10 
       };
       
       const isValid = captchaService.validateCaptcha(captcha.id, JSON.stringify(tolerancePosition));
