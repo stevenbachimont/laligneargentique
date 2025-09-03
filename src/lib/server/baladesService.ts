@@ -289,8 +289,23 @@ class BaladesService {
       email: row.email,
       nombrePersonnes: row.nombre_personnes,
       message: row.message,
+      statut: row.statut || 'en_attente', // Ajouter le statut
+      present: row.present === 1, // Convertir en boolean
       createdAt: row.created_at
     }));
+  }
+
+  // Mettre à jour la présence d'une réservation
+  updatePresence(reservationId: number, present: boolean): boolean {
+    try {
+      const stmt = db.prepare('UPDATE reservations SET present = ? WHERE id = ?');
+      const result = stmt.run(present ? 1 : 0, reservationId);
+      
+      return result.changes > 0;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la présence:', error);
+      return false;
+    }
   }
 
   // Obtenir le statut d'une balade

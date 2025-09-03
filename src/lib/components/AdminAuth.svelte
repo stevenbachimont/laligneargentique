@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
 
-  let accessCode = '';
   let isAuthenticated = false;
-  let isLoading = false;
+  let isLoading = true;
+  let accessCode = '';
   let errorMessage = '';
   let isVisible = false;
 
@@ -17,6 +17,7 @@
     if (auth === 'true') {
       isAuthenticated = true;
     }
+    isLoading = false;
     setTimeout(() => { isVisible = true; }, 100);
   });
 
@@ -49,6 +50,7 @@
     sessionStorage.removeItem('admin_authenticated');
     accessCode = '';
     errorMessage = '';
+    goto('/admin');
   }
 
   function handleKeyPress(event: KeyboardEvent) {
@@ -58,18 +60,23 @@
   }
 </script>
 
-<div class="admin-page">
-  <div class="admin-container {isVisible ? 'fade-in' : ''}">
-    {#if !isAuthenticated}
-      <!-- Page de connexion -->
+{#if isLoading}
+  <div class="admin-auth-loading">
+    <div class="spinner"></div>
+    <p>Vérification de l'authentification...</p>
+  </div>
+{:else if !isAuthenticated}
+  <!-- Page de connexion -->
+  <div class="admin-auth-page">
+    <div class="admin-auth-container {isVisible ? 'fade-in' : ''}">
       <div class="login-section">
         <div class="admin-icon">
           <div class="lock-icon">🔒</div>
         </div>
 
         <div class="login-header">
-          <h1>Administration</h1>
-          <p class="subtitle">Accès sécurisé à la gestion des balades</p>
+          <h1>Accès Administrateur</h1>
+          <p class="subtitle">Code d'accès requis</p>
         </div>
 
         <form on:submit|preventDefault={handleLogin} class="login-form">
@@ -93,59 +100,49 @@
           {/if}
 
           <button type="submit" class="btn-login" disabled={isLoading}>
-            {isLoading ? 'Vérification...' : 'Accéder à l\'administration'}
+            {isLoading ? 'Vérification...' : 'Accéder'}
           </button>
         </form>
 
         <div class="security-note">
           <p>🔐 Accès réservé aux administrateurs</p>
-          <p>Contactez l'administrateur pour obtenir le code d'accès</p>
         </div>
       </div>
-    {:else}
-      <!-- Interface d'administration -->
-      <div class="admin-interface">
-        <div class="admin-header">
-          <h1>🎞️ Administration des Balades</h1>
-          <button class="btn-logout" on:click={handleLogout}>
-            🚪 Déconnexion
-          </button>
-        </div>
-
-        <div class="admin-content">
-          <div class="admin-grid">
-            <div class="admin-card" on:click={() => window.location.href = '/admin/balades'}>
-              <div class="card-icon">📋</div>
-              <h3>Balades</h3>
-              <p>Gérer les balades</p>
-            </div>
-
-            <div class="admin-card" on:click={() => window.location.href = '/admin/invitations'}>
-              <div class="card-icon">🎁</div>
-              <h3>Invitations</h3>
-              <p>Codes d'accès gratuits</p>
-            </div>
-
-            <div class="admin-card" on:click={() => window.location.href = '/admin/reservations'}>
-              <div class="card-icon">📅</div>
-              <h3>Réservations</h3>
-              <p>Suivre les inscriptions</p>
-            </div>
-
-            <div class="admin-card" on:click={() => window.open('/photographie/argentique', '_blank')}>
-              <div class="card-icon">👁️</div>
-              <h3>Site public</h3>
-              <p>Voir le site</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    {/if}
+    </div>
   </div>
-</div>
+{:else}
+  <!-- Contenu protégé -->
+  <slot />
+{/if}
 
 <style>
-  .admin-page {
+  .admin-auth-loading {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #000000, #1a1a1a);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .admin-auth-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #000000, #1a1a1a);
     color: #fff;
@@ -155,8 +152,8 @@
     padding: 2rem;
   }
 
-  .admin-container {
-    max-width: 600px;
+  .admin-auth-container {
+    max-width: 500px;
     width: 100%;
     background: rgba(255,255,255,0.05);
     border-radius: 20px;
@@ -191,7 +188,7 @@
   }
 
   .login-header h1 {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     color: #ffd700;
     margin-bottom: 1rem;
     background: linear-gradient(45deg, #ffd700, #ffed4e);
@@ -292,82 +289,6 @@
     font-size: 0.9rem;
   }
 
-  /* Interface d'administration */
-  .admin-interface {
-    padding: 2rem;
-  }
-
-  .admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .admin-header h1 {
-    font-size: 2rem;
-    color: #ffd700;
-    margin: 0;
-  }
-
-  .btn-logout {
-    background: rgba(255,0,0,0.2);
-    color: #ff6b6b;
-    border: 1px solid rgba(255,0,0,0.3);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .btn-logout:hover {
-    background: rgba(255,0,0,0.3);
-    transform: translateY(-1px);
-  }
-
-  .admin-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .admin-card {
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-  }
-
-  .admin-card:hover {
-    transform: translateY(-3px);
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255, 215, 0, 0.3);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  }
-
-  .card-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
-    display: block;
-  }
-
-  .admin-card h3 {
-    color: #ffd700;
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-  }
-
-  .admin-card p {
-    color: rgba(255,255,255,0.8);
-    font-size: 0.85rem;
-    margin: 0;
-  }
-
   /* Animations */
   .fade-in {
     opacity: 1;
@@ -388,11 +309,11 @@
 
   /* Responsive */
   @media (max-width: 768px) {
-    .admin-page {
+    .admin-auth-page {
       padding: 1rem;
     }
 
-    .admin-container {
+    .admin-auth-container {
       max-width: 100%;
     }
 
@@ -401,65 +322,17 @@
     }
 
     .login-header h1 {
-      font-size: 2rem;
-    }
-
-    .admin-header {
-      flex-direction: column;
-      gap: 1rem;
-      text-align: center;
-    }
-
-    .admin-header h1 {
-      font-size: 1.5rem;
-    }
-
-    .admin-interface {
-      padding: 1rem;
-    }
-
-    .admin-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-
-    .admin-card {
-      padding: 1rem;
-    }
-
-    .card-icon {
-      font-size: 2rem;
+      font-size: 1.8rem;
     }
   }
 
   @media (max-width: 480px) {
-    .admin-page {
+    .admin-auth-page {
       padding: 0.5rem;
     }
 
     .login-section {
       padding: 1.5rem 1rem;
-    }
-
-    .admin-interface {
-      padding: 0.5rem;
-    }
-
-    .admin-grid {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-    }
-
-    .admin-card {
-      padding: 1rem;
-    }
-
-    .admin-card h3 {
-      font-size: 1rem;
-    }
-
-    .admin-card p {
-      font-size: 0.8rem;
     }
   }
 </style>

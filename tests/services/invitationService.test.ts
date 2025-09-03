@@ -122,7 +122,7 @@ describe('InvitationService', () => {
       const invitation = invitations[0];
 
       // Marquer l'invitation comme utilisée
-      invitationService.markInvitationAsUsed(invitation.id);
+      invitationService.markAsUsed(invitation.code);
 
       const result = invitationService.isValidCodeWithEmail(
         invitation.code,
@@ -150,7 +150,7 @@ describe('InvitationService', () => {
       const invitation = invitations[0];
 
       // Marquer l'invitation comme utilisée
-      invitationService.markInvitationAsUsed(invitation.id);
+      invitationService.markAsUsed(invitation.code);
 
       const result = invitationService.hasExistingReservation(
         'test@example.com',

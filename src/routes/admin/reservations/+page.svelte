@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import AdminAuth from '$lib/components/AdminAuth.svelte';
 
   interface Reservation {
     id: number;
@@ -7,12 +8,16 @@
     prenom: string;
     nom: string;
     email: string;
+    telephone?: string;
+    adresse?: string;
     nombrePersonnes: number;
     message?: string;
     statut: string;
     createdAt: string;
     code?: string;
+    present?: boolean; // Nouveau champ pour la présence
     balade?: {
+      id: number;
       theme: string;
       date: string;
       heure: string;
@@ -21,23 +26,35 @@
     };
   }
 
-  interface Stats {
-    total: number;
-    payantes: number;
-    invitations: number;
-    confirmees: number;
-    enAttente: number;
+  interface BaladeWithReservations {
+    id: number;
+    theme: string;
+    date: string;
+    heure: string;
+    lieu: string;
+    prix: string;
+    type: 'payante' | 'invitation';
+    reservations: Reservation[];
   }
 
   let reservations: Reservation[] = [];
-  let stats: Stats = { total: 0, payantes: 0, invitations: 0, confirmees: 0, enAttente: 0 };
   let loading = true;
   let error = '';
-  let filterType = 'all'; // 'all', 'payante', 'invitation'
-  let filterStatut = 'all'; // 'all', 'confirmee', 'en_attente'
+  let isVisible = false;
+  
+  // États pour la réduction des sections
+  let sectionsCollapsed = {
+    enLignePayantes: false,
+    enLigneInvitations: false,
+    passees: false
+  };
+
+  // États pour les balades déroulées
+  let expandedBalades = new Set<number>();
 
   onMount(async () => {
     await loadReservations();
+    setTimeout(() => { isVisible = true; }, 100);
   });
 
   async function loadReservations() {
@@ -46,9 +63,12 @@
       const response = await fetch('/api/admin/reservations');
       const data = await response.json();
       
+      console.log('🔍 Réponse API réservations:', data);
+      
       if (data.success) {
         reservations = data.reservations;
-        stats = data.stats;
+        console.log('🔍 Réservations chargées:', reservations.length);
+        console.log('🔍 Détail des réservations:', reservations);
       } else {
         error = data.error || 'Erreur lors du chargement des réservations';
       }
@@ -60,29 +80,138 @@
     }
   }
 
-  function getFilteredReservations() {
-    return reservations.filter(reservation => {
-      const typeMatch = filterType === 'all' || reservation.type === filterType;
-      const statutMatch = filterStatut === 'all' || 
-        (filterStatut === 'confirmee' && (reservation.statut === 'confirmee' || reservation.statut === 'utilisee')) ||
-        (filterStatut === 'en_attente' && (reservation.statut === 'en_attente' || reservation.statut === 'envoyee'));
-      
-      return typeMatch && statutMatch;
+  function getBaladesEnLignePayantes(): BaladeWithReservations[] {
+    console.log('🔍 getBaladesEnLignePayantes - Réservations totales:', reservations.length);
+    
+    const baladesMap = new Map<number, BaladeWithReservations>();
+    
+    const reservationsFiltrees = reservations.filter(reservation => 
+      reservation.type === 'payante' && 
+      (reservation.statut === 'confirmee' || reservation.statut === 'en_attente') &&
+      reservation.balade && new Date(reservation.balade.date) >= new Date()
+    );
+    
+    console.log('🔍 Réservations payantes filtrées:', reservationsFiltrees.length);
+    
+    reservationsFiltrees.forEach(reservation => {
+      if (reservation.balade) {
+        const baladeId = reservation.balade.id;
+        if (!baladesMap.has(baladeId)) {
+          baladesMap.set(baladeId, {
+            id: baladeId,
+            theme: reservation.balade.theme,
+            date: reservation.balade.date,
+            heure: reservation.balade.heure,
+            lieu: reservation.balade.lieu,
+            prix: reservation.balade.prix,
+            type: 'payante',
+            reservations: []
+          });
+        }
+        baladesMap.get(baladeId)!.reservations.push(reservation);
+      }
     });
+    
+    const result = Array.from(baladesMap.values())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    console.log('🔍 Balades payantes trouvées:', result.length);
+    return result;
   }
+
+  function getBaladesEnLigneInvitations(): BaladeWithReservations[] {
+    console.log('🔍 getBaladesEnLigneInvitations - Réservations totales:', reservations.length);
+    
+    const baladesMap = new Map<number, BaladeWithReservations>();
+    
+    const reservationsFiltrees = reservations.filter(reservation => 
+      reservation.type === 'invitation' && 
+      (reservation.statut === 'confirmee' || reservation.statut === 'utilisee' || reservation.statut === 'envoyee' || reservation.statut === 'en_attente') &&
+      reservation.balade && new Date(reservation.balade.date) >= new Date()
+    );
+    
+    console.log('🔍 Réservations d\'invitation filtrées:', reservationsFiltrees.length);
+    
+    reservationsFiltrees.forEach(reservation => {
+      if (reservation.balade) {
+        const baladeId = reservation.balade.id;
+        if (!baladesMap.has(baladeId)) {
+          baladesMap.set(baladeId, {
+            id: baladeId,
+            theme: reservation.balade.theme,
+            date: reservation.balade.date,
+            heure: reservation.balade.heure,
+            lieu: reservation.balade.lieu,
+            prix: reservation.balade.prix,
+            type: 'invitation',
+            reservations: []
+          });
+        }
+        baladesMap.get(baladeId)!.reservations.push(reservation);
+      }
+    });
+    
+    const result = Array.from(baladesMap.values())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    console.log('🔍 Balades d\'invitation trouvées:', result.length);
+    return result;
+  }
+
+  function getBaladesPassees(): BaladeWithReservations[] {
+    console.log('🔍 getBaladesPassees - Réservations totales:', reservations.length);
+    
+    const baladesMap = new Map<number, BaladeWithReservations>();
+    
+    // Traiter toutes les réservations passées (y compris les balades sans réservations)
+    const reservationsPassees = reservations.filter(reservation => 
+      reservation.balade && new Date(reservation.balade.date) < new Date()
+    );
+    
+    console.log('🔍 Réservations passées trouvées:', reservationsPassees.length);
+    
+    reservationsPassees.forEach(reservation => {
+      if (reservation.balade) {
+        const baladeId = reservation.balade.id;
+        if (!baladesMap.has(baladeId)) {
+          baladesMap.set(baladeId, {
+            id: baladeId,
+            theme: reservation.balade.theme,
+            date: reservation.balade.date,
+            heure: reservation.balade.heure,
+            lieu: reservation.balade.lieu,
+            prix: reservation.balade.prix,
+            type: reservation.type,
+            reservations: []
+          });
+        }
+        
+        // Ajouter la réservation seulement si elle a des données réelles (pas une balade sans réservation)
+        if (reservation.statut !== 'pas_de_reservation') {
+          baladesMap.get(baladeId)!.reservations.push(reservation);
+        }
+      }
+    });
+    
+    const result = Array.from(baladesMap.values())
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    console.log('🔍 Balades passées trouvées (avec et sans réservations):', result.length);
+    return result;
+  }
+
+
 
   function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     });
   }
 
   function getStatutBadge(statut: string, type: string) {
-    const badges = {
+    const badges: { [key: string]: { class: string; text: string } } = {
       'confirmee': { class: 'badge-success', text: 'Confirmée' },
       'utilisee': { class: 'badge-success', text: 'Utilisée' },
       'en_attente': { class: 'badge-warning', text: 'En attente' },
@@ -98,161 +227,473 @@
       ? { class: 'badge-payante', text: '💰 Payante' }
       : { class: 'badge-invitation', text: '🎁 Invitation' };
   }
+
+  function toggleSection(section: keyof typeof sectionsCollapsed) {
+    sectionsCollapsed[section] = !sectionsCollapsed[section];
+  }
+
+  function toggleBalade(baladeId: number) {
+    if (expandedBalades.has(baladeId)) {
+      expandedBalades.delete(baladeId);
+    } else {
+      expandedBalades.add(baladeId);
+    }
+    expandedBalades = expandedBalades; // Trigger reactivity
+  }
+
+  function getTotalParticipants(balade: BaladeWithReservations): number {
+    return balade.reservations.reduce((total, reservation) => total + reservation.nombrePersonnes, 0);
+  }
+
+  function getParticipantsPresents(balade: BaladeWithReservations): number {
+    return balade.reservations.reduce((total, reservation) => {
+      return total + (reservation.present ? reservation.nombrePersonnes : 0);
+    }, 0);
+  }
+
+  async function togglePresence(reservationId: number, present: boolean) {
+    try {
+      const response = await fetch('/api/admin/reservations/presence', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          reservationId,
+          present
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Mettre à jour l'état local
+        reservations = reservations.map(reservation => 
+          reservation.id === reservationId 
+            ? { ...reservation, present }
+            : reservation
+        );
+        // Forcer la réactivité de Svelte
+        reservations = [...reservations];
+        console.log(`✅ Présence mise à jour pour la réservation ${reservationId}: ${present ? 'présent' : 'absent'}`);
+      } else {
+        console.error('❌ Erreur lors de la mise à jour de la présence:', data.error);
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour de la présence:', error);
+    }
+  }
 </script>
 
-<div class="admin-reservations">
-  <div class="header">
-    <h1>📋 Suivi des réservations</h1>
-    <p>Gérez et suivez toutes les réservations (payantes et invitations)</p>
-  </div>
-
-  {#if loading}
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Chargement des réservations...</p>
-    </div>
-  {:else if error}
-    <div class="error">
-      <p>❌ {error}</p>
-      <button on:click={loadReservations} class="btn-retry">Réessayer</button>
-    </div>
-  {:else}
-    <!-- Statistiques -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number">{stats.total}</div>
-        <div class="stat-label">Total</div>
-      </div>
-      <div class="stat-card stat-payante">
-        <div class="stat-number">{stats.payantes}</div>
-        <div class="stat-label">💰 Payantes</div>
-      </div>
-      <div class="stat-card stat-invitation">
-        <div class="stat-number">{stats.invitations}</div>
-        <div class="stat-label">🎁 Invitations</div>
-      </div>
-      <div class="stat-card stat-confirmee">
-        <div class="stat-number">{stats.confirmees}</div>
-        <div class="stat-label">✅ Confirmées</div>
-      </div>
-      <div class="stat-card stat-attente">
-        <div class="stat-number">{stats.enAttente}</div>
-        <div class="stat-label">⏳ En attente</div>
-      </div>
+<AdminAuth>
+  <div class="admin-reservations-page">
+    <div class="admin-header">
+      <button class="btn-retour" on:click={() => window.location.href = '/admin'}>
+        ← Retour à l'administration
+      </button>
+      <h1>📅 Réservations</h1>
     </div>
 
-    <!-- Filtres -->
-    <div class="filters">
-      <div class="filter-group">
-        <label for="type-filter">Type :</label>
-        <select id="type-filter" bind:value={filterType}>
-          <option value="all">Tous</option>
-          <option value="payante">💰 Payantes</option>
-          <option value="invitation">🎁 Invitations</option>
-        </select>
-      </div>
-      
-      <div class="filter-group">
-        <label for="statut-filter">Statut :</label>
-        <select id="statut-filter" bind:value={filterStatut}>
-          <option value="all">Tous</option>
-          <option value="confirmee">✅ Confirmées</option>
-          <option value="en_attente">⏳ En attente</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Liste des réservations -->
-    <div class="reservations-list">
-      {#each getFilteredReservations() as reservation}
-        <div class="reservation-card">
-          <div class="reservation-header">
-            <div class="reservation-info">
-              <h3>{reservation.prenom} {reservation.nom}</h3>
-              <p class="email">{reservation.email}</p>
-              <div class="badges">
-                <span class="badge {getTypeBadge(reservation.type).class}">
-                  {getTypeBadge(reservation.type).text}
-                </span>
-                <span class="badge {getStatutBadge(reservation.statut, reservation.type).class}">
-                  {getStatutBadge(reservation.statut, reservation.type).text}
-                </span>
-              </div>
-            </div>
-            <div class="reservation-meta">
-              <p class="date">📅 {formatDate(reservation.createdAt)}</p>
-              {#if reservation.code}
-                <p class="code">🔑 Code: {reservation.code}</p>
-              {/if}
-            </div>
-          </div>
-
-          <div class="reservation-details">
-            <div class="detail-section">
-              <h4>👥 Participants</h4>
-              <p>{reservation.nombrePersonnes} personne{reservation.nombrePersonnes > 1 ? 's' : ''}</p>
-            </div>
-
-            {#if reservation.balade}
-              <div class="detail-section">
-                <h4>🎯 Balade</h4>
-                <p><strong>{reservation.balade.theme}</strong></p>
-                <p>📅 {new Date(reservation.balade.date).toLocaleDateString('fr-FR')} à {reservation.balade.heure}</p>
-                <p>📍 {reservation.balade.lieu}</p>
-                <p>💰 {reservation.balade.prix}</p>
-              </div>
-            {/if}
-
-            {#if reservation.message}
-              <div class="detail-section">
-                <h4>💬 Message</h4>
-                <p class="message">{reservation.message}</p>
-              </div>
-            {/if}
-          </div>
-
-          <div class="reservation-actions">
-            <button class="btn-contact" on:click={() => window.open(`mailto:${reservation.email}`)}>
-              📧 Contacter
-            </button>
-            {#if reservation.type === 'invitation' && reservation.statut === 'envoyee'}
-              <button class="btn-remind" on:click={() => {/* TODO: Renvoyer invitation */}}>
-                🔄 Renvoyer
-              </button>
-            {/if}
-          </div>
+    <div class="admin-content {isVisible ? 'fade-in' : ''}">
+      {#if loading}
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Chargement des réservations...</p>
         </div>
-      {/each}
+      {:else if error}
+        <div class="error-message">
+          {error}
+        </div>
+      {:else}
+        <div class="reservations-container">
+          <!-- En ligne - Payantes -->
+          <div class="reservation-section">
+            <div class="section-header" 
+                 on:click={() => toggleSection('enLignePayantes')}
+                 on:keydown={(e) => e.key === 'Enter' && toggleSection('enLignePayantes')}
+                 role="button"
+                 tabindex="0"
+                 aria-expanded={!sectionsCollapsed.enLignePayantes}>
+              <div class="section-title">
+                <span class="section-icon">💰</span>
+                <h2>En ligne - Payantes</h2>
+                <span class="count">{getBaladesEnLignePayantes().length}</span>
+              </div>
+              <span class="toggle-icon {sectionsCollapsed.enLignePayantes ? 'collapsed' : ''}">▼</span>
+            </div>
+            {#if !sectionsCollapsed.enLignePayantes}
+              <div class="balades-list">
+                {#if getBaladesEnLignePayantes().length > 0}
+                  {#each getBaladesEnLignePayantes() as balade}
+                    <div class="balade-item">
+                      <div class="balade-header" 
+                           on:click={() => toggleBalade(balade.id)}
+                           on:keydown={(e) => e.key === 'Enter' && toggleBalade(balade.id)}
+                           role="button"
+                           tabindex="0"
+                           aria-expanded={expandedBalades.has(balade.id)}>
+                        <div class="balade-info">
+                          <div class="balade-main">
+                            <h3 class="balade-theme">{balade.theme}</h3>
+                            <div class="balade-details">
+                              <span class="balade-date">📅 {formatDate(balade.date)}</span>
+                              <span class="balade-heure">🕐 {balade.heure}</span>
+                              <span class="balade-lieu">📍 {balade.lieu}</span>
+                              <span class="balade-prix">💰 {balade.prix}</span>
+                            </div>
+                          </div>
+                          <div class="balade-stats">
+                            <span class="participants-count">{getTotalParticipants(balade)} participant{getTotalParticipants(balade) > 1 ? 's' : ''}</span>
+                            <span class="participants-presents">{getParticipantsPresents(balade)} présent{getParticipantsPresents(balade) > 1 ? 's' : ''}</span>
+                            <span class="reservations-count">{balade.reservations.length} réservation{balade.reservations.length > 1 ? 's' : ''}</span>
+                          </div>
+                        </div>
+                        <span class="balade-toggle {expandedBalades.has(balade.id) ? 'expanded' : ''}">▼</span>
+                      </div>
+                      
+                      {#if expandedBalades.has(balade.id)}
+                        <div class="participants-list">
+                          {#each balade.reservations as reservation}
+                            <div class="participant-item">
+                              <div class="participant-header">
+                                <div class="participant-name">
+                                  <strong>{reservation.prenom} {reservation.nom}</strong>
+                                  <span class="reservation-id">Réservation #{reservation.id}</span>
+                                </div>
+                                <div class="participant-meta">
+                                  <span class="personnes">{reservation.nombrePersonnes} personne{reservation.nombrePersonnes > 1 ? 's' : ''}</span>
+                                  <span class="badge {getStatutBadge(reservation.statut, reservation.type).class}">
+                                    {getStatutBadge(reservation.statut, reservation.type).text}
+                                  </span>
+                                  <label class="presence-checkbox">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={reservation.present || false}
+                                      on:change={(e) => togglePresence(reservation.id, (e.target as HTMLInputElement).checked)}
+                                    />
+                                    <span class="checkmark"></span>
+                                    <span class="presence-label">Présent</span>
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="participant-details">
+                                <div class="contact-info">
+                                  <div class="contact-item">
+                                    <span class="label">📧 Email:</span>
+                                    <span class="value">{reservation.email}</span>
+                                  </div>
+                                  {#if reservation.telephone}
+                                    <div class="contact-item">
+                                      <span class="label">📞 Téléphone:</span>
+                                      <span class="value">{reservation.telephone}</span>
+                                    </div>
+                                  {/if}
+                                  {#if reservation.adresse}
+                                    <div class="contact-item">
+                                      <span class="label">🏠 Adresse:</span>
+                                      <span class="value">{reservation.adresse}</span>
+                                    </div>
+                                  {/if}
+                                  {#if reservation.message}
+                                    <div class="contact-item">
+                                      <span class="label">💬 Message:</span>
+                                      <span class="value">{reservation.message}</span>
+                                    </div>
+                                  {/if}
+                                </div>
+                              </div>
+                            </div>
+                          {/each}
+                        </div>
+                      {/if}
+                    </div>
+                  {/each}
+                {:else}
+                  <div class="empty-state">
+                    <p>📭 Aucune balade payante en ligne</p>
+                  </div>
+                {/if}
+              </div>
+            {/if}
+          </div>
 
-      {#if getFilteredReservations().length === 0}
-        <div class="no-reservations">
-          <p>📭 Aucune réservation trouvée avec ces filtres</p>
+          <!-- En ligne - Invitations -->
+          <div class="reservation-section">
+            <div class="section-header" 
+                 on:click={() => toggleSection('enLigneInvitations')}
+                 on:keydown={(e) => e.key === 'Enter' && toggleSection('enLigneInvitations')}
+                 role="button"
+                 tabindex="0"
+                 aria-expanded={!sectionsCollapsed.enLigneInvitations}>
+              <div class="section-title">
+                <span class="section-icon">🎁</span>
+                <h2>En ligne - Invitations</h2>
+                <span class="count">{getBaladesEnLigneInvitations().length}</span>
+              </div>
+              <span class="toggle-icon {sectionsCollapsed.enLigneInvitations ? 'collapsed' : ''}">▼</span>
+            </div>
+            {#if !sectionsCollapsed.enLigneInvitations}
+              <div class="balades-list">
+                {#if getBaladesEnLigneInvitations().length > 0}
+                  {#each getBaladesEnLigneInvitations() as balade}
+                    <div class="balade-item">
+                      <div class="balade-header" 
+                           on:click={() => toggleBalade(balade.id)}
+                           on:keydown={(e) => e.key === 'Enter' && toggleBalade(balade.id)}
+                           role="button"
+                           tabindex="0"
+                           aria-expanded={expandedBalades.has(balade.id)}>
+                        <div class="balade-info">
+                          <div class="balade-main">
+                            <h3 class="balade-theme">{balade.theme}</h3>
+                            <div class="balade-details">
+                              <span class="balade-date">📅 {formatDate(balade.date)}</span>
+                              <span class="balade-heure">🕐 {balade.heure}</span>
+                              <span class="balade-lieu">📍 {balade.lieu}</span>
+                              <span class="balade-prix">🎁 Gratuit</span>
+                            </div>
+                          </div>
+                          <div class="balade-stats">
+                            <span class="participants-count">{getTotalParticipants(balade)} participant{getTotalParticipants(balade) > 1 ? 's' : ''}</span>
+                            <span class="participants-presents">{getParticipantsPresents(balade)} présent{getParticipantsPresents(balade) > 1 ? 's' : ''}</span>
+                            <span class="reservations-count">{balade.reservations.length} réservation{balade.reservations.length > 1 ? 's' : ''}</span>
+                          </div>
+                        </div>
+                        <span class="balade-toggle {expandedBalades.has(balade.id) ? 'expanded' : ''}">▼</span>
+                      </div>
+                      
+                      {#if expandedBalades.has(balade.id)}
+                        <div class="participants-list">
+                          {#each balade.reservations as reservation}
+                            <div class="participant-item">
+                              <div class="participant-header">
+                                <div class="participant-name">
+                                  <strong>{reservation.prenom} {reservation.nom}</strong>
+                                  <span class="reservation-id">Réservation #{reservation.id}</span>
+                                </div>
+                                <div class="participant-meta">
+                                  <span class="code">Code: {reservation.code || 'N/A'}</span>
+                                  <span class="personnes">{reservation.nombrePersonnes} personne{reservation.nombrePersonnes > 1 ? 's' : ''}</span>
+                                  <span class="badge {getStatutBadge(reservation.statut, reservation.type).class}">
+                                    {getStatutBadge(reservation.statut, reservation.type).text}
+                                  </span>
+                                  <label class="presence-checkbox">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={reservation.present || false}
+                                      on:change={(e) => togglePresence(reservation.id, (e.target as HTMLInputElement).checked)}
+                                    />
+                                    <span class="checkmark"></span>
+                                    <span class="presence-label">Présent</span>
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="participant-details">
+                                <div class="contact-info">
+                                  <div class="contact-item">
+                                    <span class="label">📧 Email:</span>
+                                    <span class="value">{reservation.email}</span>
+                                  </div>
+                                  {#if reservation.telephone}
+                                    <div class="contact-item">
+                                      <span class="label">📞 Téléphone:</span>
+                                      <span class="value">{reservation.telephone}</span>
+                                    </div>
+                                  {/if}
+                                  {#if reservation.adresse}
+                                    <div class="contact-item">
+                                      <span class="label">🏠 Adresse:</span>
+                                      <span class="value">{reservation.adresse}</span>
+                                    </div>
+                                  {/if}
+                                  {#if reservation.message}
+                                    <div class="contact-item">
+                                      <span class="label">💬 Message:</span>
+                                      <span class="value">{reservation.message}</span>
+                                    </div>
+                                  {/if}
+                                </div>
+                              </div>
+                            </div>
+                          {/each}
+                        </div>
+                      {/if}
+                    </div>
+                  {/each}
+                {:else}
+                  <div class="empty-state">
+                    <p>📭 Aucune balade d'invitation en ligne</p>
+                  </div>
+                {/if}
+              </div>
+            {/if}
+          </div>
+
+          <!-- Passées -->
+          <div class="reservation-section">
+            <div class="section-header" 
+                 on:click={() => toggleSection('passees')}
+                 on:keydown={(e) => e.key === 'Enter' && toggleSection('passees')}
+                 role="button"
+                 tabindex="0"
+                 aria-expanded={!sectionsCollapsed.passees}>
+              <div class="section-title">
+                <span class="section-icon">📅</span>
+                <h2>Passées</h2>
+                <span class="count">{getBaladesPassees().length}</span>
+              </div>
+              <span class="toggle-icon {sectionsCollapsed.passees ? 'collapsed' : ''}">▼</span>
+            </div>
+            {#if !sectionsCollapsed.passees}
+              <div class="balades-list">
+                {#if getBaladesPassees().length > 0}
+                  {#each getBaladesPassees() as balade}
+                    <div class="balade-item">
+                      <div class="balade-header" 
+                           on:click={() => toggleBalade(balade.id)}
+                           on:keydown={(e) => e.key === 'Enter' && toggleBalade(balade.id)}
+                           role="button"
+                           tabindex="0"
+                           aria-expanded={expandedBalades.has(balade.id)}>
+                        <div class="balade-info">
+                          <div class="balade-main">
+                            <h3 class="balade-theme">{balade.theme}</h3>
+                            <div class="balade-details">
+                              <span class="balade-date">📅 {formatDate(balade.date)}</span>
+                              <span class="balade-heure">🕐 {balade.heure}</span>
+                              <span class="balade-lieu">📍 {balade.lieu}</span>
+                              <span class="balade-prix">{balade.type === 'invitation' ? '🎁 Gratuit' : `💰 ${balade.prix}`}</span>
+                            </div>
+                          </div>
+                          <div class="balade-stats">
+                            <span class="participants-count">{getTotalParticipants(balade)} participant{getTotalParticipants(balade) > 1 ? 's' : ''}</span>
+                            <span class="participants-presents">{getParticipantsPresents(balade)} présent{getParticipantsPresents(balade) > 1 ? 's' : ''}</span>
+                            <span class="reservations-count">{balade.reservations.length} réservation{balade.reservations.length > 1 ? 's' : ''}</span>
+                          </div>
+                        </div>
+                        <span class="balade-toggle {expandedBalades.has(balade.id) ? 'expanded' : ''}">▼</span>
+                      </div>
+                      
+                      {#if expandedBalades.has(balade.id)}
+                        <div class="participants-list">
+                          {#each balade.reservations as reservation}
+                            <div class="participant-item">
+                              <div class="participant-header">
+                                <div class="participant-name">
+                                  <strong>{reservation.prenom} {reservation.nom}</strong>
+                                  <span class="reservation-id">Réservation #{reservation.id}</span>
+                                </div>
+                                <div class="participant-meta">
+                                  {#if reservation.code}
+                                    <span class="code">Code: {reservation.code}</span>
+                                  {/if}
+                                  <span class="personnes">{reservation.nombrePersonnes} personne{reservation.nombrePersonnes > 1 ? 's' : ''}</span>
+                                  <span class="badge {getStatutBadge(reservation.statut, reservation.type).class}">
+                                    {getStatutBadge(reservation.statut, reservation.type).text}
+                                  </span>
+                                  <label class="presence-checkbox">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={reservation.present || false}
+                                      on:change={(e) => togglePresence(reservation.id, (e.target as HTMLInputElement).checked)}
+                                    />
+                                    <span class="checkmark"></span>
+                                    <span class="presence-label">Présent</span>
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="participant-details">
+                                <div class="contact-info">
+                                  <div class="contact-item">
+                                    <span class="label">📧 Email:</span>
+                                    <span class="value">{reservation.email}</span>
+                                  </div>
+                                  {#if reservation.telephone}
+                                    <div class="contact-item">
+                                      <span class="label">📞 Téléphone:</span>
+                                      <span class="value">{reservation.telephone}</span>
+                                    </div>
+                                  {/if}
+                                  {#if reservation.adresse}
+                                    <div class="contact-item">
+                                      <span class="label">🏠 Adresse:</span>
+                                      <span class="value">{reservation.adresse}</span>
+                                    </div>
+                                  {/if}
+                                  {#if reservation.message}
+                                    <div class="contact-item">
+                                      <span class="label">💬 Message:</span>
+                                      <span class="value">{reservation.message}</span>
+                                    </div>
+                                  {/if}
+                                </div>
+                              </div>
+                            </div>
+                          {/each}
+                        </div>
+                      {/if}
+                    </div>
+                  {/each}
+                {:else}
+                  <div class="empty-state">
+                    <p>📭 Aucune balade passée</p>
+                  </div>
+                {/if}
+              </div>
+            {/if}
+          </div>
+
+
         </div>
       {/if}
     </div>
-  {/if}
-</div>
+</AdminAuth>
 
 <style>
-  .admin-reservations {
-    max-width: 1200px;
-    margin: 0 auto;
+  .admin-reservations-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #000000, #1a1a1a);
+    color: #fff;
     padding: 2rem;
   }
 
-  .header {
-    text-align: center;
+  .admin-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
     margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
   }
 
-  .header h1 {
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
+  .btn-retour {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #000;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
   }
 
-  .header p {
-    color: #7f8c8d;
-    font-size: 1.1rem;
+  .btn-retour:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  }
+
+  .admin-header h1 {
+    font-size: 2rem;
+    color: #ffd700;
+    margin: 0;
+  }
+
+  .admin-content {
+    opacity: 0;
+    transform: translateY(30px);
   }
 
   .loading {
@@ -263,8 +704,8 @@
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-left: 4px solid #ffd700;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
@@ -275,221 +716,490 @@
     100% { transform: rotate(360deg); }
   }
 
-  .error {
-    text-align: center;
-    padding: 2rem;
-    background: #fee;
-    border: 1px solid #fcc;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-  }
-
-  .btn-retry {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 1rem;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-left: 4px solid #3498db;
-  }
-
-  .stat-payante { border-left-color: #f39c12; }
-  .stat-invitation { border-left-color: #9b59b6; }
-  .stat-confirmee { border-left-color: #27ae60; }
-  .stat-attente { border-left-color: #e67e22; }
-
-  .stat-number {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #2c3e50;
-  }
-
-  .stat-label {
-    color: #7f8c8d;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-  }
-
-  .filters {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2rem;
+  .error-message {
+    background: rgba(255,0,0,0.1);
+    border: 1px solid rgba(255,0,0,0.3);
+    color: #ff6b6b;
     padding: 1rem;
-    background: #f8f9fa;
     border-radius: 8px;
+    margin-bottom: 1rem;
   }
 
-  .filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .reservations-container {
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
-  .filter-group label {
-    font-weight: 600;
-    color: #2c3e50;
-  }
-
-  .filter-group select {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-  }
-
-  .reservations-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .reservation-card {
-    background: white;
+  .reservation-section {
+    background: rgba(255,255,255,0.03);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255,255,255,0.08);
     overflow: hidden;
   }
 
-  .reservation-header {
+  .section-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
-  .reservation-info h3 {
-    margin: 0 0 0.5rem 0;
-    color: #2c3e50;
+  .section-header:hover {
+    background: rgba(255,255,255,0.08);
   }
 
-  .email {
-    color: #7f8c8d;
-    margin: 0 0 1rem 0;
-  }
-
-  .badges {
+  .section-title {
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
+  .section-icon {
+    font-size: 1.2rem;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    color: #ffd700;
+    font-size: 1.1rem;
     font-weight: 600;
   }
 
-  .badge-payante { background: #fff3cd; color: #856404; }
-  .badge-invitation { background: #e2e3f1; color: #383d41; }
-  .badge-success { background: #d4edda; color: #155724; }
-  .badge-warning { background: #fff3cd; color: #856404; }
-  .badge-info { background: #d1ecf1; color: #0c5460; }
-  .badge-danger { background: #f8d7da; color: #721c24; }
-  .badge-secondary { background: #e2e3e5; color: #383d41; }
-
-  .reservation-meta {
-    text-align: right;
-    color: #7f8c8d;
-    font-size: 0.9rem;
+  .count {
+    background: rgba(255, 215, 0, 0.2);
+    color: #ffd700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 215, 0, 0.3);
   }
 
-  .reservation-details {
-    padding: 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+  .toggle-icon {
+    color: #ffd700;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
   }
 
-  .detail-section h4 {
-    margin: 0 0 0.5rem 0;
-    color: #2c3e50;
-    font-size: 0.9rem;
+  .toggle-icon.collapsed {
+    transform: rotate(-90deg);
   }
 
-  .detail-section p {
-    margin: 0;
-    color: #7f8c8d;
+  .balades-list {
+    background: rgba(255,255,255,0.02);
   }
 
-  .message {
-    background: #f8f9fa;
-    padding: 0.75rem;
-    border-radius: 4px;
-    border-left: 3px solid #3498db;
+  .balade-item {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
   }
 
-  .reservation-actions {
-    padding: 1rem 1.5rem;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+  .balade-item:last-child {
+    border-bottom: none;
+  }
+
+  .balade-header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .balade-header:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .balade-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
     gap: 1rem;
   }
 
-  .btn-contact, .btn-remind {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+  .balade-main {
+    flex: 1;
+  }
+
+  .balade-theme {
+    color: #4CAF50;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .balade-details {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .balade-details span {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+  }
+
+  .balade-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+
+  .participants-count {
+    color: #ffd700;
+    font-weight: 600;
     font-size: 0.9rem;
   }
 
-  .btn-contact {
-    background: #3498db;
-    color: white;
+  .participants-presents {
+    color: #4CAF50;
+    font-weight: 600;
+    font-size: 0.9rem;
   }
 
-  .btn-remind {
-    background: #f39c12;
-    color: white;
+  .reservations-count {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8rem;
   }
 
-  .no-reservations {
+  .balade-toggle {
+    color: #ffd700;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+    margin-left: 1rem;
+  }
+
+  .balade-toggle.expanded {
+    transform: rotate(180deg);
+  }
+
+  .participants-list {
+    background: rgba(255,255,255,0.02);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .participant-item {
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    padding: 1rem 1.5rem;
+  }
+
+  .participant-item:last-child {
+    border-bottom: none;
+  }
+
+  .participant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .participant-name {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .participant-name strong {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .reservation-id {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+  }
+
+  .participant-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .personnes {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+  }
+
+  .participant-details {
+    margin-top: 0.75rem;
+  }
+
+  .contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .contact-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .contact-item .label {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .contact-item .value {
+    color: rgba(255,255,255,0.9);
+    font-size: 0.85rem;
+    word-break: break-word;
+  }
+
+  .presence-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .presence-checkbox input[type="checkbox"] {
+    display: none;
+  }
+
+  .checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ffd700;
+    border-radius: 3px;
+    background: transparent;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .presence-checkbox input[type="checkbox"]:checked + .checkmark {
+    background: #4CAF50;
+    border-color: #4CAF50;
+  }
+
+  .presence-checkbox input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .presence-label {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .presence-checkbox:hover .checkmark {
+    border-color: #4CAF50;
+  }
+
+  .code {
+    color: #ffd700;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+  }
+
+  .badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .badge-payante { 
+    background: rgba(255, 193, 7, 0.2); 
+    color: #ffc107; 
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+  
+  .badge-invitation { 
+    background: rgba(156, 39, 176, 0.2); 
+    color: #9C27B0; 
+    border: 1px solid rgba(156, 39, 176, 0.3);
+  }
+  
+  .badge-success { 
+    background: rgba(76, 175, 80, 0.2); 
+    color: #4CAF50; 
+    border: 1px solid rgba(76, 175, 80, 0.3);
+  }
+  
+  .badge-warning { 
+    background: rgba(255, 152, 0, 0.2); 
+    color: #ff9800; 
+    border: 1px solid rgba(255, 152, 0, 0.3);
+  }
+  
+  .badge-info { 
+    background: rgba(33, 150, 243, 0.2); 
+    color: #2196F3; 
+    border: 1px solid rgba(33, 150, 243, 0.3);
+  }
+  
+  .badge-danger { 
+    background: rgba(244, 67, 54, 0.2); 
+    color: #f44336; 
+    border: 1px solid rgba(244, 67, 54, 0.3);
+  }
+  
+  .badge-secondary { 
+    background: rgba(158, 158, 158, 0.2); 
+    color: #9e9e9e; 
+    border: 1px solid rgba(158, 158, 158, 0.3);
+  }
+
+  .empty-state {
     text-align: center;
-    padding: 3rem;
-    color: #7f8c8d;
+    padding: 2rem;
+    color: rgba(255,255,255,0.7);
+    font-style: italic;
   }
 
+  /* Animations */
+  .fade-in {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive */
   @media (max-width: 768px) {
-    .admin-reservations {
+    .admin-reservations-page {
       padding: 1rem;
     }
 
-    .reservation-header {
+    .admin-header {
       flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .admin-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .balade-header {
+      padding: 0.75rem 1rem;
+    }
+
+    .balade-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .balade-stats {
+      align-items: flex-start;
+      flex-direction: row;
       gap: 1rem;
     }
 
-    .reservation-meta {
-      text-align: left;
-    }
-
-    .filters {
+    .balade-details {
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.25rem;
     }
 
-    .reservation-details {
+    .participant-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .participant-meta {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .contact-info {
       grid-template-columns: 1fr;
+    }
+
+    .section-header {
+      padding: 0.75rem 1rem;
+    }
+
+    .section-title {
+      gap: 0.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .admin-reservations-page {
+      padding: 0.5rem;
+    }
+
+    .balade-header {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .participant-item {
+      padding: 0.75rem;
+    }
+
+    .section-header {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .section-header h2 {
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .count {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+    }
+
+    .balade-theme {
+      font-size: 0.9rem;
+    }
+
+    .participant-name strong {
+      font-size: 0.9rem;
+    }
+
+    .balade-details span {
+      font-size: 0.75rem;
     }
   }
 </style>

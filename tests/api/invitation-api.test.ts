@@ -33,6 +33,7 @@ describe('API Invitations - Tests d\'intégration', () => {
 
     it('devrait valider un code avec le bon email', async () => {
       expect(invitation).toBeDefined();
+      expect(invitation?.code).toBeDefined();
 
       // Simuler l'appel API
       const requestData = {
@@ -72,7 +73,7 @@ describe('API Invitations - Tests d\'intégration', () => {
       expect(invitation).toBeDefined();
 
       // Marquer l'invitation comme utilisée
-      invitationService.markInvitationAsUsed(invitation.id);
+      invitationService.markAsUsed(invitation.code);
 
       const existingReservation = invitationService.hasExistingReservation(
         'test@example.com',
@@ -131,8 +132,8 @@ describe('API Invitations - Tests d\'intégration', () => {
       expect(existingReservation.hasReservation).toBe(false);
 
       // Marquer l'invitation comme utilisée (simulation de la réservation)
-      const success = invitationService.markInvitationAsUsed(invitation.id);
-      expect(success).toBe(true);
+      const result = invitationService.markAsUsed(invitation.code);
+      expect(result.success).toBe(true);
     });
 
     it('devrait échouer si le code est invalide', async () => {

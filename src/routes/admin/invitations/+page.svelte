@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { Balade } from '$lib/server/baladesService';
+  import AdminAuth from '$lib/components/AdminAuth.svelte';
 
   interface Invitation {
     id: number;
@@ -248,13 +249,14 @@
   }
 </script>
 
-<div class="admin-invitations-page">
-  <div class="admin-header">
-    <button class="btn-retour" on:click={retourAdmin}>
-      ← Retour à l'administration
-    </button>
-    <h1>🎁 Gestion des Invitations</h1>
-  </div>
+<AdminAuth>
+  <div class="admin-invitations-page">
+    <div class="admin-header">
+      <button class="btn-retour" on:click={retourAdmin}>
+        ← Retour à l'administration
+      </button>
+      <h1>🎁 Gestion des Invitations</h1>
+    </div>
 
   <div class="admin-content {isVisible ? 'fade-in' : ''}">
     {#if isLoading}
@@ -451,7 +453,8 @@
       {/if}
     {/if}
   </div>
-</div>
+  </div>
+</AdminAuth>
 
 <style>
   .admin-invitations-page {
