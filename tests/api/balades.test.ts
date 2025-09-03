@@ -39,8 +39,8 @@ describe('API Balades Publiques', () => {
 
       mockBaladesService.getBaladesEnLigne.mockReturnValue(mockBalades);
 
-      const request = new Request('http://localhost:3000/api/balades');
-      const response = await GET({ request } as any);
+      const url = new URL('http://localhost:3000/api/balades');
+      const response = await GET({ url } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -68,8 +68,8 @@ describe('API Balades Publiques', () => {
 
       mockBaladesService.getBaladesFutures.mockReturnValue(mockBalades);
 
-      const request = new Request('http://localhost:3000/api/balades?type=futures');
-      const response = await GET({ request } as any);
+      const url = new URL('http://localhost:3000/api/balades?type=futures');
+      const response = await GET({ url } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -97,8 +97,8 @@ describe('API Balades Publiques', () => {
 
       mockBaladesService.getBaladesArchivees.mockReturnValue(mockBalades);
 
-      const request = new Request('http://localhost:3000/api/balades?type=archivees');
-      const response = await GET({ request } as any);
+      const url = new URL('http://localhost:3000/api/balades?type=archivees');
+      const response = await GET({ url } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -126,8 +126,8 @@ describe('API Balades Publiques', () => {
 
       mockBaladesService.getAllBalades.mockReturnValue(mockBalades);
 
-      const request = new Request('http://localhost:3000/api/balades?admin=true');
-      const response = await GET({ request } as any);
+      const url = new URL('http://localhost:3000/api/balades?admin=true');
+      const response = await GET({ url } as any);
       const data = await response.json();
 
       expect(response.status).toBe(200);

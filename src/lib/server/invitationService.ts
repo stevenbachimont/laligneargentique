@@ -130,6 +130,15 @@ class InvitationService {
         return { success: false, error: 'Balade non trouvée' };
       }
 
+      // Vérifier qu'il y a assez de places disponibles
+      const totalPlacesNeeded = data.emails.length * data.nombrePersonnes;
+      if (balade.placesDisponibles < totalPlacesNeeded) {
+        return { 
+          success: false, 
+          error: `Pas assez de places disponibles. ${balade.placesDisponibles} places disponibles pour ${totalPlacesNeeded} places nécessaires` 
+        };
+      }
+
       const invitations: Invitation[] = [];
       const now = new Date().toISOString();
 
@@ -229,6 +238,36 @@ class InvitationService {
     }
 
     return { success: true };
+  }
+
+  /**
+   * Marque une invitation comme utilisée par ID (pour les tests)
+   */
+  markInvitationAsUsed(invitationId: number): boolean {
+    const invitation = this.invitations.find(inv => inv.id === invitationId);
+    
+    if (!invitation || invitation.statut === 'utilisee') {
+      return false;
+    }
+
+    invitation.statut = 'utilisee';
+    invitation.dateUtilisation = new Date().toISOString();
+    return true;
+  }
+
+  /**
+   * Récupère une invitation par ID
+   */
+  getInvitationById(invitationId: number): Invitation | null {
+    return this.invitations.find(inv => inv.id === invitationId) || null;
+  }
+
+  /**
+   * Vide toutes les invitations (pour les tests)
+   */
+  clearAllInvitations(): void {
+    this.invitations = [];
+    this.nextId = 1;
   }
 }
 

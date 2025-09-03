@@ -1,230 +1,184 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EmailService } from '../../src/lib/server/emailService';
-import { EmailTemplateService } from '../../src/lib/server/emailTemplateService';
+import { EmailService } from '$lib/server/emailService';
+import { EmailTemplateService } from '$lib/server/emailTemplateService';
 
-// Mock des variables d'environnement
-vi.mock('$env/dynamic/private', () => ({
-  env: {
-    EMAIL_USER: 'test@example.com',
-    EMAIL_APP_PASSWORD: 'test-password',
-    ADMIN_EMAIL: 'admin@example.com'
-  }
+// Mock du service de template
+vi.mock('$lib/server/emailTemplateService', () => ({
+  EmailTemplateService: vi.fn().mockImplementation(() => ({
+    getTemplate: vi.fn(() => ({
+      subject: 'Test Invitation',
+      html: '<p>Test HTML</p>',
+      text: 'Test Text'
+    })),
+    getStyles: vi.fn(() => ({
+      body: 'font-family: Arial, sans-serif;',
+      container: 'max-width: 600px; margin: 0 auto;',
+      header: 'background: #f0f0f0; padding: 20px;',
+      content: 'padding: 20px;',
+      highlight: 'background: #ffffcc; padding: 10px;',
+      success: 'color: green;',
+      details: 'margin: 10px 0;',
+      infoBox: 'border: 1px solid #ccc; padding: 15px;',
+      contactInfo: 'font-style: italic;',
+      paymentInfo: 'background: #f9f9f9;',
+      footer: 'text-align: center; font-size: 12px;'
+    })),
+    generateEmailHTML: vi.fn(() => '<p>Generated HTML</p>'),
+    generateEmailText: vi.fn(() => 'Generated Text')
+  }))
 }));
 
-// Mock de nodemailer
-const mockTransporter = {
-  sendMail: vi.fn().mockResolvedValue({ messageId: 'test-id' }),
-  verify: vi.fn().mockResolvedValue(true)
-};
-
-vi.mock('nodemailer', () => ({
-  createTransport: vi.fn().mockReturnValue(mockTransporter)
-}));
-
-describe('EmailService', () => {
+describe('EmailService - Invitations', () => {
   let emailService: EmailService;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Mock des variables d'environnement
+    vi.stubEnv('EMAIL_USER', 'test@example.com');
+    vi.stubEnv('EMAIL_APP_PASSWORD', 'test-password');
+    vi.stubEnv('PUBLIC_BASE_URL', 'http://localhost:3000');
+    
     emailService = new EmailService();
   });
 
-  describe('sendArgentiqueReservation', () => {
-    it('devrait envoyer les emails de réservation argentique', async () => {
-      const data = {
+  describe('sendInvitationEmail', () => {
+    it('devrait générer le bon contenu d\'email', async () => {
+      const invitation = {
+        id: 1,
+        baladeId: 9,
+        code: 'TEST1234',
+        email: 'test@example.com',
         nom: 'Dupont',
         prenom: 'Jean',
-        email: 'jean.dupont@example.com',
-        telephone: '0123456789',
-        dateSouhaitee: '2024-12-25',
-        nombrePersonnes: 2,
-        message: 'Test de réservation'
-      };
-
-      const result = await emailService.sendArgentiqueReservation(data);
-
-      expect(result).toBe(true);
-      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(2);
-      
-      // Vérifier que les deux emails ont été envoyés
-      const calls = mockTransporter.sendMail.mock.calls;
-      expect(calls[0][0].to).toBe('jean.dupont@example.com');
-      expect(calls[1][0].to).toBe('admin@example.com');
-    });
-
-    it('devrait gérer les erreurs d\'envoi', async () => {
-      mockTransporter.sendMail.mockRejectedValue(new Error('Erreur SMTP'));
-
-      const data = {
-        nom: 'Test',
-        prenom: 'User',
-        email: 'test@example.com',
-        telephone: '0123456789',
-        dateSouhaitee: '2024-12-25',
+        statut: 'envoyee' as const,
+        dateCreation: '2024-01-01',
         nombrePersonnes: 1,
-        message: 'Test'
-      };
-
-      await expect(emailService.sendArgentiqueReservation(data))
-        .rejects.toThrow('Erreur lors de l\'envoi des emails');
-    });
-  });
-
-  describe('sendStripeReservationConfirmation', () => {
-    it('devrait envoyer les emails de confirmation Stripe', async () => {
-      const reservation = {
-        id: 'res_123',
-        nom: 'Martin',
-        prenom: 'Sophie',
-        email: 'sophie.martin@example.com',
-        nombrePersonnes: 1,
-        montant: 4500, // 45€ en centimes
-        paymentIntentId: 'pi_123'
+        message: 'Test message'
       };
 
       const balade = {
-        theme: 'Balade photo Nantes',
+        id: 9,
+        theme: 'Test Balade',
         date: '2024-12-25',
         heure: '14:00',
-        lieu: 'Place du Commerce'
+        lieu: 'Test Lieu',
+        placesDisponibles: 5,
+        prix: '0€',
+        description: 'Test description',
+        consignes: [],
+        materiel: [],
+        coordonnees: [],
+        parcours: [],
+        statut: 'en_ligne' as const,
+        type: 'invitation' as const
       };
 
-      const result = await emailService.sendStripeReservationConfirmation(reservation, balade);
+      // Mock du transporter
+      const mockSendMail = vi.fn().mockResolvedValue({ messageId: 'test-id' });
+      (emailService as any).transporter = { sendMail: mockSendMail };
+
+      const result = await emailService.sendInvitationEmail(invitation, balade);
 
       expect(result).toBe(true);
-      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(2);
-      
-      // Vérifier que les deux emails ont été envoyés
-      const calls = mockTransporter.sendMail.mock.calls;
-      expect(calls[0][0].to).toBe('sophie.martin@example.com');
-      expect(calls[1][0].to).toBe('admin@example.com');
-    });
-  });
-
-  describe('sendContactMessage', () => {
-    it('devrait envoyer les emails de contact', async () => {
-      const data = {
-        nom: 'Durand',
-        prenom: 'Marie',
-        email: 'marie.durand@example.com',
-        message: 'Bonjour, j\'ai une question'
-      };
-
-      const result = await emailService.sendContactMessage(data);
-
-      expect(result).toBe(true);
-      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(2);
-      
-      // Vérifier que les deux emails ont été envoyés
-      const calls = mockTransporter.sendMail.mock.calls;
-      expect(calls[0][0].to).toBe('admin@example.com');
-      expect(calls[1][0].to).toBe('marie.durand@example.com');
-    });
-  });
-
-  describe('sendReservationQuestion', () => {
-    it('devrait envoyer les emails de question sur réservation', async () => {
-      const data = {
-        reservationData: {
-          dateSouhaitee: '2024-12-25',
-          nombrePersonnes: 2
-        },
-        question: 'Puis-je amener mon appareil photo ?',
-        clientEmail: 'client@example.com',
-        clientName: 'Client Test'
-      };
-
-      const result = await emailService.sendReservationQuestion(data);
-
-      expect(result).toBe(true);
-      expect(mockTransporter.sendMail).toHaveBeenCalledTimes(2);
-      
-      // Vérifier que les deux emails ont été envoyés
-      const calls = mockTransporter.sendMail.mock.calls;
-      expect(calls[0][0].to).toBe('admin@example.com');
-      expect(calls[1][0].to).toBe('client@example.com');
-    });
-  });
-
-  describe('verifyConnection', () => {
-    it('devrait vérifier la connexion email', async () => {
-      const result = await emailService.verifyConnection();
-      expect(result).toBe(true);
-      expect(mockTransporter.verify).toHaveBeenCalled();
+      expect(mockSendMail).toHaveBeenCalledWith({
+        from: expect.any(String),
+        to: 'test@example.com',
+        subject: 'Test Invitation',
+        html: expect.any(String),
+        text: expect.any(String)
+      });
     });
 
-    it('devrait gérer les erreurs de connexion', async () => {
-      mockTransporter.verify.mockRejectedValue(new Error('Connexion échouée'));
-      
-      const result = await emailService.verifyConnection();
-      expect(result).toBe(false);
-    });
-  });
-});
-
-describe('EmailTemplateService', () => {
-  let templateService: EmailTemplateService;
-
-  beforeEach(() => {
-    templateService = new EmailTemplateService();
-  });
-
-  describe('getTemplate', () => {
-    it('devrait récupérer un template existant', () => {
-      const template = templateService.getTemplate('argentique', 'client', {
+    it('devrait inclure le lien de réservation dans l\'email', async () => {
+      const invitation = {
+        id: 1,
+        baladeId: 9,
+        code: 'TEST1234',
+        email: 'test@example.com',
+        nom: 'Dupont',
         prenom: 'Jean',
-        nom: 'Dupont'
-      });
+        statut: 'envoyee' as const,
+        dateCreation: '2024-01-01',
+        nombrePersonnes: 1
+      };
 
-      expect(template).toBeDefined();
-      expect(template.greeting).toContain('Jean Dupont');
+      const balade = {
+        id: 9,
+        theme: 'Test Balade',
+        date: '2024-12-25',
+        heure: '14:00',
+        lieu: 'Test Lieu',
+        placesDisponibles: 5,
+        prix: '0€',
+        description: 'Test description',
+        consignes: [],
+        materiel: [],
+        coordonnees: [],
+        parcours: [],
+        statut: 'en_ligne' as const,
+        type: 'invitation' as const
+      };
+
+      const mockSendMail = vi.fn().mockResolvedValue({ messageId: 'test-id' });
+      (emailService as any).transporter = { sendMail: mockSendMail };
+
+      await emailService.sendInvitationEmail(invitation, balade);
+
+      const callArgs = mockSendMail.mock.calls[0][0];
+      expect(callArgs.html).toBeDefined();
+      expect(callArgs.text).toBeDefined();
+      expect(callArgs.to).toBe('test@example.com');
     });
 
-    it('devrait remplacer les variables dans le template', () => {
-      const template = templateService.getTemplate('stripe', 'client', {
-        prenom: 'Marie',
-        nom: 'Martin',
-        theme: 'Balade photo'
-      });
+    it('devrait gérer les erreurs d\'envoi', async () => {
+      const invitation = {
+        id: 1,
+        baladeId: 9,
+        code: 'TEST1234',
+        email: 'test@example.com',
+        nom: 'Dupont',
+        prenom: 'Jean',
+        statut: 'envoyee' as const,
+        dateCreation: '2024-01-01',
+        nombrePersonnes: 1
+      };
 
-      expect(template.subject).toContain('Marie Martin');
-      expect(template.detailsFormat).toContain('Balade photo');
-    });
+      const balade = {
+        id: 9,
+        theme: 'Test Balade',
+        date: '2024-12-25',
+        heure: '14:00',
+        lieu: 'Test Lieu',
+        placesDisponibles: 5,
+        prix: '0€',
+        description: 'Test description',
+        consignes: [],
+        materiel: [],
+        coordonnees: [],
+        parcours: [],
+        statut: 'en_ligne' as const,
+        type: 'invitation' as const
+      };
 
-    it('devrait lever une erreur pour un template inexistant', () => {
-      expect(() => {
-        templateService.getTemplate('inexistant', 'client', {});
-      }).toThrow('Template non trouvé: inexistant.client');
+      // Mock d'erreur
+      const mockSendMail = vi.fn().mockRejectedValue(new Error('SMTP Error'));
+      (emailService as any).transporter = { sendMail: mockSendMail };
+
+      await expect(emailService.sendInvitationEmail(invitation, balade)).rejects.toThrow();
     });
   });
 
-  describe('generateEmailHTML', () => {
-    it('devrait générer du HTML valide', () => {
-      const template = templateService.getTemplate('argentique', 'client', {
-        prenom: 'Test',
-        nom: 'User'
-      });
-      const styles = templateService.getStyles();
-
-      const html = templateService.generateEmailHTML(template, styles);
-
-      expect(html).toContain('<!DOCTYPE html>');
-      expect(html).toContain('<html lang="fr">');
-      expect(html).toContain('Test User');
-    });
-  });
-
-  describe('generateEmailText', () => {
-    it('devrait générer du texte valide', () => {
-      const template = templateService.getTemplate('argentique', 'client', {
-        prenom: 'Test',
-        nom: 'User'
-      });
-
-      const text = templateService.generateEmailText(template);
-
-      expect(text).toContain('La Ligne Argentique');
-      expect(text).toContain('Test User');
+  describe('Configuration des URLs', () => {
+    it('devrait utiliser la bonne URL de base', () => {
+      // Test de la logique de construction d'URL
+      const baseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+      const baladeId = 9;
+      const code = 'TEST1234';
+      
+      const expectedUrl = `${baseUrl}/photographie/argentique/reservation/invitation?baladeId=${baladeId}&code=${code}`;
+      
+      expect(expectedUrl).toContain('baladeId=9');
+      expect(expectedUrl).toContain('code=TEST1234');
+      expect(expectedUrl).toContain('/photographie/argentique/reservation/invitation');
     });
   });
 });

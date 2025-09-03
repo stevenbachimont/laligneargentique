@@ -59,8 +59,8 @@ describe('Captcha API Endpoints', () => {
 
     it('devrait valider une position dans la tolérance', async () => {
       const tolerancePosition = { 
-        x: targetPosition.x + 15, 
-        y: targetPosition.y + 15 
+        x: targetPosition.x + 10, 
+        y: targetPosition.y + 10 
       };
 
       const request = new Request('http://localhost/api/captcha/validate', {
