@@ -10,6 +10,12 @@
   let baladesParAnnee: { [annee: string]: Balade[] } = {};
 
   let isVisible = false;
+  
+  // Variables pré-calculées pour les performances
+  let currentYear = new Date().getFullYear();
+  let today = new Date().toISOString().split('T')[0];
+  let anneesFutures: string[] = [];
+  let anneesPassees: string[] = [];
 
   // Fonction pour rediriger vers la page de réservation avec paiement
   function reserverBalade(balade: any) {
@@ -38,12 +44,17 @@
   function trierEtSeparerBalades() {
     // Classer par années
     baladesParAnnee = {};
+    anneesFutures = [];
+    anneesPassees = [];
     
     // Balades futures par année
     baladesFutures.forEach(balade => {
       const annee = new Date(balade.date).getFullYear().toString();
       if (!baladesParAnnee[annee]) {
         baladesParAnnee[annee] = [];
+        if (parseInt(annee) >= currentYear) {
+          anneesFutures.push(annee);
+        }
       }
       baladesParAnnee[annee].push(balade);
     });
@@ -53,9 +64,16 @@
       const annee = new Date(balade.date).getFullYear().toString();
       if (!baladesParAnnee[annee]) {
         baladesParAnnee[annee] = [];
+        if (parseInt(annee) < currentYear) {
+          anneesPassees.push(annee);
+        }
       }
       baladesParAnnee[annee].push(balade);
     });
+    
+    // Trier les années
+    anneesFutures.sort((a, b) => parseInt(a) - parseInt(b));
+    anneesPassees.sort((a, b) => parseInt(b) - parseInt(a));
   }
 
   function getAnneeLabel(annee: string): string {
@@ -64,41 +82,28 @@
 
   onMount(async () => {
     try {
-      // Charger les balades payantes depuis l'API
-      const responsePayantes = await fetch('/api/balades?type=payantes');
-      const dataPayantes = await responsePayantes.json();
+      // Charger toutes les balades en un seul appel API
+      const response = await fetch('/api/balades?admin=true');
+      const data = await response.json();
       
-      if (dataPayantes.success) {
-        baladesPayantes = dataPayantes.balades;
+      if (data.success) {
+        const allBalades = data.balades;
+        // Mettre à jour la variable today globale
+        today = new Date().toISOString().split('T')[0];
+        
+        // Séparer les balades par type et date
+        baladesPayantes = allBalades.filter(b => b.type === 'payante' && b.date >= today);
+        baladesInvitations = allBalades.filter(b => b.type === 'invitation' && b.date >= today);
+        baladesArchivees = allBalades.filter(b => b.date < today);
+        
+        // Combiner toutes les balades futures pour le tri
+        baladesFutures = [...baladesPayantes, ...baladesInvitations];
+
+        // Classer les balades par années
+        trierEtSeparerBalades();
       } else {
-        console.error('Erreur lors du chargement des balades payantes:', dataPayantes.error);
+        console.error('Erreur lors du chargement des balades:', data.error);
       }
-
-      // Charger les balades sur invitation depuis l'API
-      const responseInvitations = await fetch('/api/balades?type=invitations');
-      const dataInvitations = await responseInvitations.json();
-      
-      if (dataInvitations.success) {
-        baladesInvitations = dataInvitations.balades;
-      } else {
-        console.error('Erreur lors du chargement des balades sur invitation:', dataInvitations.error);
-      }
-
-      // Charger les balades archivées depuis l'API
-      const responseArchivees = await fetch('/api/balades?type=archivees');
-      const dataArchivees = await responseArchivees.json();
-      
-      if (dataArchivees.success) {
-        baladesArchivees = dataArchivees.balades;
-      } else {
-        console.error('Erreur lors du chargement des balades archivées:', dataArchivees.error);
-      }
-
-      // Combiner toutes les balades futures pour le tri
-      baladesFutures = [...baladesPayantes, ...baladesInvitations];
-
-      // Classer les balades par années
-      trierEtSeparerBalades();
     } catch (error) {
       console.error('Erreur lors du chargement des balades:', error);
     }
@@ -158,11 +163,11 @@
           <p class="section-subtitle">Découvrez nos balades photographiques argentiques et réservez votre place</p>
           
           <div class="balades-annees">
-            {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) >= new Date().getFullYear()).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [annee, baladesAnnee]}
+            {#each anneesFutures as annee}
               <div class="annee-section">
                 <h3 class="annee-title">{getAnneeLabel(annee)}</h3>
                 <div class="balades-grid">
-                  {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0] && b.type === 'payante') as balade}
+                  {#each baladesParAnnee[annee].filter(b => b.date >= today && b.type === 'payante') as balade}
                     <div class="balade-card balade-payante">
                       <div class="balade-header">
                         <div class="balade-date">
@@ -219,11 +224,11 @@
           </div>
           
           <div class="balades-annees">
-            {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) >= new Date().getFullYear()).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [annee, baladesAnnee]}
+            {#each anneesFutures as annee}
               <div class="annee-section">
                 <h3 class="annee-title">{getAnneeLabel(annee)}</h3>
                 <div class="balades-grid">
-                  {#each baladesAnnee.filter(b => b.date >= new Date().toISOString().split('T')[0] && b.type === 'invitation') as balade}
+                  {#each baladesParAnnee[annee].filter(b => b.date >= today && b.type === 'invitation') as balade}
                     <div class="balade-card balade-invitation">
                       <div class="balade-header">
                         <div class="balade-date invitation">
@@ -286,11 +291,11 @@
         
         {#if baladesArchivees.length > 0}
           <div class="balades-annees balades-archivees">
-            {#each Object.entries(baladesParAnnee).filter(([annee]) => parseInt(annee) < new Date().getFullYear()).sort(([a], [b]) => parseInt(b) - parseInt(a)) as [annee, baladesAnnee]}
+            {#each anneesPassees as annee}
               <div class="annee-section">
                 <h3 class="annee-title archivee">{getAnneeLabel(annee)}</h3>
                 <div class="balades-grid">
-                  {#each baladesAnnee.filter(b => b.date < new Date().toISOString().split('T')[0]) as balade}
+                  {#each baladesParAnnee[annee].filter(b => b.date < today) as balade}
                     <div class="balade-card balade-archivee">
                       <div class="balade-header">
                         <div class="balade-date archivee">
@@ -383,7 +388,6 @@
     background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/photos/street/3.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
     opacity: 0;
     transform: translateY(30px);
   }
