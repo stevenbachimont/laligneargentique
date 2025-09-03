@@ -42,6 +42,7 @@ db.exec(`
     message TEXT,
     statut TEXT NOT NULL DEFAULT 'en_attente_paiement',
     montant_total DECIMAL(10,2) NOT NULL,
+    present BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (balade_id) REFERENCES balades (id)
   );
@@ -59,6 +60,15 @@ db.exec(`
     FOREIGN KEY (reservation_id) REFERENCES reservations (id)
   );
 `);
+
+// Migration : Ajouter la colonne 'present' si elle n'existe pas
+try {
+  db.prepare('ALTER TABLE reservations ADD COLUMN present BOOLEAN DEFAULT 0').run();
+  console.log('✅ Colonne "present" ajoutée à la table reservations');
+} catch (error) {
+  // La colonne existe déjà, pas d'erreur
+  console.log('ℹ️ Colonne "present" déjà présente dans la table reservations');
+}
 
 // Insérer les données initiales si la table est vide
 const baladeCount = db.prepare('SELECT COUNT(*) as count FROM balades').get() as { count: number };

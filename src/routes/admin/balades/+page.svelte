@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { Balade } from '$lib/server/baladesService';
+  import AdminAuth from '$lib/components/AdminAuth.svelte';
 
   // Types pour les étapes du parcours
   interface EtapeParcours {
@@ -603,21 +604,15 @@
   function retourAdmin() {
     window.location.href = '/admin';
   }
-
-  function allerInvitations() {
-    window.location.href = '/admin/invitations';
-  }
 </script>
 
-<div class="admin-balades-page">
-  <div class="admin-header">
+<AdminAuth>
+  <div class="admin-balades-page">
+      <div class="admin-header">
     <button class="btn-retour" on:click={retourAdmin}>
       ← Retour à l'administration
     </button>
     <h1>📋 Gestion des Balades</h1>
-    <button class="btn-invitations" on:click={allerInvitations}>
-      🎁 Invitations
-    </button>
   </div>
 
   <div class="admin-content {isVisible ? 'fade-in' : ''}">
@@ -1049,7 +1044,8 @@
       </div>
     {/if}
   </div>
-</div>
+  </div>
+</AdminAuth>
 
 <style>
   .admin-balades-page {
@@ -1087,24 +1083,7 @@
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
   }
 
-  .btn-invitations {
-    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
-    color: #fff;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    white-space: nowrap;
-  }
 
-  .btn-invitations:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
-  }
 
   .admin-header h1 {
     font-size: 2rem;
