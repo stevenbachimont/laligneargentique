@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EmailService } from '$lib/server/emailService';
 import { EmailTemplateService } from '$lib/server/emailTemplateService';
 
+// Mock des variables d'environnement
+vi.mock('$env/dynamic/private', () => ({
+  env: {
+    EMAIL_USER: 'test@example.com',
+    EMAIL_APP_PASSWORD: 'test-password',
+    PUBLIC_BASE_URL: 'http://localhost:3000',
+    ADMIN_EMAIL: 'admin@example.com'
+  }
+}));
+
 // Mock du service de template
 vi.mock('$lib/server/emailTemplateService', () => ({
   EmailTemplateService: vi.fn().mockImplementation(() => ({
@@ -32,11 +42,6 @@ describe('EmailService - Invitations', () => {
   let emailService: EmailService;
 
   beforeEach(() => {
-    // Mock des variables d'environnement
-    vi.stubEnv('EMAIL_USER', 'test@example.com');
-    vi.stubEnv('EMAIL_APP_PASSWORD', 'test-password');
-    vi.stubEnv('PUBLIC_BASE_URL', 'http://localhost:3000');
-    
     emailService = new EmailService();
   });
 
