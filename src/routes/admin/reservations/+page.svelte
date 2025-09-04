@@ -60,7 +60,20 @@
   async function loadReservations() {
     try {
       loading = true;
-      const response = await fetch('/api/admin/reservations');
+      
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        error = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
+      const response = await fetch('/api/admin/reservations', {
+        headers: {
+          'X-Admin-Session': sessionToken
+        }
+      });
       const data = await response.json();
       
       console.log('🔍 Réponse API réservations:', data);
@@ -253,10 +266,19 @@
 
   async function togglePresence(reservationId: number, present: boolean) {
     try {
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        error = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
       const response = await fetch('/api/admin/reservations/presence', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Admin-Session': sessionToken
         },
         body: JSON.stringify({
           reservationId,
@@ -642,6 +664,7 @@
               </div>
             {/if}
           </div>
+          
         </div>
       {/if}
     </div>

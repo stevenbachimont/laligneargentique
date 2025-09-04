@@ -67,7 +67,20 @@
   async function loadBalades() {
     try {
       isLoading = true;
-      const response = await fetch('/api/balades?admin=true');
+      
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
+      const response = await fetch('/api/balades?admin=true', {
+        headers: {
+          'X-Admin-Session': sessionToken
+        }
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -493,6 +506,14 @@
     }
 
     try {
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
       const url = isEditing ? `/api/admin/balades/${selectedBalade?.id}` : '/api/admin/balades';
       const method = isEditing ? 'PUT' : 'POST';
 
@@ -500,6 +521,7 @@
         method,
         headers: {
           'Content-Type': 'application/json',
+          'X-Admin-Session': sessionToken
         },
         body: JSON.stringify(baladeForm)
       });

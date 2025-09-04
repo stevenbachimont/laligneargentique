@@ -46,8 +46,20 @@
 
   async function loadBalades() {
     try {
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
       // Charger uniquement les balades sur invitation (futures)
-      const response = await fetch('/api/balades?type=invitations');
+      const response = await fetch('/api/balades?type=invitations', {
+        headers: {
+          'X-Admin-Session': sessionToken
+        }
+      });
       const data = await response.json();
       
       console.log('🔍 Debug loadBalades:', { response: response.ok, data });
@@ -67,7 +79,19 @@
 
   async function loadInvitations() {
     try {
-      const response = await fetch('/api/admin/invitations');
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
+      const response = await fetch('/api/admin/invitations', {
+        headers: {
+          'X-Admin-Session': sessionToken
+        }
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -131,10 +155,19 @@
     }
 
     try {
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
       const response = await fetch('/api/admin/invitations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Admin-Session': sessionToken
         },
         body: JSON.stringify({
           baladeId: parseInt(invitationForm.baladeId),
