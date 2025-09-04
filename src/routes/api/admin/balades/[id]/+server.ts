@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+async function putHandler({ params, request }: { params: { id: string }; request: Request }) {
   try {
     const baladeId = parseInt(params.id);
     const baladeData = await request.json();
@@ -58,9 +59,11 @@ export const PUT: RequestHandler = async ({ params, request }) => {
       error: 'Erreur interne du serveur'
     }, { status: 500 });
   }
-};
+}
 
-export const DELETE: RequestHandler = async ({ params }) => {
+export const PUT = withAdminSecurity(putHandler);
+
+async function deleteHandler({ params }: { params: { id: string } }) {
   try {
     const baladeId = parseInt(params.id);
     
@@ -95,4 +98,6 @@ export const DELETE: RequestHandler = async ({ params }) => {
       error: 'Erreur interne du serveur'
     }, { status: 500 });
   }
-};
+}
+
+export const DELETE = withAdminSecurity(deleteHandler);

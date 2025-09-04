@@ -2,8 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
 import { EmailService } from '$lib/server/emailService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const POST: RequestHandler = async ({ request }) => {
+async function handler({ request }: { request: Request }) {
   try {
     const { reservationId } = await request.json();
     
@@ -87,4 +88,6 @@ export const POST: RequestHandler = async ({ request }) => {
       error: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 });
   }
-};
+}
+
+export const POST = withAdminSecurity(handler);

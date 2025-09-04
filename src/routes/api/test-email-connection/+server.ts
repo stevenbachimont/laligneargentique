@@ -1,9 +1,17 @@
 import { json } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { createTransport } from 'nodemailer';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export async function GET() {
+async function handler() {
 	try {
+		// Vérifier que nous sommes en mode développement
+		if (env.NODE_ENV === 'production') {
+			return json({
+				error: 'Endpoint de test non disponible en production'
+			}, { status: 404 });
+		}
+
 		// Vérifier que les variables sont présentes
 		if (!env.EMAIL_USER || !env.EMAIL_APP_PASSWORD) {
 			return json({
@@ -30,7 +38,8 @@ export async function GET() {
 			success: true,
 			message: 'Connexion email réussie',
 			emailUser: env.EMAIL_USER,
-			emailPassword: env.EMAIL_APP_PASSWORD ? 'Configuré' : 'Manquant'
+			emailPassword: env.EMAIL_APP_PASSWORD ? 'Configuré' : 'Manquant',
+			warning: 'Endpoint de test - Ne pas utiliser en production'
 		});
 
 	} catch (error) {
@@ -45,3 +54,5 @@ export async function GET() {
 		}, { status: 500 });
 	}
 }
+
+export const GET = withAdminSecurity(handler);

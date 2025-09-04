@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const DELETE: RequestHandler = async ({ params }) => {
+async function handler({ params }: { params: { id: string } }) {
   try {
     const reservationId = parseInt(params.id);
     
@@ -28,4 +29,6 @@ export const DELETE: RequestHandler = async ({ params }) => {
       error: 'Erreur interne du serveur'
     }, { status: 500 });
   }
-};
+}
+
+export const DELETE = withAdminSecurity(handler);

@@ -2,9 +2,18 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { ValidationService } from '$lib/server/validationService';
 import type { EmailData } from '$lib/server/types';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
+import { env } from '$env/dynamic/private';
 
-export const POST: RequestHandler = async ({ request }) => {
+async function handler({ request }: { request: Request }) {
   try {
+    // Vérifier que nous sommes en mode développement
+    if (env.NODE_ENV === 'production') {
+      return json({
+        error: 'Endpoint de test non disponible en production'
+      }, { status: 404 });
+    }
+
     const data: EmailData = await request.json();
     
     console.log('🧪 Test API - Données reçues:', data);
@@ -29,7 +38,8 @@ export const POST: RequestHandler = async ({ request }) => {
       message: 'Test de validation réussi',
       originalData: data,
       sanitizedData: sanitizedData,
-      validation: validation
+      validation: validation,
+      warning: 'Endpoint de test - Ne pas utiliser en production'
     });
 
   } catch (error) {
@@ -39,4 +49,6 @@ export const POST: RequestHandler = async ({ request }) => {
       details: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 });
   }
-};
+}
+
+export const POST = withAdminSecurity(handler);

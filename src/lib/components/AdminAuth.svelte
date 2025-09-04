@@ -30,24 +30,54 @@
     isLoading = true;
     errorMessage = '';
 
-    // Simuler un délai pour l'authentification
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const response = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ accessCode })
+      });
 
-    if (accessCode === ADMIN_CODE) {
-      isAuthenticated = true;
-      sessionStorage.setItem('admin_authenticated', 'true');
-      errorMessage = '';
-    } else {
-      errorMessage = 'Code d\'accès incorrect.';
+      const result = await response.json();
+
+      if (result.success) {
+        isAuthenticated = true;
+        sessionStorage.setItem('admin_authenticated', 'true');
+        sessionStorage.setItem('admin_session_token', result.sessionToken);
+        errorMessage = '';
+      } else {
+        errorMessage = result.error || 'Code d\'accès incorrect.';
+        accessCode = '';
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'authentification:', error);
+      errorMessage = 'Erreur de connexion. Veuillez réessayer.';
       accessCode = '';
     }
 
     isLoading = false;
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    const sessionToken = sessionStorage.getItem('admin_session_token');
+    
+    if (sessionToken) {
+      try {
+        await fetch('/api/admin/auth', {
+          method: 'DELETE',
+          headers: {
+            'X-Admin-Session': sessionToken
+          }
+        });
+      } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+      }
+    }
+
     isAuthenticated = false;
     sessionStorage.removeItem('admin_authenticated');
+    sessionStorage.removeItem('admin_session_token');
     accessCode = '';
     errorMessage = '';
     goto('/admin');

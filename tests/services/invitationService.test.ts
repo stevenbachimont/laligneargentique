@@ -147,10 +147,17 @@ describe('InvitationService', () => {
 
     it('devrait détecter une réservation existante', () => {
       const invitations = invitationService.getAllInvitations();
-      const invitation = invitations[0];
-
+      
+      // Trouver l'invitation pour test@example.com et balade 9
+      const invitation = invitations.find(inv => 
+        inv.email === 'test@example.com' && inv.baladeId === 9
+      );
+      
+      expect(invitation).toBeDefined();
+      
       // Marquer l'invitation comme utilisée
-      invitationService.markAsUsed(invitation.code);
+      const markResult = invitationService.markAsUsed(invitation!.code);
+      expect(markResult.success).toBe(true);
 
       const result = invitationService.hasExistingReservation(
         'test@example.com',
@@ -172,10 +179,17 @@ describe('InvitationService', () => {
 
     it('devrait ne pas détecter de réservation pour un autre email', () => {
       const invitations = invitationService.getAllInvitations();
-      const invitation = invitations[0];
+      
+      // Trouver l'invitation pour test@example.com et balade 9
+      const invitation = invitations.find(inv => 
+        inv.email === 'test@example.com' && inv.baladeId === 9
+      );
+      
+      expect(invitation).toBeDefined();
 
       // Marquer l'invitation comme utilisée
-      invitationService.markInvitationAsUsed(invitation.id);
+      const markResult = invitationService.markAsUsed(invitation!.code);
+      expect(markResult.success).toBe(true);
 
       const result = invitationService.hasExistingReservation(
         'other@example.com',

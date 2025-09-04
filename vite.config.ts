@@ -9,7 +9,9 @@ export default defineConfig(({ mode }) => {
 	
 	return {
 		define: {
-			'import.meta.env.VITE_ADMIN_ACCESS_CODE': JSON.stringify(env.ADMIN_ACCESS_CODE)
+			'import.meta.env.VITE_ADMIN_ACCESS_CODE': JSON.stringify(env.ADMIN_ACCESS_CODE),
+			'process.env.VITEST': JSON.stringify(mode === 'test' ? 'true' : 'false'),
+			'process.env.NODE_ENV': JSON.stringify(mode === 'test' ? 'test' : process.env.NODE_ENV || 'development')
 		},
 		plugins: [
 			sveltekit(),
