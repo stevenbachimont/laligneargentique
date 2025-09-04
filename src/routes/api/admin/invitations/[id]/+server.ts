@@ -1,9 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { invitationService } from '$lib/server/invitationService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
 // DELETE - Supprimer une invitation
-export const DELETE: RequestHandler = async ({ params }) => {
+async function deleteHandler({ params }: { params: { id: string } }) {
   try {
     const invitationId = parseInt(params.id);
     
@@ -35,10 +36,12 @@ export const DELETE: RequestHandler = async ({ params }) => {
       { status: 500 }
     );
   }
-};
+}
+
+export const DELETE = withAdminSecurity(deleteHandler);
 
 // PUT - Mettre à jour le statut d'une invitation
-export const PUT: RequestHandler = async ({ params, request }) => {
+async function putHandler({ params, request }: { params: { id: string }; request: Request }) {
   try {
     const invitationId = parseInt(params.id);
     
@@ -79,4 +82,6 @@ export const PUT: RequestHandler = async ({ params, request }) => {
       { status: 500 }
     );
   }
-};
+}
+
+export const PUT = withAdminSecurity(putHandler);

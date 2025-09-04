@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const POST: RequestHandler = async ({ request }) => {
+async function handler({ request }: { request: Request }) {
   try {
     const baladeData = await request.json();
     
@@ -68,4 +69,6 @@ export const POST: RequestHandler = async ({ request }) => {
       error: 'Erreur interne du serveur'
     }, { status: 500 });
   }
-};
+}
+
+export const POST = withAdminSecurity(handler);

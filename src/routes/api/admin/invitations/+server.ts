@@ -3,9 +3,10 @@ import type { RequestHandler } from './$types';
 import { invitationService } from '$lib/server/invitationService';
 import { baladesService } from '$lib/server/baladesService';
 import { EmailService } from '$lib/server/emailService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
 // GET - Récupérer toutes les invitations
-export const GET: RequestHandler = async () => {
+async function getHandler() {
   try {
     const invitations = invitationService.getAllInvitations();
     
@@ -40,10 +41,12 @@ export const GET: RequestHandler = async () => {
       { status: 500 }
     );
   }
-};
+}
+
+export const GET = withAdminSecurity(getHandler);
 
 // POST - Créer de nouvelles invitations
-export const POST: RequestHandler = async ({ request }) => {
+async function postHandler({ request }: { request: Request }) {
   try {
     const { baladeId, emails, nombrePersonnes, message } = await request.json();
 
@@ -130,4 +133,6 @@ export const POST: RequestHandler = async ({ request }) => {
       { status: 500 }
     );
   }
-};
+}
+
+export const POST = withAdminSecurity(postHandler);

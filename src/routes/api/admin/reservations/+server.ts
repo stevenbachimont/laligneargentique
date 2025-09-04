@@ -2,8 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
 import { invitationService } from '$lib/server/invitationService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const GET: RequestHandler = async () => {
+async function handler() {
   try {
     // Récupérer toutes les réservations
     const toutesReservations = baladesService.getAllReservations();
@@ -146,4 +147,6 @@ export const GET: RequestHandler = async () => {
       error: 'Erreur lors de la récupération des réservations'
     }, { status: 500 });
   }
-};
+}
+
+export const GET = withAdminSecurity(handler);

@@ -642,8 +642,6 @@
               </div>
             {/if}
           </div>
-
-
         </div>
       {/if}
     </div>

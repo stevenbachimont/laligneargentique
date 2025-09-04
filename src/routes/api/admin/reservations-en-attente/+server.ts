@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const GET: RequestHandler = async () => {
+async function handler() {
   try {
     // Récupérer toutes les réservations
     const reservations = baladesService.getAllReservations();
@@ -42,4 +43,6 @@ export const GET: RequestHandler = async () => {
       total: 0
     }, { status: 500 });
   }
-};
+}
+
+export const GET = withAdminSecurity(handler);

@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { baladesService } from '$lib/server/baladesService';
+import { withAdminSecurity } from '$lib/server/adminMiddleware';
 
-export const POST: RequestHandler = async () => {
+async function handler() {
   try {
     console.log('🔧 Début de la correction des places disponibles...');
     
@@ -23,4 +24,6 @@ export const POST: RequestHandler = async () => {
       error: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 });
   }
-};
+}
+
+export const POST = withAdminSecurity(handler);
