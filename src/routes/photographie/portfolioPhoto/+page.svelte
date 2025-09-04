@@ -48,10 +48,9 @@
       description: "Vues panoramiques",
       photos: [
         "/photos/paysages/1.jpg",
-        "/photos/paysages/2.jpg",
-        "/photos/paysages/3.jpg"
+        
       ],
-      thumbnail: "/photos/paysages/1.jpg"
+      thumbnail: "/photos/paysages/IMG_8296.jpg"
     },
     {
       id: 4,
