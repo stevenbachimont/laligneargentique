@@ -28,3 +28,14 @@ vite.config.ts.timestamp-*
 src/lib/paraglide
 
 /../generated/prisma
+
+# Base de données et sauvegardes
+data/
+backups/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
