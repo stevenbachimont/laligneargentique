@@ -20,44 +20,15 @@ async function handler() {
     
 
     
-    // Séparer les réservations payantes et d'invitation
+    // Séparer les réservations payantes (ignorer les réservations d'invitation)
     const reservationsPayantes = [];
-    const reservationsInvitation = [];
     
     toutesReservations.forEach(reservation => {
       const balade = baladesService.getBaladeById(reservation.baladeId);
       console.log(`🔍 Réservation ${reservation.id}: baladeId=${reservation.baladeId}, balade trouvée:`, !!balade, 'type:', balade?.type);
       
-      if (balade && balade.type === 'invitation') {
-        // C'est une réservation pour une balade d'invitation
-        // Vérifier si cette réservation correspond à une invitation utilisée
-        const invitationUtilisee = invitations.find(inv => 
-          inv.baladeId === reservation.baladeId && 
-          inv.email === reservation.email && 
-          inv.statut === 'utilisee'
-        );
-        
-        if (invitationUtilisee) {
-          // Cette réservation correspond à une invitation utilisée, on l'affiche avec le code d'invitation
-          reservationsInvitation.push({
-            ...reservation,
-            type: 'invitation',
-            statut: 'utilisee',
-            createdAt: reservation.createdAt,
-            code: invitationUtilisee.code, // Utiliser le vrai code d'invitation
-            balade: {
-              id: balade.id,
-              theme: balade.theme,
-              date: balade.date,
-              heure: balade.heure,
-              lieu: balade.lieu,
-              prix: 'Gratuit'
-            }
-          });
-        }
-        // Si pas d'invitation correspondante, on ignore cette réservation (doublon)
-      } else {
-        // C'est une réservation payante
+      if (balade && balade.type !== 'invitation') {
+        // C'est une réservation payante (pas d'invitation)
         reservationsPayantes.push({
           ...reservation,
           type: 'payante',
@@ -72,10 +43,10 @@ async function handler() {
           } : null
         });
       }
+      // Ignorer complètement les réservations d'invitation (doublons)
     });
     
     console.log('🔍 Réservations payantes:', reservationsPayantes.length);
-    console.log('🔍 Réservations d\'invitation:', reservationsInvitation.length);
 
     // Enrichir les invitations avec les détails des balades
     const invitationsAvecDetails = invitations.map(invitation => {
@@ -106,7 +77,7 @@ async function handler() {
     const baladesPasseesSansReservations = baladesPassees
       .filter(balade => {
         // Vérifier si cette balade a déjà des réservations
-        const aDesReservations = [...reservationsPayantes, ...reservationsInvitation, ...invitationsAvecDetails]
+        const aDesReservations = [...reservationsPayantes, ...invitationsAvecDetails]
           .some(reservation => reservation.balade?.id === balade.id);
         return !aDesReservations;
       })
@@ -132,10 +103,9 @@ async function handler() {
     
     console.log('🔍 Balades passées sans réservations:', baladesPasseesSansReservations.length);
     
-    // Combiner toutes les données : réservations payantes + réservations d'invitation + invitations + balades passées sans réservations
+    // Combiner toutes les données : réservations payantes + invitations + balades passées sans réservations
     const toutesReservationsCombinees = [
       ...reservationsPayantes, 
-      ...reservationsInvitation, 
       ...invitationsAvecDetails,
       ...baladesPasseesSansReservations
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -146,7 +116,7 @@ async function handler() {
       stats: {
         total: toutesReservationsCombinees.length,
         payantes: reservationsPayantes.length,
-        invitations: reservationsInvitation.length + invitationsAvecDetails.length,
+        invitations: invitationsAvecDetails.length,
         confirmees: toutesReservationsCombinees.filter(r => r.statut === 'confirmee' || r.statut === 'utilisee').length,
         enAttente: toutesReservationsCombinees.filter(r => r.statut === 'en_attente' || r.statut === 'envoyee').length
       }
