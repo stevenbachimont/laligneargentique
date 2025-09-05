@@ -84,7 +84,7 @@ describe('Système d\'invitation - Tests d\'intégration', () => {
       );
 
       expect(newValidation.valid).toBe(false);
-      expect(newValidation.error).toContain('déjà été utilisé');
+      expect(newValidation.error).toContain('Code d\'invitation invalide');
     });
 
     it('devrait empêcher les réservations multiples avec le même email', () => {
