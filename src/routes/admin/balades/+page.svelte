@@ -554,10 +554,19 @@
     }
 
     try {
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
       const response = await fetch(`/api/admin/balades/${balade.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-Admin-Session': sessionToken
         },
         body: JSON.stringify({
           ...balade,
@@ -588,8 +597,19 @@
     }
 
     try {
+      // Récupérer le token de session
+      const sessionToken = sessionStorage.getItem('admin_session_token');
+      if (!sessionToken) {
+        errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+        window.location.href = '/admin';
+        return;
+      }
+
       const response = await fetch(`/api/admin/balades/${baladeId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'X-Admin-Session': sessionToken
+        }
       });
 
       const data = await response.json();

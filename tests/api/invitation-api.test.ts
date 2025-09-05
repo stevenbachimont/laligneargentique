@@ -6,12 +6,9 @@ describe('API Invitations - Tests d\'intégration', () => {
   beforeEach(() => {
     invitationService.clearAllInvitations();
     
-    // Réinitialiser les places de la balade ID 9
-    const balade = baladesService.getBaladeById(9);
-    if (balade) {
-      // Remettre 10 places disponibles
-      baladesService.reserverPlaces(9, balade.placesDisponibles - 10);
-    }
+    // Réinitialiser les places de la balade ID 9 à 10 places
+    const stmt = baladesService.db.prepare('UPDATE balades SET places_disponibles = 10 WHERE id = 9');
+    stmt.run();
   });
 
   describe('Validation des codes d\'invitation', () => {
