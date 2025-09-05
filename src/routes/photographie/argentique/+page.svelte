@@ -758,7 +758,7 @@
     cursor: pointer;
     transition: transform 0.3s ease;
     font-size: 0.9rem;
-    width: 100%;
+    width: 20%;
   }
 
   .btn-invitation:hover {
