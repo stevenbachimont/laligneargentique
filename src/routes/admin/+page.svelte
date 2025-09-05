@@ -45,8 +45,8 @@
         sessionStorage.setItem('admin_authenticated', 'true');
         sessionStorage.setItem('admin_session_token', result.sessionToken);
         errorMessage = '';
-        // Rediriger vers le dashboard admin
-        goto('/admin/balades');
+        // Rester sur la page admin principale
+        // goto('/admin/balades');
       } else {
         errorMessage = result.error || 'Code d\'accès incorrect.';
         accessCode = '';

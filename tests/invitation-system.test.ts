@@ -10,12 +10,9 @@ describe('Système d\'invitation - Tests d\'intégration', () => {
   beforeEach(() => {
     invitationService.clearAllInvitations();
     
-    // Réinitialiser les places de la balade ID 9
-    const balade = baladesService.getBaladeById(9);
-    if (balade) {
-      // Remettre 10 places disponibles
-      baladesService.reserverPlaces(9, balade.placesDisponibles - 10);
-    }
+    // Réinitialiser les places de la balade ID 9 à 10 places
+    const stmt = baladesService.db.prepare('UPDATE balades SET places_disponibles = 10 WHERE id = 9');
+    stmt.run();
   });
 
   describe('Flux complet de réservation d\'invitation', () => {
@@ -53,9 +50,12 @@ describe('Système d\'invitation - Tests d\'intégration', () => {
       // 4. Marquer l'invitation comme utilisée (simulation de réservation)
       const markUsed = invitationService.markAsUsed(invitation.code);
       expect(markUsed.success).toBe(true);
+      expect(markUsed.invitation).toBeDefined();
+      expect(markUsed.invitation!.statut).toBe('utilisee');
 
       // 5. Vérifier que l'invitation est maintenant utilisée
       const updatedInvitation = invitationService.getInvitationById(invitation.id);
+      expect(updatedInvitation).toBeDefined();
       expect(updatedInvitation!.statut).toBe('utilisee');
 
       // 6. Vérifier qu'une nouvelle tentative de réservation échoue
@@ -149,10 +149,14 @@ describe('Système d\'invitation - Tests d\'intégration', () => {
     });
 
     it('devrait vérifier les places disponibles', () => {
+      // S'assurer que la balade a exactement 10 places
+      const stmt = baladesService.db.prepare('UPDATE balades SET places_disponibles = 10 WHERE id = 9');
+      stmt.run();
+      
       const balade = baladesService.getBaladeById(9);
       
       expect(balade).toBeDefined();
-      expect(balade!.placesDisponibles).toBeGreaterThan(0);
+      expect(balade!.placesDisponibles).toBe(10);
       
       // Tester la réservation de places
       const placesAvant = balade!.placesDisponibles;

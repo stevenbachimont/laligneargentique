@@ -30,21 +30,32 @@ async function handler() {
       
       if (balade && balade.type === 'invitation') {
         // C'est une réservation pour une balade d'invitation
-        reservationsInvitation.push({
-          ...reservation,
-          type: 'invitation',
-          statut: reservation.statut || 'envoyee', // Statut par défaut pour les invitations
-          createdAt: reservation.createdAt,
-          code: `INV-${reservation.id}`, // Code généré pour les anciennes réservations
-          balade: {
-            id: balade.id,
-            theme: balade.theme,
-            date: balade.date,
-            heure: balade.heure,
-            lieu: balade.lieu,
-            prix: 'Gratuit'
-          }
-        });
+        // Vérifier si cette réservation correspond à une invitation utilisée
+        const invitationUtilisee = invitations.find(inv => 
+          inv.baladeId === reservation.baladeId && 
+          inv.email === reservation.email && 
+          inv.statut === 'utilisee'
+        );
+        
+        if (invitationUtilisee) {
+          // Cette réservation correspond à une invitation utilisée, on l'affiche avec le code d'invitation
+          reservationsInvitation.push({
+            ...reservation,
+            type: 'invitation',
+            statut: 'utilisee',
+            createdAt: reservation.createdAt,
+            code: invitationUtilisee.code, // Utiliser le vrai code d'invitation
+            balade: {
+              id: balade.id,
+              theme: balade.theme,
+              date: balade.date,
+              heure: balade.heure,
+              lieu: balade.lieu,
+              prix: 'Gratuit'
+            }
+          });
+        }
+        // Si pas d'invitation correspondante, on ignore cette réservation (doublon)
       } else {
         // C'est une réservation payante
         reservationsPayantes.push({

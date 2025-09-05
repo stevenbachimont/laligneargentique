@@ -40,6 +40,8 @@ export interface Reservation {
 }
 
 class BaladesService {
+  // Exposer la base de données pour les tests
+  public db = db;
   // Récupérer toutes les balades
   getAllBalades(): Balade[] {
     const stmt = db.prepare('SELECT * FROM balades ORDER BY date, heure');

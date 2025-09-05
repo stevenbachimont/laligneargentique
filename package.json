@@ -17,7 +17,8 @@
 		"test:e2e": "playwright test",
 		"test:stripe": "node test-stripe-complet.js",
 		"test:all": "npm run test:unit -- --run && npm run test:stripe",
-		"manage-balades": "node scripts/manage-balades.js"
+		"manage-balades": "node scripts/manage-balades.js",
+		"test:admin": "node scripts/test-admin-functions.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
