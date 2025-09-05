@@ -438,13 +438,13 @@
     background: linear-gradient(45deg, #9C27B0, #7B1FA2);
     color: #fff;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.3s ease;
-    font-size: 1rem;
-    width: 100%;
+    font-size: 0.9rem;
+    width: 20%;
   }
 
   .btn-invitation:hover {

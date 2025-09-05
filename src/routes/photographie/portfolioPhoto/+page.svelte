@@ -25,7 +25,7 @@
     {
       id: 2,
       title: "Portraits",
-      description: "Portraits en noir et blanc",
+      description: "Portraits connus et inconus",
       photos: [
         "/photos/portraits/Charlie.jpg",
         "/photos/portraits/IMG_7790.jpg",
@@ -45,24 +45,15 @@
     {
       id: 3,
       title: "Paysages",
-      description: "Vues panoramiques",
+      description: "les lignes d'horizon",
       photos: [
-        "/photos/paysages/1.jpg",
+        "/photos/paysages/IMG_8296.jpg",
+        "/photos/paysages/IMG_8282.jpg",
         
       ],
       thumbnail: "/photos/paysages/IMG_8296.jpg"
     },
-    {
-      id: 4,
-      title: "Quotidien",
-      description: "Vues quotidiennes",
-      photos: [
-        "/photos/quotidien/1.jpg",
-        "/photos/quotidien/2.jpg",
-        "/photos/quotidien/3.jpg"
-      ],
-      thumbnail: "/photos/quotidien/1.jpg"
-    }
+    
   ];
 
   let selectedSeries: PhotoSeries | null = null;
