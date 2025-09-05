@@ -4,8 +4,12 @@ import { baladesService } from '$lib/server/baladesService';
 
 describe('InvitationService', () => {
   beforeEach(() => {
-    // Nettoyer les invitations avant chaque test
+    // Nettoyer complètement la base de données pour éviter les interférences
     invitationService.clearAllInvitations();
+    
+    // Nettoyer les réservations qui pourraient interférer
+    const cleanReservations = baladesService.db.prepare('DELETE FROM reservations WHERE balade_id = 9');
+    cleanReservations.run();
     
     // Réinitialiser les places de la balade ID 9 à 10 places
     const stmt = baladesService.db.prepare('UPDATE balades SET places_disponibles = 10 WHERE id = 9');
@@ -200,14 +204,21 @@ describe('InvitationService', () => {
   describe('Gestion des invitations', () => {
     it('devrait récupérer toutes les invitations', () => {
       // Créer quelques invitations
-      invitationService.createInvitations({
+      const result = invitationService.createInvitations({
         baladeId: 9,
         emails: ['user1@example.com', 'user2@example.com'],
         nombrePersonnes: 1
       });
 
+      expect(result.success).toBe(true);
+      expect(result.invitations).toHaveLength(2);
+
+      // Vérifier que les invitations créées sont bien présentes
       const invitations = invitationService.getAllInvitations();
-      expect(invitations).toHaveLength(2);
+      const createdInvitations = invitations.filter(inv => 
+        inv.email === 'user1@example.com' || inv.email === 'user2@example.com'
+      );
+      expect(createdInvitations).toHaveLength(2);
     });
 
     it('devrait récupérer une invitation par ID', () => {
