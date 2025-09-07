@@ -7,14 +7,14 @@ Cette section contient toute la documentation relative à l'interface d'administ
 ## 📚 Documentation Disponible
 
 ### 🎯 Interface d'Administration
-- **[ADMIN_INTERFACE.md](./ADMIN_INTERFACE.md)** - Guide complet de l'interface d'administration
+- **[ADMIN_INTERFACE.md](01-administration/ADMIN_INTERFACE.md)** - Guide complet de l'interface d'administration
   - Authentification sécurisée
   - Gestion des balades
   - Gestion des réservations
   - Interface responsive
 
 ### 🗺️ Gestion des Parcours
-- **[GESTION_PARCOURS_ADMIN.md](./GESTION_PARCOURS_ADMIN.md)** - Documentation de la gestion des parcours
+- **[GESTION_PARCOURS_ADMIN.md](01-administration/GESTION_PARCOURS_ADMIN.md)** - Documentation de la gestion des parcours
   - Création de parcours étape par étape
   - Gestion des coordonnées GPS
   - Modification et suppression des étapes

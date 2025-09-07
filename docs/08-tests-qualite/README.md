@@ -7,20 +7,20 @@ Cette section contient toute la documentation relative aux tests et à la qualit
 ## 📚 Documentation Disponible
 
 ### 📊 Résumés d'Implémentation
-- **[RESUME_IMPLEMENTATION.md](./RESUME_IMPLEMENTATION.md)** - Résumé complet de l'implémentation
+- **[RESUME_IMPLEMENTATION.md](08-tests-qualite/RESUME_IMPLEMENTATION.md)** - Résumé complet de l'implémentation
   - Fonctionnalités implémentées
   - Architecture technique
   - Défis rencontrés
   - Solutions adoptées
 
 ### 📅 Résumé des Dates
-- **[RESUME_DATES.md](./RESUME_DATES.md)** - Chronologie du projet
+- **[RESUME_DATES.md](08-tests-qualite/RESUME_DATES.md)** - Chronologie du projet
   - Dates importantes
   - Jalons du projet
   - Évolutions majeures
 
 ### 🧪 Tests Adaptés
-- **[RESUME_TESTS_ADAPTES.md](./RESUME_TESTS_ADAPTES.md)** - Documentation des tests
+- **[RESUME_TESTS_ADAPTES.md](08-tests-qualite/RESUME_TESTS_ADAPTES.md)** - Documentation des tests
   - Stratégie de test
   - Tests unitaires
   - Tests d'intégration

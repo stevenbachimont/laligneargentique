@@ -7,7 +7,7 @@ Cette section contient toute la documentation relative aux guides utilisateur et
 ## 📚 Documentation Disponible
 
 ### 📖 Guide Utilisateur Final
-- **[GUIDE_UTILISATEUR_FINAL.md](./GUIDE_UTILISATEUR_FINAL.md)** - Guide complet pour les utilisateurs finaux
+- **[GUIDE_UTILISATEUR_FINAL.md](10-guides-utilisateur/GUIDE_UTILISATEUR_FINAL.md)** - Guide complet pour les utilisateurs finaux
   - Vue d'ensemble du système
   - Fonctionnalités principales
   - Utilisation du système
@@ -176,9 +176,9 @@ npm run test:unit
 ### Variables d'Environnement
 ```bash
 # .env
-EMAIL_USER=contact.bachimont@gmail.com
+EMAIL_USER=votre-email@gmail.com
 EMAIL_APP_PASSWORD=votre_mot_de_passe_app
-ADMIN_EMAIL=contact.bachimont@gmail.com
+ADMIN_EMAIL=votre-email-admin@gmail.com
 ```
 
 ## 🔄 Workflow Typique

@@ -242,14 +242,15 @@
           <li><a href="#/01-administration/">🔧 Administration</a></li>
           <li><a href="#/02-paiements-stripe/">💳 Paiements Stripe</a></li>
           <li><a href="#/03-securite-api/">🔒 Sécurité API</a></li>
-          <li><a href="#/04-email-templates/">📧 Templates Email</a></li>
-          <li><a href="#/05-systeme-balades/">🚶 Système Balades</a></li>
-          <li><a href="#/06-captcha-photo/">📸 Captcha Photo</a></li>
-          <li><a href="#/07-guide-utilisateur/">👥 Guide Utilisateur</a></li>
-          <li><a href="#/08-deploiement/">🚀 Déploiement</a></li>
-          <li><a href="#/09-tests/">🧪 Tests</a></li>
-          <li><a href="#/10-corrections/">🔧 Corrections</a></li>
-          <li><a href="#/11-architecture-technique/">🏗️ Architecture</a></li>
+          <li><a href="#/04-systeme-balades/">🚶 Système Balades</a></li>
+          <li style="margin-left: 1rem;"><a href="#/04-systeme-balades/SYSTEME_STATUT_BALADES">📊 Statut Balades</a></li>
+          <li><a href="#/05-emails-communication/">📧 Emails & Communication</a></li>
+          <li><a href="#/06-captcha-securite/">📸 Captcha & Sécurité</a></li>
+          <li><a href="#/07-deploiement-configuration/">🚀 Déploiement & Config</a></li>
+          <li><a href="#/08-tests-qualite/">🧪 Tests & Qualité</a></li>
+          <li><a href="#/09-corrections-ameliorations/">🔧 Corrections & Améliorations</a></li>
+          <li><a href="#/10-guides-utilisateur/">👥 Guides Utilisateur</a></li>
+          <li><a href="#/11-architecture-technique/">🏗️ Architecture Technique</a></li>
         </ul>
       </div>
     </nav>
@@ -272,6 +273,12 @@
       subMaxLevel: 3,
       auto2top: true,
       executeScript: true,
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md'
+      },
+      notFoundPage: '_404.md',
+      homepage: 'README.md',
+      basePath: '/',
       search: {
         maxAge: 86400000,
         paths: 'auto',

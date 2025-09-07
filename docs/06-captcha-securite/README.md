@@ -7,14 +7,14 @@ Cette section contient toute la documentation relative au système de captcha ph
 ## 📚 Documentation Disponible
 
 ### 🎮 Captcha Photo Game
-- **[CAPTCHA_PHOTO_GAME.md](./CAPTCHA_PHOTO_GAME.md)** - Documentation complète du captcha photo
+- **[CAPTCHA_PHOTO_GAME.md](06-captcha-securite/CAPTCHA_PHOTO_GAME.md)** - Documentation complète du captcha photo
   - Concept du captcha en deux étapes
   - Ajustement de l'exposition
   - Ajustement de la netteté
   - Interface interactive
 
 ### 🖼️ Images Captcha
-- **[README_CAPTCHA_IMAGES.md](./README_CAPTCHA_IMAGES.md)** - Documentation des images utilisées
+- **[README_CAPTCHA_IMAGES.md](06-captcha-securite/README_CAPTCHA_IMAGES.md)** - Documentation des images utilisées
   - Gestion des images
   - Optimisation
   - Formats supportés

@@ -7,39 +7,39 @@ Cette section contient toute la documentation relative aux corrections de bugs e
 ## 📚 Documentation Disponible
 
 ### 🚨 Corrections de Bugs
-- **[CORRECTION_ERREUR_RESEAU.md](./CORRECTION_ERREUR_RESEAU.md)** - Correction des erreurs réseau
+- **[CORRECTION_ERREUR_RESEAU.md](09-corrections-ameliorations/CORRECTION_ERREUR_RESEAU.md)** - Correction des erreurs réseau
   - Problèmes de connexion
   - Gestion des timeouts
   - Retry automatique
 
-- **[CORRECTION_PARCOURS_RESERVATION.md](./CORRECTION_PARCOURS_RESERVATION.md)** - Correction du parcours de réservation
+- **[CORRECTION_PARCOURS_RESERVATION.md](09-corrections-ameliorations/CORRECTION_PARCOURS_RESERVATION.md)** - Correction du parcours de réservation
   - Problèmes de navigation
   - Validation des formulaires
   - Gestion des erreurs
 
-- **[CORRECTION_REDIRECTION_RESERVATION.md](./CORRECTION_REDIRECTION_RESERVATION.md)** - Correction des redirections
+- **[CORRECTION_REDIRECTION_RESERVATION.md](09-corrections-ameliorations/CORRECTION_REDIRECTION_RESERVATION.md)** - Correction des redirections
   - Problèmes de redirection
   - Gestion des URLs
   - Navigation utilisateur
 
 ### 🚀 Améliorations
-- **[AMELIORATION_PARCOURS_DETAILS.md](./AMELIORATION_PARCOURS_DETAILS.md)** - Amélioration des détails de parcours
+- **[AMELIORATION_PARCOURS_DETAILS.md](09-corrections-ameliorations/AMELIORATION_PARCOURS_DETAILS.md)** - Amélioration des détails de parcours
   - Interface utilisateur
   - Affichage des informations
   - Expérience utilisateur
 
-- **[AMELIORATIONS_PAGE_PRINCIPALE.md](./AMELIORATIONS_PAGE_PRINCIPALE.md)** - Améliorations de la page principale
+- **[AMELIORATIONS_PAGE_PRINCIPALE.md](09-corrections-ameliorations/AMELIORATIONS_PAGE_PRINCIPALE.md)** - Améliorations de la page principale
   - Design et layout
   - Performance
   - Fonctionnalités
 
 ### 📝 Simplification
-- **[DOCUMENTATION_SIMPLIFICATION_ANNEES.md](./DOCUMENTATION_SIMPLIFICATION_ANNEES.md)** - Simplification de la documentation des années
+- **[DOCUMENTATION_SIMPLIFICATION_ANNEES.md](09-corrections-ameliorations/DOCUMENTATION_SIMPLIFICATION_ANNEES.md)** - Simplification de la documentation des années
   - Structure des données
   - Affichage des années
   - Gestion des dates
 
-- **[GUIDE_UTILISATION_SIMPLIFICATION.md](./GUIDE_UTILISATION_SIMPLIFICATION.md)** - Guide d'utilisation simplifié
+- **[GUIDE_UTILISATION_SIMPLIFICATION.md](09-corrections-ameliorations/GUIDE_UTILISATION_SIMPLIFICATION.md)** - Guide d'utilisation simplifié
   - Interface utilisateur
   - Workflow simplifié
   - Documentation utilisateur

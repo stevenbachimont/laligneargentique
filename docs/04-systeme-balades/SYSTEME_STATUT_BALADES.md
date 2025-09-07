@@ -598,9 +598,9 @@ sqlite3 data.db ".schema balades"
 #### **Variables d'Environnement**
 ```bash
 # .env
-EMAIL_USER=contact.bachimont@gmail.com
+EMAIL_USER=votre-email@gmail.com
 EMAIL_APP_PASSWORD=votre_mot_de_passe_app
-ADMIN_EMAIL=contact.bachimont@gmail.com
+ADMIN_EMAIL=votre-email-admin@gmail.com
 # Aucune variable supplémentaire requise pour le système de statut
 ```
 
