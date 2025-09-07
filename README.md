@@ -211,6 +211,29 @@ node scripts/manage-balades.js
 - 🗑️ Supprimer une balade
 - 📋 Voir les réservations
 
+## 📚 Documentation
+
+La documentation complète du projet est organisée par thématiques dans le dossier `docs/` :
+
+### 🎯 **Documentation Principale**
+- **[📚 Documentation Complète](./docs/README.md)** - Index principal de toute la documentation
+- **[🔐 Administration](./docs/01-administration/)** - Interface d'administration et gestion
+- **[💳 Paiements Stripe](./docs/02-paiements-stripe/)** - Configuration et déploiement des paiements
+- **[🛡️ Sécurité & API](./docs/03-securite-api/)** - Sécurité des APIs et authentification
+- **[🗺️ Système de Balades](./docs/04-systeme-balades/)** - Gestion des balades et statuts
+- **[📧 Emails & Communication](./docs/05-emails-communication/)** - Templates d'emails et configuration
+- **[📸 Captcha & Sécurité](./docs/06-captcha-securite/)** - Système de captcha photo
+- **[🚀 Déploiement & Configuration](./docs/07-deploiement-configuration/)** - Guides de déploiement
+- **[🧪 Tests & Qualité](./docs/08-tests-qualite/)** - Tests et qualité du code
+- **[🔧 Corrections & Améliorations](./docs/09-corrections-ameliorations/)** - Corrections et améliorations
+- **[👥 Guides Utilisateur](./docs/10-guides-utilisateur/)** - Documentation utilisateur final
+- **[🏗️ Architecture Technique](./docs/11-architecture-technique/)** - Architecture et spécifications techniques
+
+### 🚀 **Démarrage Rapide**
+- **Développeurs** : Consultez [Architecture Technique](./docs/11-architecture-technique/) et [Déploiement](./docs/07-deploiement-configuration/)
+- **Administrateurs** : Consultez [Administration](./docs/01-administration/) et [Système de Balades](./docs/04-systeme-balades/)
+- **Utilisateurs** : Consultez [Guides Utilisateur](./docs/10-guides-utilisateur/)
+
 ## 🧪 Tests
 
 Le projet inclut une suite de tests complète :
@@ -232,3 +255,5 @@ npm run test:stripe  # Tests Stripe
 - ✅ **API endpoints**
 - ✅ **Intégration des composants**
 - ✅ **💳 Tests Stripe** (paiements, webhooks, emails)
+
+> **📚 Documentation détaillée** : Consultez [Tests & Qualité](./docs/08-tests-qualite/) pour la documentation complète des tests.
