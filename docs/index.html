@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Documentation MonSite</title>
+  <title>Documentation stevenbachimont.com</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Documentation complète du projet MonSite">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
@@ -267,7 +267,7 @@
     // Configuration Docsify
     window.$docsify = {
       name: 'Documentation MonSite',
-      repo: '',
+      repo: 'https://github.com/stevenbachimont/monsite',
       loadSidebar: false,
       loadNavbar: false,
       subMaxLevel: 3,
@@ -319,6 +319,11 @@
         }
       }
     };
+
+    // Configuration conditionnelle pour GitHub Pages
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      window.$docsify.basePath = '/docs';
+    }
 
     // Fonction pour initialiser le comportement mobile
     function initMobileBehavior() {
