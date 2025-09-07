@@ -7,7 +7,7 @@ Cette section contient toute la documentation relative à la sécurité des APIs
 ## 📚 Documentation Disponible
 
 ### 🔐 Sécurité des APIs
-- **[SECURITE_API.md](./SECURITE_API.md)** - Documentation complète de la sécurité
+- **[SECURITE_API.md](03-securite-api/SECURITE_API.md)** - Documentation complète de la sécurité
   - Authentification admin sécurisée
   - Protection des routes admin
   - Rate limiting

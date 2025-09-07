@@ -7,13 +7,13 @@ Cette section contient toute la documentation relative au déploiement et à la 
 ## 📚 Documentation Disponible
 
 ### 📊 Déploiement des Données
-- **[DEPLOIEMENT_DONNEES.md](./DEPLOIEMENT_DONNEES.md)** - Guide de déploiement des données
+- **[DEPLOIEMENT_DONNEES.md](07-deploiement-configuration/DEPLOIEMENT_DONNEES.md)** - Guide de déploiement des données
   - Migration de base de données
   - Configuration des données initiales
   - Sauvegarde et restauration
 
 ### ⚙️ Configuration d'Environnement
-- **[ENV_CONFIGURATION.md](./ENV_CONFIGURATION.md)** - Configuration des variables d'environnement
+- **[ENV_CONFIGURATION.md](07-deploiement-configuration/ENV_CONFIGURATION.md)** - Configuration des variables d'environnement
   - Variables requises
   - Configuration par environnement
   - Validation des configurations
@@ -79,8 +79,8 @@ ADMIN_ACCESS_CODE=test123
 ```bash
 NODE_ENV=production
 DATABASE_URL=sqlite:./data/balades.db
-EMAIL_USER=contact.bachimont@gmail.com
-ADMIN_ACCESS_CODE=argentique2024
+EMAIL_USER=votre-email@gmail.com
+ADMIN_ACCESS_CODE=votre_code_securise
 ```
 
 ## 🚀 Processus de Déploiement

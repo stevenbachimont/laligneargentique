@@ -7,26 +7,26 @@ Cette section contient toute la documentation relative au système de paiement S
 ## 📚 Documentation Disponible
 
 ### 🚀 Déploiement Stripe
-- **[GUIDE_DEPLOIEMENT_STRIPE.md](./GUIDE_DEPLOIEMENT_STRIPE.md)** - Guide complet de déploiement
+- **[GUIDE_DEPLOIEMENT_STRIPE.md](02-paiements-stripe/GUIDE_DEPLOIEMENT_STRIPE.md)** - Guide complet de déploiement
   - Configuration des variables d'environnement
   - Déploiement avec Docker
   - Vérification du déploiement
   - Dépannage
 
 ### 🔧 Configuration Webhook
-- **[CONFIGURATION_WEBHOOK_STRIPE.md](./CONFIGURATION_WEBHOOK_STRIPE.md)** - Configuration des webhooks
+- **[CONFIGURATION_WEBHOOK_STRIPE.md](02-paiements-stripe/CONFIGURATION_WEBHOOK_STRIPE.md)** - Configuration des webhooks
   - Création des endpoints
   - Sélection des événements
   - Configuration des secrets
 
 ### 🚨 Résolution de Problèmes
-- **[RESOLUTION_DEPLOIEMENT_STRIPE.md](./RESOLUTION_DEPLOIEMENT_STRIPE.md)** - Solutions aux problèmes courants
+- **[RESOLUTION_DEPLOIEMENT_STRIPE.md](02-paiements-stripe/RESOLUTION_DEPLOIEMENT_STRIPE.md)** - Solutions aux problèmes courants
   - Erreurs de configuration
   - Problèmes de webhook
   - Dépannage des paiements
 
 ### 🧪 Tests Stripe
-- **[TESTS_STRIPE_DEPLOIEMENT.md](./TESTS_STRIPE_DEPLOIEMENT.md)** - Tests et validation
+- **[TESTS_STRIPE_DEPLOIEMENT.md](02-paiements-stripe/TESTS_STRIPE_DEPLOIEMENT.md)** - Tests et validation
   - Tests de paiement
   - Validation des webhooks
   - Tests d'intégration

@@ -7,14 +7,14 @@ Cette section contient toute la documentation relative au système d'emails et d
 ## 📚 Documentation Disponible
 
 ### 📝 Templates d'Emails
-- **[EMAIL_TEMPLATES_README.md](./EMAIL_TEMPLATES_README.md)** - Guide complet des templates d'emails
+- **[EMAIL_TEMPLATES_README.md](05-emails-communication/EMAIL_TEMPLATES_README.md)** - Guide complet des templates d'emails
   - Structure des templates
   - Variables disponibles
   - Modification du contenu
   - Types d'emails disponibles
 
 ### ⚙️ Configuration Email
-- **[README-EMAIL-SETUP.md](./README-EMAIL-SETUP.md)** - Configuration du système d'emails
+- **[README-EMAIL-SETUP.md](05-emails-communication/README-EMAIL-SETUP.md)** - Configuration du système d'emails
   - Variables d'environnement
   - Configuration Gmail
   - Configuration SMTP personnalisé

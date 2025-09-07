@@ -7,27 +7,27 @@ Cette section contient toute la documentation relative au système de gestion de
 ## 📚 Documentation Disponible
 
 ### 🎯 Système de Statut
-- **[SYSTEME_STATUT_BALADES.md](./SYSTEME_STATUT_BALADES.md)** - Documentation complète du système de statut
+- **[SYSTEME_STATUT_BALADES.md](04-systeme-balades/SYSTEME_STATUT_BALADES.md)** - Documentation complète du système de statut
   - Statuts disponibles (brouillon/en ligne)
   - Workflow de création et publication
   - Interface d'administration
   - Tests et validation
 
 ### 🎨 Système de Code Couleur
-- **[SYSTEME_CODE_COULEUR.md](./SYSTEME_CODE_COULEUR.md)** - Guide du système de code couleur
+- **[SYSTEME_CODE_COULEUR.md](04-systeme-balades/SYSTEME_CODE_COULEUR.md)** - Guide du système de code couleur
   - Indicateurs visuels de disponibilité
   - Logique des couleurs
   - Interface utilisateur
   - Responsive design
 
 ### 📚 Balades Archivées
-- **[SYSTEME_BALADES_ARCHIVEES.md](./SYSTEME_BALADES_ARCHIVEES.md)** - Documentation technique des balades archivées
+- **[SYSTEME_BALADES_ARCHIVEES.md](04-systeme-balades/SYSTEME_BALADES_ARCHIVEES.md)** - Documentation technique des balades archivées
   - Architecture technique
   - Gestion des rétrospectives
   - Interface utilisateur
   - Base de données
 
-- **[README_BALADES_ARCHIVEES.md](./README_BALADES_ARCHIVEES.md)** - Guide utilisateur des balades archivées
+- **[README_BALADES_ARCHIVEES.md](04-systeme-balades/README_BALADES_ARCHIVEES.md)** - Guide utilisateur des balades archivées
   - Utilisation du système
   - Interface utilisateur
   - Fonctionnalités
