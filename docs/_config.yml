@@ -1,0 +1,5 @@
+# Configuration GitHub Pages pour Docsify
+theme: jekyll-theme-minimal
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap

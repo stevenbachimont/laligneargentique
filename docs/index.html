@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Documentation MonSite</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Documentation complète du projet MonSite">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <style>
+    /* Variables CSS */
+    :root {
+      --theme-color: #42b983;
+      --border-color: #e1e4e8;
+      --bg-color: #f6f8fa;
+    }
+
+    /* Reset et base */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Supprimer tous les paddings par défaut de Docsify */
+    .content,
+    .content > div,
+    .content > main,
+    .content > section,
+    #app > div:not(.sidebar),
+    .app-name + div,
+    .app-name + main,
+    .app-name + section {
+      padding-left: 0 !important;
+      margin-left: 0 !important;
+    }
+
+    /* Layout principal */
+    #app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background: white;
+      border-right: 1px solid var(--border-color);
+      z-index: 1000;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Zone de contenu */
+    .content {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+      min-height: 100vh;
+      background: white;
+      padding-right: 4rem;
+      margin-top: 0;
+    }
+
+    /* Contenu markdown */
+    .markdown-section {
+      max-width: none;
+      padding: 1rem 1rem 1rem 0.5rem;
+      margin: 0;
+      margin-right: 1rem;
+    }
+
+    /* Titre de l'app */
+    .app-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--theme-color);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-color);
+    }
+
+    /* Navigation sidebar */
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+
+    .sidebar-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar-nav li {
+      margin: 0;
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: #333;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+
+    .sidebar-nav a:hover {
+      background-color: var(--bg-color);
+    }
+
+    .sidebar-nav a.active {
+      background-color: var(--theme-color);
+      color: white;
+    }
+
+    /* Bouton toggle mobile */
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      background: var(--theme-color);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Overlay mobile */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .content {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .sidebar-toggle {
+        display: block;
+      }
+
+      .sidebar-overlay.show {
+        display: block;
+      }
+
+      .markdown-section {
+        padding: 1rem;
+      }
+    }
+
+    /* Styles pour le contenu */
+    .markdown-section h1,
+    .markdown-section h2,
+    .markdown-section h3 {
+      color: var(--theme-color);
+      border-bottom: 2px solid var(--theme-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .markdown-section code {
+      background: var(--bg-color);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+
+    .markdown-section pre {
+      background: var(--bg-color);
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .markdown-section blockquote {
+      border-left: 4px solid var(--theme-color);
+      padding-left: 1rem;
+      margin-left: 0;
+      color: #666;
+    }
+
+    .markdown-section table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .markdown-section th,
+    .markdown-section td {
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    .markdown-section th {
+      background: var(--bg-color);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Bouton toggle mobile -->
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    
+    <!-- Overlay mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="app-name">📚 Documentation MonSite</div>
+      <div class="sidebar-nav">
+        <ul>
+          <li><a href="#/" class="active">🏠 Accueil</a></li>
+          <li><a href="#/01-administration/">🔧 Administration</a></li>
+          <li><a href="#/02-paiements-stripe/">💳 Paiements Stripe</a></li>
+          <li><a href="#/03-securite-api/">🔒 Sécurité API</a></li>
+          <li><a href="#/04-email-templates/">📧 Templates Email</a></li>
+          <li><a href="#/05-systeme-balades/">🚶 Système Balades</a></li>
+          <li><a href="#/06-captcha-photo/">📸 Captcha Photo</a></li>
+          <li><a href="#/07-guide-utilisateur/">👥 Guide Utilisateur</a></li>
+          <li><a href="#/08-deploiement/">🚀 Déploiement</a></li>
+          <li><a href="#/09-tests/">🧪 Tests</a></li>
+          <li><a href="#/10-corrections/">🔧 Corrections</a></li>
+          <li><a href="#/11-architecture-technique/">🏗️ Architecture</a></li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Zone de contenu -->
+    <main class="content">
+      <div class="markdown-section">
+        <!-- Le contenu sera chargé ici par Docsify -->
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Configuration Docsify
+    window.$docsify = {
+      name: 'Documentation MonSite',
+      repo: '',
+      loadSidebar: false,
+      loadNavbar: false,
+      subMaxLevel: 3,
+      auto2top: true,
+      executeScript: true,
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: 'Rechercher dans la documentation...',
+        noData: 'Aucun résultat trouvé.',
+        depth: 6
+      },
+      copyCode: {
+        buttonText: 'Copier le code',
+        errorText: 'Erreur lors de la copie',
+        successText: 'Code copié !'
+      },
+      pagination: {
+        previousText: 'Précédent',
+        nextText: 'Suivant',
+        crossChapter: true
+      },
+      tabs: {
+        persist: true,
+        sync: true,
+        theme: 'classic',
+        tabComments: true,
+        tabHeadings: true
+      },
+      zoom: {
+        selector: 'img',
+        background: {
+          'background-color': 'rgba(0,0,0,0.8)'
+        }
+      },
+      emoji: {
+        enable: true
+      },
+      hooks: {
+        mounted: function() {
+          // Initialiser le comportement mobile
+          initMobileBehavior();
+        },
+        doneEach: function() {
+          // Mettre à jour la navigation active
+          updateActiveNav();
+        }
+      }
+    };
+
+    // Fonction pour initialiser le comportement mobile
+    function initMobileBehavior() {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('sidebar-toggle');
+      const overlay = document.getElementById('sidebar-overlay');
+
+      // Toggle sidebar
+      toggle.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+      });
+
+      // Fermer sidebar en cliquant sur l'overlay
+      overlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+      });
+
+      // Fermer sidebar en redimensionnant vers desktop
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        }
+      });
+    }
+
+    // Fonction pour mettre à jour la navigation active
+    function updateActiveNav() {
+      const currentPath = window.location.hash;
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPath || 
+            (currentPath === '#/' && link.getAttribute('href') === '#/')) {
+          link.classList.add('active');
+        }
+      });
+    }
+  </script>
+
+  <!-- Docsify Core -->
+  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  
+  <!-- Plugins Docsify -->
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
+</body>
+</html>
