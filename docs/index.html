@@ -2,351 +2,293 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>📚 Documentation MonSite - Portfolio Photographique</title>
+  <title>Documentation MonSite</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Documentation complète du projet MonSite - Portfolio photographique et système de balades argentique avec réservations en ligne">
+  <meta name="description" content="Documentation complète du projet MonSite">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <meta name="theme-color" content="#000000">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="../static/favicon.png" type="image/png">
-  
-  <!-- Styles -->
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
-  
-  <!-- Custom Styles -->
   <style>
+    /* Variables CSS */
     :root {
-      --base-font-size: 16px;
-      --theme-color: #000000;
-      --theme-color-light: #333333;
-      --accent-color: #ffd700;
-      --text-color: #333333;
+      --theme-color: #42b983;
       --border-color: #e1e4e8;
-      --code-bg: #f6f8fa;
+      --bg-color: #f6f8fa;
     }
-    
+
+    /* Reset et base */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.6;
+      margin: 0;
+      padding: 0;
     }
-    
-    .app-name {
-      font-weight: 600;
-      color: var(--theme-color);
-      background: white;
-      padding: 1rem;
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    /* Supprimer tous les paddings par défaut de Docsify */
+    .content,
+    .content > div,
+    .content > main,
+    .content > section,
+    #app > div:not(.sidebar),
+    .app-name + div,
+    .app-name + main,
+    .app-name + section {
+      padding-left: 0 !important;
+      margin-left: 0 !important;
     }
-    
-    .sidebar-nav > ul > li > a {
-      font-weight: 500;
-      color: var(--theme-color);
+
+    /* Layout principal */
+    #app {
+      display: flex;
+      min-height: 100vh;
     }
-    
-    .sidebar-nav > ul > li > a:hover {
-      color: var(--accent-color);
-    }
-    
-    .markdown-section h1 {
-      color: var(--theme-color);
-      border-bottom: 2px solid var(--accent-color);
-      padding-bottom: 0.5rem;
-    }
-    
-    .markdown-section h2 {
-      color: var(--theme-color-light);
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 0.3rem;
-    }
-    
-    .markdown-section h3 {
-      color: var(--theme-color-light);
-    }
-    
-    .markdown-section code {
-      background-color: var(--code-bg);
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 0.9em;
-    }
-    
-    .markdown-section pre {
-      background-color: var(--code-bg);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .markdown-section blockquote {
-      border-left: 4px solid var(--accent-color);
-      background-color: #f8f9fa;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 0 4px 4px 0;
-    }
-    
-    .markdown-section table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 1rem 0;
-    }
-    
-    .markdown-section th,
-    .markdown-section td {
-      border: 1px solid var(--border-color);
-      padding: 0.75rem;
-      text-align: left;
-    }
-    
-    .markdown-section th {
-      background-color: var(--code-bg);
-      font-weight: 600;
-    }
-    
-    .markdown-section tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    
-    /* Navigation améliorée */
-    .navbar {
-      background: linear-gradient(135deg, var(--theme-color), var(--theme-color-light));
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .navbar a {
-      color: white !important;
-      font-weight: 500;
-    }
-    
-    .navbar a:hover {
-      color: var(--accent-color) !important;
-    }
-    
-    /* Sidebar améliorée */
+
+    /* Sidebar */
     .sidebar {
-      background-color: #f8f9fa;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background: white;
       border-right: 1px solid var(--border-color);
-      width: 280px !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      height: 100vh !important;
-      overflow-y: auto !important;
-      z-index: 1000 !important;
-      transform: translateX(0) !important;
-      transition: transform 0.3s ease !important;
+      z-index: 1000;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      padding: 0;
+      margin: 0;
     }
-    
-    .sidebar-toggle {
-      display: block !important;
-      position: fixed !important;
-      top: 20px !important;
-      left: 20px !important;
-      z-index: 1001 !important;
-      background: var(--theme-color) !important;
-      color: white !important;
-      border: none !important;
-      padding: 10px !important;
-      border-radius: 4px !important;
-      cursor: pointer !important;
-      font-size: 16px !important;
+
+    /* Zone de contenu */
+    .content {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+      min-height: 100vh;
+      background: white;
+      padding-right: 4rem;
+      margin-top: 0;
     }
-    
+
+    /* Contenu markdown */
+    .markdown-section {
+      max-width: none;
+      padding: 1rem 1rem 1rem 0.5rem;
+      margin: 0;
+      margin-right: 1rem;
+    }
+
+    /* Titre de l'app */
+    .app-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--theme-color);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-color);
+    }
+
+    /* Navigation sidebar */
     .sidebar-nav {
-      padding: 20px !important;
-      margin-top: 60px !important;
+      padding: 1rem 0;
     }
-    
-    .sidebar-nav > ul > li > a {
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      margin: 0.2rem 0;
-      transition: all 0.2s ease;
+
+    .sidebar-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar-nav li {
+      margin: 0;
+    }
+
+    .sidebar-nav a {
       display: block;
+      padding: 0.5rem 1rem;
+      color: #333;
       text-decoration: none;
+      transition: background-color 0.2s;
     }
-    
-    .sidebar-nav > ul > li > a:hover {
-      background-color: var(--accent-color);
-      color: var(--theme-color) !important;
+
+    .sidebar-nav a:hover {
+      background-color: var(--bg-color);
     }
-    
-    /* Overlay pour mobile */
+
+    .sidebar-nav a.active {
+      background-color: var(--theme-color);
+      color: white;
+    }
+
+    /* Bouton toggle mobile */
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      background: var(--theme-color);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Overlay mobile */
     .sidebar-overlay {
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 999;
-      display: none;
     }
-    
-    .sidebar-overlay.show {
-      display: block;
-    }
-    
-    /* Masquer la sidebar par défaut sur mobile */
+
+    /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
-        transform: translateX(-100%) !important;
+        transform: translateX(-100%);
       }
-      
+
       .sidebar.open {
-        transform: translateX(0) !important;
+        transform: translateX(0);
       }
-      
+
+      .content {
+        margin-left: 0;
+        width: 100%;
+      }
+
       .sidebar-toggle {
-        display: block !important;
+        display: block;
       }
-      
+
       .sidebar-overlay.show {
         display: block;
       }
-    }
-    
-    /* Afficher la sidebar par défaut sur desktop */
-    @media (min-width: 769px) {
-      .sidebar {
-        transform: translateX(0) !important;
-      }
-      
-      .sidebar-toggle {
-        display: none !important;
-      }
-    }
-    
-    /* Ajuster le conteneur principal */
-    #app {
-      display: flex;
-      min-height: 100vh;
-    }
-    
-    /* Sidebar fixe */
-    .sidebar {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 280px !important;
-      height: 100vh !important;
-      z-index: 1000 !important;
-      transform: translateX(0) !important;
-      transition: transform 0.3s ease !important;
-    }
-    
-    /* Zone de contenu principal */
-    .content {
-      margin-left: 280px !important;
-      width: calc(100% - 280px) !important;
-      min-height: 100vh !important;
-      transition: margin-left 0.3s ease !important;
-    }
-    
-    /* Section markdown */
-    .markdown-section {
-      margin-left: 0 !important;
-      max-width: none !important;
-      padding: 2rem !important;
-    }
-    
-    /* Titre du menu */
-    .app-name {
-      margin-left: 0 !important;
-      position: relative !important;
-      z-index: 1002 !important;
-    }
-    
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%) !important;
-      }
-      
-      .sidebar.open {
-        transform: translateX(0) !important;
-      }
-      
-      .content {
-        margin-left: 0 !important;
-        width: 100% !important;
-      }
-      
-      .markdown-section {
-        padding: 1rem !important;
-      }
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
+
       .markdown-section {
         padding: 1rem;
       }
-      
-      .markdown-section h1 {
-        font-size: 1.8rem;
-      }
-      
-      .markdown-section h2 {
-        font-size: 1.4rem;
-      }
     }
-    
-    /* Loading amélioré */
-    #app:empty::before {
-      content: "📚 Chargement de la documentation...";
-      display: block;
-      text-align: center;
-      padding: 2rem;
-      color: var(--theme-color-light);
-      font-size: 1.1rem;
+
+    /* Styles pour le contenu */
+    .markdown-section h1,
+    .markdown-section h2,
+    .markdown-section h3 {
+      color: var(--theme-color);
+      border-bottom: 2px solid var(--theme-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .markdown-section code {
+      background: var(--bg-color);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+
+    .markdown-section pre {
+      background: var(--bg-color);
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .markdown-section blockquote {
+      border-left: 4px solid var(--theme-color);
+      padding-left: 1rem;
+      margin-left: 0;
+      color: #666;
+    }
+
+    .markdown-section table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .markdown-section th,
+    .markdown-section td {
+      border: 1px solid var(--border-color);
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    .markdown-section th {
+      background: var(--bg-color);
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <div id="app"></div>
-  
+  <div id="app">
+    <!-- Bouton toggle mobile -->
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    
+    <!-- Overlay mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="app-name">📚 Documentation MonSite</div>
+      <div class="sidebar-nav">
+        <ul>
+          <li><a href="#/" class="active">🏠 Accueil</a></li>
+          <li><a href="#/01-administration/">🔧 Administration</a></li>
+          <li><a href="#/02-paiements-stripe/">💳 Paiements Stripe</a></li>
+          <li><a href="#/03-securite-api/">🔒 Sécurité API</a></li>
+          <li><a href="#/04-email-templates/">📧 Templates Email</a></li>
+          <li><a href="#/05-systeme-balades/">🚶 Système Balades</a></li>
+          <li><a href="#/06-captcha-photo/">📸 Captcha Photo</a></li>
+          <li><a href="#/07-guide-utilisateur/">👥 Guide Utilisateur</a></li>
+          <li><a href="#/08-deploiement/">🚀 Déploiement</a></li>
+          <li><a href="#/09-tests/">🧪 Tests</a></li>
+          <li><a href="#/10-corrections/">🔧 Corrections</a></li>
+          <li><a href="#/11-architecture-technique/">🏗️ Architecture</a></li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Zone de contenu -->
+    <main class="content">
+      <div class="markdown-section">
+        <!-- Le contenu sera chargé ici par Docsify -->
+      </div>
+    </main>
+  </div>
+
   <script>
+    // Configuration Docsify
     window.$docsify = {
-      name: '📚 Documentation MonSite',
+      name: 'Documentation MonSite',
       repo: '',
-      homepage: 'README.md',
-      loadSidebar: true,
+      loadSidebar: false,
       loadNavbar: false,
-      subMaxLevel: 4,
-      coverpage: false,
+      subMaxLevel: 3,
       auto2top: true,
       executeScript: true,
-      mergeNavbar: false,
-      formatUpdated: '{MM}/{DD} {HH}:{mm}',
-      
-      // Recherche améliorée
       search: {
         maxAge: 86400000,
         paths: 'auto',
-        placeholder: '🔍 Rechercher dans la documentation...',
-        noData: '❌ Aucun résultat trouvé!',
-        depth: 6,
-        namespace: 'monsite-docs'
+        placeholder: 'Rechercher dans la documentation...',
+        noData: 'Aucun résultat trouvé.',
+        depth: 6
       },
-      
-      // Copie de code
       copyCode: {
-        buttonText: '📋 Copier',
-        errorText: '❌ Erreur',
-        successText: '✅ Copié!'
+        buttonText: 'Copier le code',
+        errorText: 'Erreur lors de la copie',
+        successText: 'Code copié !'
       },
-      
-      // Pagination
       pagination: {
-        previousText: '⬅️ Précédent',
-        nextText: 'Suivant ➡️',
-        crossChapter: true,
-        crossChapterText: true
+        previousText: 'Précédent',
+        nextText: 'Suivant',
+        crossChapter: true
       },
-      
-      // Onglets
       tabs: {
         persist: true,
         sync: true,
@@ -354,161 +296,78 @@
         tabComments: true,
         tabHeadings: true
       },
-      
-      // Zoom d'images
       zoom: {
         selector: 'img',
         background: {
           'background-color': 'rgba(0,0,0,0.8)'
         }
       },
-      
-      // Emojis
       emoji: {
-        enable: true,
-        shortname: true,
-        unicode: false
+        enable: true
       },
-      
-      // Alias pour la navigation
-      alias: {
-        '/.*/_sidebar.md': '/_sidebar.md',
-        '/.*/_navbar.md': '/_navbar.md'
-      },
-      
-      // Hooks personnalisés
       hooks: {
-        'mounted': function() {
-          console.log('📚 Documentation MonSite chargée avec succès!');
-          
-          // Ajouter le bouton de toggle pour la sidebar
-          this.addSidebarToggle();
-          
-          // Aligner le contenu
-          this.alignContent();
+        mounted: function() {
+          // Initialiser le comportement mobile
+          initMobileBehavior();
         },
-        'doneEach': function() {
-          // Améliorer les liens externes
-          const links = document.querySelectorAll('a[href^="http"]');
-          links.forEach(link => {
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-          });
-          
-          // Forcer l'alignement du contenu
-          this.alignContent();
-        },
-        'addSidebarToggle': function() {
-          // Créer le bouton de toggle
-          const toggleButton = document.createElement('button');
-          toggleButton.className = 'sidebar-toggle';
-          toggleButton.innerHTML = '☰';
-          toggleButton.title = 'Ouvrir/Fermer le menu';
-          
-          // Créer l'overlay
-          const overlay = document.createElement('div');
-          overlay.className = 'sidebar-overlay';
-          
-          // Ajouter les éléments au body
-          document.body.appendChild(toggleButton);
-          document.body.appendChild(overlay);
-          
-          // Gérer le clic sur le bouton
-          toggleButton.addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-              sidebar.classList.toggle('open');
-              overlay.classList.toggle('show');
-            }
-          });
-          
-          // Fermer la sidebar en cliquant sur l'overlay
-          overlay.addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-              sidebar.classList.remove('open');
-              overlay.classList.remove('show');
-            }
-          });
-          
-          // Fermer la sidebar en cliquant à l'extérieur sur mobile
-          document.addEventListener('click', function(e) {
-            if (window.innerWidth <= 768) {
-              const sidebar = document.querySelector('.sidebar');
-              const toggleButton = document.querySelector('.sidebar-toggle');
-              
-              if (sidebar && sidebar.classList.contains('open') && 
-                  !sidebar.contains(e.target) && 
-                  !toggleButton.contains(e.target)) {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('show');
-              }
-            }
-          });
-          
-          // Gérer le redimensionnement de la fenêtre
-          window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-              const sidebar = document.querySelector('.sidebar');
-              const overlay = document.querySelector('.sidebar-overlay');
-              if (sidebar) sidebar.classList.remove('open');
-              if (overlay) overlay.classList.remove('show');
-            }
-          });
-        },
-        'alignContent': function() {
-          // Forcer l'alignement du contenu
-          setTimeout(() => {
-            const content = document.querySelector('.content');
-            const markdownSection = document.querySelector('.markdown-section');
-            
-            if (window.innerWidth > 768) {
-              // Desktop : sidebar fixe + contenu décalé
-              if (content) {
-                content.style.marginLeft = '280px';
-                content.style.width = 'calc(100% - 280px)';
-                content.style.transition = 'margin-left 0.3s ease';
-              }
-              if (markdownSection) {
-                markdownSection.style.marginLeft = '0';
-                markdownSection.style.padding = '2rem';
-              }
-            } else {
-              // Mobile : contenu pleine largeur
-              if (content) {
-                content.style.marginLeft = '0';
-                content.style.width = '100%';
-              }
-              if (markdownSection) {
-                markdownSection.style.padding = '1rem';
-              }
-            }
-          }, 100);
+        doneEach: function() {
+          // Mettre à jour la navigation active
+          updateActiveNav();
         }
       }
+    };
+
+    // Fonction pour initialiser le comportement mobile
+    function initMobileBehavior() {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('sidebar-toggle');
+      const overlay = document.getElementById('sidebar-overlay');
+
+      // Toggle sidebar
+      toggle.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+      });
+
+      // Fermer sidebar en cliquant sur l'overlay
+      overlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+      });
+
+      // Fermer sidebar en redimensionnant vers desktop
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        }
+      });
+    }
+
+    // Fonction pour mettre à jour la navigation active
+    function updateActiveNav() {
+      const currentPath = window.location.hash;
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+      
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === currentPath || 
+            (currentPath === '#/' && link.getAttribute('href') === '#/')) {
+          link.classList.add('active');
+        }
+      });
     }
   </script>
-  
+
   <!-- Docsify Core -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   
-  <!-- Plugins Essentiels -->
+  <!-- Plugins Docsify -->
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify-zoom@1"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/external-script.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
-  
-  <!-- Plugin de mise en évidence du code -->
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-sql.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
 </body>
 </html>
