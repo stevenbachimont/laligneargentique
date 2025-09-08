@@ -323,6 +323,10 @@
     // Configuration conditionnelle pour GitHub Pages
     if (window.location.hostname === 'stevenbachimont.github.io') {
       window.$docsify.basePath = '/docs';
+      window.$docsify.relativePath = true;
+      console.log('GitHub Pages détecté - basePath configuré à /docs');
+    } else {
+      console.log('Serveur local détecté - pas de basePath');
     }
 
     // Fonction pour initialiser le comportement mobile
