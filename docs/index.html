@@ -28,10 +28,12 @@
       overflow-y: auto;
       background: #f8f9fa;
       border-right: 1px solid #e1e4e8;
+      padding-left: 1rem;
     }
     
     .content {
-      margin-left: 280px;
+      margin-left: 1rem;
+      margin-right: 1rem;
       width: calc(100% - 280px);
       min-height: 100vh;
       background: white;
@@ -41,6 +43,7 @@
     .markdown-section {
       max-width: none;
       margin: 0;
+      padding-left: 1rem;
     }
     
     .app-name {
@@ -84,6 +87,22 @@
     
     .sidebar-toggle {
       display: none;
+    }
+    
+    /* Supprimer les paddings par défaut de Docsify */
+    .sidebar-nav {
+      padding: 0;
+      margin: 0;
+    }
+    
+    .sidebar-nav ul {
+      padding: 0;
+      margin: 0;
+    }
+    
+    .sidebar-nav li {
+      padding: 0;
+      margin: 0;
     }
   </style>
 </head>
