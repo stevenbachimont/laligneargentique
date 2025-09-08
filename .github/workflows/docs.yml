@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - steven2
     paths:
       - 'docs/**'
       - '.github/workflows/docs.yml'
