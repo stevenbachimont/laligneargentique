@@ -2,7 +2,7 @@ name: Documentation
 
 on:
   push:
-    branches: [main, steven2]
+    branches: [main]
     paths: ['docs/**']
   workflow_dispatch:
 
