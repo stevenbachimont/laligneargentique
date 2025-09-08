@@ -22,7 +22,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 250px;
+      width: 280px;
       height: 100vh;
       z-index: 1000;
       overflow-y: auto;
@@ -31,8 +31,8 @@
     }
     
     .content {
-      margin-left: 250px;
-      width: calc(100% - 250px);
+      margin-left: 280px;
+      width: calc(100% - 280px);
       min-height: 100vh;
       background: white;
       padding: 2rem;
@@ -102,7 +102,7 @@
   <script>
     window.$docsify = {
       name: '📚 Documentation MonSite',
-      repo: 'https://github.com/stevenbachimont/monsite/docs',
+      repo: 'https://github.com/stevenbachimont/monsite',
       homepage: 'README.md',
       loadSidebar: true,
       loadNavbar: false,
@@ -111,9 +111,6 @@
       executeScript: true,
       mergeNavbar: false,
       notFoundPage: '_404.md',
-      basePath: '/docs/',
-      relativePath: true,
-      maxLevel: 4,
       
       search: {
         maxAge: 86400000,
@@ -155,16 +152,6 @@
         enable: true
       },
       
-      alias: {
-        '/.*/_sidebar.md': '/_sidebar.md'
-      },
-      
-      routerMode: 'hash',
-      
-      requestHeaders: {
-        'cache-control': 'max-age=300'
-      },
-      
       hooks: {
         mounted: function() {
           // Ajouter le bouton de toggle pour mobile
@@ -192,24 +179,6 @@
           overlay.addEventListener('click', () => {
             sidebar.classList.remove('open');
             overlay.style.display = 'none';
-          });
-        },
-        
-        ready: function() {
-          console.log('📚 Documentation MonSite chargée');
-        },
-        
-        doneEach: function() {
-          // Améliorer les liens internes
-          const links = document.querySelectorAll('a[href^="#/"]');
-          links.forEach(link => {
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              const href = this.getAttribute('href');
-              if (href && href.startsWith('#/')) {
-                window.location.hash = href;
-              }
-            });
           });
         }
       }
