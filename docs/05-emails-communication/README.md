@@ -73,7 +73,7 @@ Les styles sont centralisés dans la section `styles` du fichier JSON :
 ```bash
 # Configuration Gmail (recommandé)
 EMAIL_USER=votre-email@gmail.com
-EMAIL_APP_PASSWORD=votre-mot-de-passe-d-application
+EMAIL_APP_PASSWORD=...
 ADMIN_EMAIL=votre-email-admin@gmail.com
 
 # Ou configuration SMTP personnalisé

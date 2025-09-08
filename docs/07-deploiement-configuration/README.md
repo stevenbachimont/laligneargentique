@@ -48,10 +48,10 @@ ADMIN_EMAIL=votre-email-admin@gmail.com
 ADMIN_ACCESS_CODE=votre_code_securise
 
 # Stripe (pour les paiements)
-STRIPE_SECRET_KEY=sk_live_votre_cle_secrete
-STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique
-STRIPE_WEBHOOK_SECRET=whsec_votre_webhook_secret
-PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
 # Environnement
 NODE_ENV=production
@@ -79,8 +79,8 @@ ADMIN_ACCESS_CODE=test123
 ```bash
 NODE_ENV=production
 DATABASE_URL=sqlite:./data/balades.db
-EMAIL_USER=votre-email@gmail.com
-ADMIN_ACCESS_CODE=votre_code_securise
+EMAIL_USER=contact.bachimont@gmail.com
+ADMIN_ACCESS_CODE=argentique2024
 ```
 
 ## 🚀 Processus de Déploiement

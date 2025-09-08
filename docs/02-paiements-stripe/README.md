@@ -55,10 +55,10 @@ Cette section contient toute la documentation relative au système de paiement S
 
 ### Variables d'Environnement
 ```bash
-STRIPE_SECRET_KEY=sk_live_votre_cle_secrete
-STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique
-STRIPE_WEBHOOK_SECRET=whsec_votre_webhook_secret
-PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ```
 
 ### Webhook Endpoint

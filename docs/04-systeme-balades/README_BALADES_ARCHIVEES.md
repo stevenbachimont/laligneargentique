@@ -238,9 +238,9 @@ npm run test:unit
 
 ```bash
 # .env
-EMAIL_USER=votre-email@gmail.com
-EMAIL_APP_PASSWORD=votre_mot_de_passe_app
-ADMIN_EMAIL=votre-email-admin@gmail.com
+EMAIL_USER=contact.bachimont@gmail.com
+EMAIL_APP_PASSWORD=...
+ADMIN_EMAIL=contact.bachimont@gmail.com
 ```
 
 ## 📚 Documentation Complète

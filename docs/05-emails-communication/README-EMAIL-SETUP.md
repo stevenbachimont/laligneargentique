@@ -30,7 +30,7 @@ Créez un fichier `.env` à la racine de votre projet :
 ```env
 # Configuration Email Gmail
 EMAIL_USER=votre-email@gmail.com
-EMAIL_APP_PASSWORD=votre-mot-de-passe-d-application-16-caracteres
+EMAIL_APP_PASSWORD=...
 
 # Email de l'administrateur (optionnel)
 ADMIN_EMAIL=votre-email-admin@gmail.com

@@ -49,9 +49,9 @@ const securityHeaders = {
 ### Variables d'Environnement
 ```bash
 # .env
-STRIPE_SECRET_KEY=sk_test_votre_cle_secrete
-GMAIL_PASSWORD=votre_mot_de_passe_app
-ADMIN_PASSWORD=votre_mot_de_passe_admin
+STRIPE_SECRET_KEY=sk_test_...
+GMAIL_PASSWORD=...
+ADMIN_PASSWORD=...
 ```
 
 ### Validation des Webhooks

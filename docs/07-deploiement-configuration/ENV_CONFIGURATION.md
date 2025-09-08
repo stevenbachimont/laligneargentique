@@ -52,7 +52,7 @@ Les variables sont automatiquement configurées via le script `start.sh` :
 environment:
   - ADMIN_ACCESS_CODE=your-secure-code
   - EMAIL_USER=your-email@gmail.com
-  - EMAIL_APP_PASSWORD=your-app-password
+  - EMAIL_APP_PASSWORD=...
   - ADMIN_EMAIL=admin@yourdomain.com
 ```
 
