@@ -20,10 +20,10 @@ Le déploiement échouait avec l'erreur :
 
 ```env
 # Configuration Stripe (OBLIGATOIRE pour les paiements)
-STRIPE_SECRET_KEY=sk_test_votre_cle_secrete_stripe
-STRIPE_PUBLISHABLE_KEY=pk_test_votre_cle_publique_stripe
-STRIPE_WEBHOOK_SECRET=whsec_votre_webhook_secret
-PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_votre_cle_publique_stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 ### 2. Mise à jour du script de démarrage
@@ -104,9 +104,9 @@ docker-compose up -d --build
 
 ```bash
 # 1. Exporter les variables
-export STRIPE_SECRET_KEY="sk_live_votre_cle_secrete"
-export STRIPE_PUBLISHABLE_KEY="pk_live_votre_cle_publique"
-export STRIPE_WEBHOOK_SECRET="whsec_votre_webhook_secret"
+export STRIPE_SECRET_KEY="sk_live_..."
+export STRIPE_PUBLISHABLE_KEY="pk_live_..."
+export STRIPE_WEBHOOK_SECRET="whsec_..."
 
 # 2. Déployer
 docker-compose up -d --build

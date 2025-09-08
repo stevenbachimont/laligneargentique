@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Documentation stevenbachimont.com</title>
+  <title>Documentation MonSite</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Documentation complète du projet MonSite">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
@@ -267,7 +267,7 @@
     // Configuration Docsify
     window.$docsify = {
       name: 'Documentation MonSite',
-      repo: 'https://github.com/stevenbachimont/monsite',
+      repo: '',
       loadSidebar: false,
       loadNavbar: false,
       subMaxLevel: 3,
@@ -278,6 +278,7 @@
       },
       notFoundPage: '_404.md',
       homepage: 'README.md',
+      basePath: '/',
       search: {
         maxAge: 86400000,
         paths: 'auto',
@@ -308,6 +309,9 @@
           'background-color': 'rgba(0,0,0,0.8)'
         }
       },
+      emoji: {
+        enable: true
+      },
       hooks: {
         mounted: function() {
           // Initialiser le comportement mobile
@@ -319,15 +323,6 @@
         }
       }
     };
-
-    // Configuration conditionnelle pour GitHub Pages
-    if (window.location.hostname === 'stevenbachimont.github.io') {
-      window.$docsify.basePath = '/docs';
-      window.$docsify.relativePath = true;
-      console.log('GitHub Pages détecté - basePath configuré à /docs');
-    } else {
-      console.log('Serveur local détecté - pas de basePath');
-    }
 
     // Fonction pour initialiser le comportement mobile
     function initMobileBehavior() {
@@ -380,5 +375,6 @@
   <script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
 </body>
 </html>

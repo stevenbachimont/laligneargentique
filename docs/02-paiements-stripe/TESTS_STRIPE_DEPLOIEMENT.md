@@ -222,7 +222,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 # Email
 EMAIL_USER=your-email@gmail.com
-EMAIL_APP_PASSWORD=your-app-password
+EMAIL_APP_PASSWORD=...
 ADMIN_EMAIL=admin@example.com
 ```
 

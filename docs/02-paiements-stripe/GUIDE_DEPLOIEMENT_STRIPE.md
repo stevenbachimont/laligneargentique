@@ -21,10 +21,10 @@ cp env.production.example .env
 
 ```env
 # Configuration Stripe (OBLIGATOIRE pour les paiements)
-STRIPE_SECRET_KEY=sk_live_votre_cle_secrete_reelle
-STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique_reelle
-STRIPE_WEBHOOK_SECRET=whsec_votre_webhook_secret_reel
-PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique_reelle
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 ```
 
 ### 3. Obtenir les clés Stripe
@@ -59,9 +59,9 @@ docker-compose up -d --build
 
 ```bash
 # 1. Exporter les variables
-export STRIPE_SECRET_KEY="sk_live_votre_cle_secrete"
-export STRIPE_PUBLISHABLE_KEY="pk_live_votre_cle_publique"
-export STRIPE_WEBHOOK_SECRET="whsec_votre_webhook_secret"
+export STRIPE_SECRET_KEY="sk_live_..."
+export STRIPE_PUBLISHABLE_KEY="pk_live_..."
+export STRIPE_WEBHOOK_SECRET="whsec_..."
 
 # 2. Déployer
 docker-compose up -d --build
@@ -108,7 +108,7 @@ Dans les logs Stripe, vous devriez voir les événements webhook reçus.
 grep PUBLIC_STRIPE_PUBLISHABLE_KEY .env
 
 # Si elle n'existe pas, l'ajouter
-echo "PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_votre_cle_publique" >> .env
+echo "PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_..." >> .env
 ```
 
 ### Erreur : "Cannot find module 'stripe'"
