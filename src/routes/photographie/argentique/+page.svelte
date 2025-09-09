@@ -92,9 +92,9 @@
         today = new Date().toISOString().split('T')[0];
         
         // Séparer les balades par type et date
-        baladesPayantes = allBalades.filter(b => b.type === 'payante' && b.date >= today);
-        baladesInvitations = allBalades.filter(b => b.type === 'invitation' && b.date >= today);
-        baladesArchivees = allBalades.filter(b => b.date < today);
+        baladesPayantes = allBalades.filter((b: Balade) => b.type === 'payante' && b.date >= today);
+        baladesInvitations = allBalades.filter((b: Balade) => b.type === 'invitation' && b.date >= today);
+        baladesArchivees = allBalades.filter((b: Balade) => b.date < today);
         
         // Combiner toutes les balades futures pour le tri
         baladesFutures = [...baladesPayantes, ...baladesInvitations];
@@ -134,8 +134,11 @@
           <div class="feature-card">
             <div class="feature-icon">📷</div>
             <h3>Appareils fournis</h3>
-            <p>Appareils photo argentiques restaurés par mes soints. Découvrez les différents modèles et leurs caractéristiques.</p>
+            <p>Appareils photo argentiques restaurés par mes soins. Découvrez les différents modèles et leurs caractéristiques.</p>
             <img src="/background/appareils.jpg" alt="collection d'appareils" class="feature-image">
+            <a href="/photographie/argentique/flotte" class="btn-decouvrir-flotte">
+              Découvrir la flotte
+            </a>
           </div>
           <div class="feature-card">
             <div class="feature-icon">🎯</div>
@@ -483,6 +486,24 @@
     margin-bottom: 1rem;
   }
 
+  .btn-decouvrir-flotte {
+    display: inline-block;
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #000;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .btn-decouvrir-flotte:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  }
+
   .balades-section {
     margin-bottom: 5rem;
     opacity: 0;
@@ -777,11 +798,6 @@
     color: #00ff00;
   }
 
-  .retrospective-info {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
-  }
 
   .no-balades {
     text-align: center;
@@ -954,9 +970,6 @@
       gap: 1rem;
     }
 
-    .balade-info h2 {
-      font-size: 1.3rem;
-    }
 
     .balade-description {
       font-size: 0.95rem;
