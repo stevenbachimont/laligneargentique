@@ -5,7 +5,7 @@ import {
   getAppareilById, 
   getAppareilsDisponibles,
   type AppareilPhoto 
-} from '$lib/data/appareilsData';
+} from '../../src/lib/data/appareilsData';
 
 describe('AppareilsData - Données des appareils photos', () => {
   describe('Structure des données', () => {

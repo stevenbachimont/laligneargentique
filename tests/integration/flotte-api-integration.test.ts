@@ -147,7 +147,7 @@ describe('Flotte - Tests d\'intégration API', () => {
   describe('Gestion des erreurs API', () => {
     it('devrait gérer les erreurs de données', async () => {
       // Mock d'une erreur en modifiant le mock existant
-      const { getAppareilsByCategorie } = await import('$lib/data/appareilsData');
+      const { getAppareilsByCategorie } = await import('../../src/lib/data/appareilsData');
       vi.mocked(getAppareilsByCategorie).mockImplementation(() => {
         throw new Error('Erreur de test');
       });
