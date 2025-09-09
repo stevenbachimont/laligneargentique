@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import FlottePage from './+page.svelte';
-import { getAppareilsByCategorie } from '$lib/data/appareilsData';
+import { getAppareilsByCategorie } from '../../../../lib/data/appareilsData';
 
 // Mock des données d'appareils
 const mockAppareilsData = {
