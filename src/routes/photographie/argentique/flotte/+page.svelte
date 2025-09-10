@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getAppareilsByCategorie, type AppareilPhoto } from '../../../../data/appareilsData';
+  import { getAppareilsByCategorie, type AppareilPhoto } from '$lib/data/appareilsData';
 
   let appareilsParCategorie: { [categorie: string]: AppareilPhoto[] } = {};
   let categorieActive = '';
