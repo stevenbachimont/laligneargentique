@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { appareilsPhotos, getAppareilsByCategorie, getAppareilsDisponibles } from '$lib/data/appareilsData';
+import { appareilsPhotos, getAppareilsByCategorie, getAppareilsDisponibles } from '../../../data/appareilsData';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
