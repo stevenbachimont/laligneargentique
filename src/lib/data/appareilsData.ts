@@ -130,6 +130,46 @@ export const appareilsPhotos: AppareilPhoto[] = [
     prixLocation: 35
   },
   {
+    id: '10',
+    nom: 'Canon F-1',
+    marque: 'Canon',
+    modele: 'F-1',
+    categorie: 'SLR',
+    annee: 1971,
+    description: 'Le premier SLR professionnel de Canon, conçu pour les photographes professionnels. Une construction robuste et des performances exceptionnelles.',
+    caracteristiques: [
+      'Format 35mm',
+      'Monture FD',
+      'Entièrement mécanique',
+      'Mise au point manuelle',
+      'Construction professionnelle',
+      'Vitesses de 1s à 1/2000s'
+    ],
+    image: '/flotte/SLR/canon-f1.jpg',
+    statut: 'disponible',
+    prixLocation: 55
+  },
+  {
+    id: '11',
+    nom: 'Zorki 4',
+    marque: 'Zorki',
+    modele: '4',
+    categorie: 'SLR',
+    annee: 1956,
+    description: 'Un SLR soviétique robuste et fiable, inspiré du Leica. Parfait pour découvrir la photographie argentique avec un budget accessible.',
+    caracteristiques: [
+      'Format 35mm',
+      'Monture M39',
+      'Entièrement mécanique',
+      'Mise au point manuelle',
+      'Construction soviétique robuste',
+      'Vitesses de 1s à 1/1000s'
+    ],
+    image: '/flotte/SLR/zorki-4.jpg',
+    statut: 'disponible',
+    prixLocation: 30
+  },
+  {
     id: '7',
     nom: 'Zeiss Ikon Super Ikonta',
     marque: 'Zeiss Ikon',
@@ -147,6 +187,46 @@ export const appareilsPhotos: AppareilPhoto[] = [
     image: '/flotte/Folding/zeiss-super-ikonta.jpg',
     statut: 'disponible',
     prixLocation: 50
+  },
+  {
+    id: '12',
+    nom: 'Voigtländer Bessa',
+    marque: 'Voigtländer',
+    modele: 'Bessa',
+    categorie: 'Folding',
+    annee: 1939,
+    description: 'Un folding Voigtländer des années 30, élégant et compact. Parfait pour la photographie de voyage avec son design pliable.',
+    caracteristiques: [
+      'Format 6x9 cm',
+      'Objectif Skopar 105mm f/4.5',
+      'Pliage ultra-compact',
+      'Mise au point par estimation',
+      'Pellicule 120',
+      'Design art déco'
+    ],
+    image: '/flotte/Folding/voigtlander-bessa-1939.webp',
+    statut: 'disponible',
+    prixLocation: 45
+  },
+  {
+    id: '13',
+    nom: 'AGFA Record III',
+    marque: 'AGFA',
+    modele: 'Record III',
+    categorie: 'Folding',
+    annee: 1950,
+    description: 'Un folding AGFA robuste et fiable des années 50. Excellent rapport qualité-prix pour découvrir le format moyen.',
+    caracteristiques: [
+      'Format 6x9 cm',
+      'Objectif Solinar 75mm f/3.5',
+      'Pliage compact',
+      'Mise au point par estimation',
+      'Pellicule 120',
+      'Construction allemande'
+    ],
+    image: '/flotte/Folding/agfa-record-3.png',
+    statut: 'disponible',
+    prixLocation: 40
   },
   {
     id: '8',
