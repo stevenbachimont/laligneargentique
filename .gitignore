@@ -30,7 +30,7 @@ src/lib/paraglide
 /../generated/prisma
 
 # Base de données et sauvegardes
-data/
+/data/
 backups/
 *.db
 *.sqlite
