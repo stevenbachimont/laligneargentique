@@ -115,6 +115,7 @@
 <div class="argentique-page">
   <div class="hero-section {isVisible ? 'fade-in' : ''}">
     <h1>La ligne Argentique</h1>
+    <img src="/Logo/rose LLA.png" alt="logo" class="hero-logo">
     <p class="hero-subtitle">Découvrez Nantes à travers l'objectif d'un appareil photo argentique ancien</p>
   </div>
 
@@ -404,6 +405,18 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .hero-logo {
+    border-radius: 50%;
+    background-color: #ffffff;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 1rem;
+  }
+
+  .hero-logo:hover {
+    transform: scale(1.1);
   }
 
   .hero-subtitle {
