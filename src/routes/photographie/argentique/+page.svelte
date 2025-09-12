@@ -417,6 +417,47 @@
 
   .hero-logo:hover {
     transform: scale(1.1);
+    animation: spin 3s linear;
+    transition: all 1s ease;
+  }
+
+  @keyframes spin {
+    from {
+      transform: scale(1.1) rotate(360deg);
+    }
+    10%{
+      transform: scale(1.1) rotate(-90deg);
+    }
+    20%{
+      transform: scale(1.1) rotate(90deg);
+    }
+    30%{
+      transform: scale(1.1) rotate(-70deg);
+    }
+    40%{
+      transform: scale(1.1) rotate(70deg);
+    }
+    50%{ 
+      transform: scale(1.1) rotate(-45deg);
+    }
+    60%{
+      transform: scale(1.1) rotate(45deg);
+    }
+    70%{
+      transform: scale(1.1) rotate(-30deg);
+    }
+    80%{
+      transform: scale(1.1) rotate(30deg);
+    }
+    90%{
+      transform: scale(1.1) rotate(-15deg);
+    }
+    100%{
+      transform: scale(1.1) rotate(15deg);
+    }
+    100%{
+      transform: scale(1.1) rotate(0deg);
+    }
   }
 
   .hero-subtitle {
