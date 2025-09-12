@@ -9,7 +9,7 @@
   let autoPlay = true;
   let intervalId: ReturnType<typeof setInterval>;
 
-  const categories = ['TLR', 'SLR', 'Folding', 'Rangefinder', 'Point & Shoot'];
+  const categories = ['TLR', 'SLR', 'Folding'];
 
   onMount(() => {
     appareilsParCategorie = getAppareilsByCategorie();
@@ -155,12 +155,13 @@
                       <span class="prix-location">{appareil.prixLocation}€/balade</span>
                       <span class="statut {appareil.statut}">
                         {appareil.statut === 'disponible' ? 'Disponible' : 
+                          appareil.statut === 'Bientôt disponible' ? 'Bientôt disponible' :
                          appareil.statut === 'maintenance' ? 'En maintenance' : 'Réservé'}
                       </span>
                     </div>
                   </div>
                 </div>
-              {/each}
+              {/each} 
             </div>
             
             <button class="carrousel-btn next" on:click={appareilSuivant} aria-label="Appareil suivant">
@@ -182,7 +183,7 @@
           <!-- Contrôles -->
           <div class="carrousel-controls">
             <button class="control-btn" on:click={toggleAutoPlay}>
-              {autoPlay ? '⏸️ Pause' : '▶️ Lecture'}
+              {autoPlay ? '⏸ ' : '▶ '}
             </button>
             <span class="appareil-counter">
               {appareilActuel + 1} / {appareilsParCategorie[categorieActive].length}
@@ -514,9 +515,9 @@
   }
 
   .control-btn {
-    background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+    background: none;
     color: #fff;
-    border: none;
+    border: 1px solid #ffd700;
     padding: 0.75rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;

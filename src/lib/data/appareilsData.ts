@@ -4,7 +4,7 @@ export interface AppareilPhoto {
   nom: string;
   marque: string;
   modele: string;
-  categorie: 'TLR' | 'SLR' | 'Folding' | 'Rangefinder' | 'Point & Shoot';
+  categorie: 'TLR' | 'SLR' | 'Folding' ;
   annee: number;
   description: string;
   caracteristiques: string[];
