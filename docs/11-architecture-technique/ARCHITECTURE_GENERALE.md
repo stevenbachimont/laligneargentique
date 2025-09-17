@@ -26,7 +26,7 @@ Cette section détaille l'architecture générale du projet, incluant la structu
 ## 🏗️ Structure du Projet
 
 ```
-monsite/
+laligneargentique/
 ├── src/
 │   ├── app.html                 # Template HTML principal
 │   ├── app.css                  # Styles globaux

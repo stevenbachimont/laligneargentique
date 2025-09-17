@@ -89,7 +89,7 @@ ADMIN_ACCESS_CODE=argentique2024
 ```bash
 # Cloner le projet
 git clone <url-du-repo>
-cd monsite
+cd laligneargentique
 
 # Installer les dépendances
 npm install

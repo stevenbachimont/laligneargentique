@@ -30,8 +30,8 @@ echo "🔄 Début de la restauration de la base de données..."
 echo "📁 Fichier de sauvegarde: $BACKUP_FILE"
 
 # Vérifier si le conteneur est en cours d'exécution
-if ! docker ps | grep -q "monsites"; then
-    echo "❌ Le conteneur monsites n'est pas en cours d'exécution"
+if ! docker ps | grep -q "laligneargentique"; then
+    echo "❌ Le conteneur laligneargentique n'est pas en cours d'exécution"
     echo "💡 Démarrez d'abord le conteneur avec: docker-compose up -d"
     exit 1
 fi
@@ -52,7 +52,7 @@ docker-compose stop app
 
 # Copier la base de données vers le conteneur
 echo "📋 Restauration de la base de données..."
-docker cp "$BACKUP_FILE" monsites:/app/data/balades.db
+docker cp "$BACKUP_FILE" laligneargentique:/app/data/balades.db
 
 if [ $? -eq 0 ]; then
     echo "✅ Restauration réussie!"

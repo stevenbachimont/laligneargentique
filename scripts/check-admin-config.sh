@@ -7,8 +7,8 @@ echo "🔍 Diagnostic de la configuration admin"
 echo "======================================"
 
 # Vérifier si le conteneur est en cours d'exécution
-if ! docker ps | grep -q "monsites"; then
-    echo "❌ Le conteneur monsites n'est pas en cours d'exécution"
+if ! docker ps | grep -q "laligneargentique"; then
+    echo "❌ Le conteneur laligneargentique n'est pas en cours d'exécution"
     echo "💡 Démarrez le conteneur avec: docker-compose up -d"
     exit 1
 fi
@@ -18,7 +18,7 @@ echo "✅ Conteneur en cours d'exécution"
 # Vérifier la variable ADMIN_ACCESS_CODE
 echo ""
 echo "🔑 Vérification du code d'accès admin..."
-ADMIN_CODE=$(docker exec monsites env | grep ADMIN_ACCESS_CODE | cut -d'=' -f2)
+ADMIN_CODE=$(docker exec laligneargentique env | grep ADMIN_ACCESS_CODE | cut -d'=' -f2)
 
 if [ -z "$ADMIN_CODE" ]; then
     echo "❌ Variable ADMIN_ACCESS_CODE non définie"
@@ -54,15 +54,15 @@ fi
 # Vérifier la base de données
 echo ""
 echo "🗄️ Vérification de la base de données..."
-if docker exec monsites ls -la /app/data/balades.db >/dev/null 2>&1; then
+if docker exec laligneargentique ls -la /app/data/balades.db >/dev/null 2>&1; then
     echo "✅ Base de données accessible"
     
     # Compter les balades
-    BALADE_COUNT=$(docker exec monsites sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM balades;" 2>/dev/null || echo "0")
+    BALADE_COUNT=$(docker exec laligneargentique sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM balades;" 2>/dev/null || echo "0")
     echo "📊 Nombre de balades: $BALADE_COUNT"
     
     # Compter les réservations
-    RESERVATION_COUNT=$(docker exec monsites sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM reservations;" 2>/dev/null || echo "0")
+    RESERVATION_COUNT=$(docker exec laligneargentique sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM reservations;" 2>/dev/null || echo "0")
     echo "📊 Nombre de réservations: $RESERVATION_COUNT"
 else
     echo "❌ Base de données non accessible"
