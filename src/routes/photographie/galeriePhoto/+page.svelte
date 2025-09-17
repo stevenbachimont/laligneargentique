@@ -159,7 +159,7 @@
 
 <div class="portfolio-photo-page">
   <div class="content">
-    <h1 class="page-title {isVisible ? 'fade-in-up' : ''}">Portfolio Photo</h1>
+    <h1 class="page-title {isVisible ? 'fade-in-up' : ''}">Galerie Photo</h1>
     <div class="series-grid">
       {#each series as s, i}
         <div class="series-card {isVisible ? 'fade-in-up' : ''}"
