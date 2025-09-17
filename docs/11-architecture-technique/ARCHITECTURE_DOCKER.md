@@ -67,7 +67,7 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: monsite-app
+    container_name: laligneargentique-app
     ports:
       - "3000:3000"
     environment:
@@ -88,12 +88,12 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - monsite-network
+      - laligneargentique-network
 
   # Service de sauvegarde (optionnel)
   backup:
     image: alpine:latest
-    container_name: monsite-backup
+    container_name: laligneargentique-backup
     volumes:
       - ./data:/backup/data:ro
       - ./backups:/backup/output
@@ -109,10 +109,10 @@ services:
       "
     restart: unless-stopped
     networks:
-      - monsite-network
+      - laligneargentique-network
 
 networks:
-  monsite-network:
+  laligneargentique-network:
     driver: bridge
 
 volumes:
@@ -134,7 +134,7 @@ volumes:
 
 ### Structure des Volumes
 ```
-/root/monsite/
+/root/laligneargentique/
 ├── data/                    # Volume persistant pour la base de données
 │   ├── balades.db          # Base de données principale
 │   └── balades.db.backup   # Sauvegarde automatique
@@ -390,10 +390,10 @@ docker system prune -f --volumes
 docker volume ls
 
 # Inspection d'un volume
-docker volume inspect monsite_data
+docker volume inspect laligneargentique_data
 
 # Suppression d'un volume
-docker volume rm monsite_data
+docker volume rm laligneargentique_data
 ```
 
 ---

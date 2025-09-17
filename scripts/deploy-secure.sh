@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🚀 Déploiement sécurisé de monsite"
+echo "🚀 Déploiement sécurisé de laligneargentique"
 echo "=================================="
 
 # Vérifier si Docker est en cours d'exécution
@@ -18,7 +18,7 @@ fi
 echo ""
 echo "📋 Étape 1: Sauvegarde automatique de la base de données"
 echo "--------------------------------------------------------"
-if docker ps | grep -q "monsites"; then
+if docker ps | grep -q "laligneargentique"; then
     echo "🔄 Sauvegarde en cours..."
     ./scripts/backup-database.sh
     if [ $? -eq 0 ]; then
@@ -68,12 +68,12 @@ echo "---------------------------------------"
 echo "⏳ Attente du démarrage du conteneur..."
 sleep 10
 
-if docker ps | grep -q "monsites"; then
+if docker ps | grep -q "laligneargentique"; then
     echo "✅ Conteneur en cours d'exécution"
     
     # Vérifier que la base de données est accessible
     echo "🔍 Vérification de la base de données..."
-    if docker exec monsites ls -la /app/data/balades.db >/dev/null 2>&1; then
+    if docker exec laligneargentique ls -la /app/data/balades.db >/dev/null 2>&1; then
         echo "✅ Base de données accessible"
     else
         echo "⚠️  Base de données non trouvée (normal si première installation)"
@@ -82,7 +82,7 @@ if docker ps | grep -q "monsites"; then
     echo ""
     echo "🎉 Déploiement terminé avec succès!"
     echo "🌐 Votre site est accessible sur: http://localhost:3000"
-    echo "📊 Données persistantes dans le volume Docker: monsite_data"
+    echo "📊 Données persistantes dans le volume Docker: laligneargentique_data"
     
 else
     echo "❌ Le conteneur n'est pas en cours d'exécution"

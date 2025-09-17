@@ -84,7 +84,7 @@ Cette section contient la documentation relative à l'architecture technique du 
 ## 🏗️ Structure du Projet
 
 ```
-monsite/
+laligneargentique/
 ├── src/
 │   ├── app.html                 # Template HTML principal
 │   ├── app.css                  # Styles globaux

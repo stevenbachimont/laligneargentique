@@ -12,17 +12,17 @@ Le fichier `docker-compose.yml` a été modifié pour inclure des volumes persis
 ```yaml
 volumes:
   # Volume persistant pour la base de données SQLite
-  - monsite_data:/app/data
+  - laligneargentique_data:/app/data
   # Volume pour les logs (optionnel)
-  - monsite_logs:/app/logs
+  - laligneargentique_logs:/app/logs
 ```
 
 ### Volumes Docker
 ```yaml
 volumes:
-  monsite_data:
+  laligneargentique_data:
     driver: local
-  monsite_logs:
+  laligneargentique_logs:
     driver: local
 ```
 
@@ -79,23 +79,23 @@ docker-compose up -d
 ### Sauvegarde Manuelle
 ```bash
 # Copier la base depuis le conteneur
-docker cp monsites:/app/data/balades.db ./ma_sauvegarde.db
+docker cp laligneargentiques:/app/data/balades.db ./ma_sauvegarde.db
 
 # Ou depuis un volume Docker
-docker run --rm -v monsite_data:/data -v $(pwd):/backup alpine cp /data/balades.db /backup/
+docker run --rm -v laligneargentique_data:/data -v $(pwd):/backup alpine cp /data/balades.db /backup/
 ```
 
 ## 🔍 Vérification des Données
 
 ### Vérifier que les volumes sont montés
 ```bash
-docker inspect monsites | grep -A 10 "Mounts"
+docker inspect laligneargentiques | grep -A 10 "Mounts"
 ```
 
 ### Accéder à la base de données
 ```bash
 # Entrer dans le conteneur
-docker exec -it monsites sh
+docker exec -it laligneargentiques sh
 
 # Vérifier la base de données
 ls -la /app/data/
@@ -108,7 +108,7 @@ sqlite3 /app/data/balades.db ".tables"
 docker volume ls
 
 # Inspecter un volume
-docker volume inspect monsite_data
+docker volume inspect laligneargentique_data
 ```
 
 ## 🚨 Gestion des Erreurs
@@ -145,13 +145,13 @@ docker-compose up -d
 ### Vérifier l'état de la base
 ```bash
 # Compter les balades
-docker exec monsites sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM balades;"
+docker exec laligneargentiques sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM balades;"
 
 # Compter les réservations
-docker exec monsites sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM reservations;"
+docker exec laligneargentiques sqlite3 /app/data/balades.db "SELECT COUNT(*) FROM reservations;"
 
 # Voir les dernières réservations
-docker exec monsites sqlite3 /app/data/balades.db "SELECT * FROM reservations ORDER BY created_at DESC LIMIT 5;"
+docker exec laligneargentiques sqlite3 /app/data/balades.db "SELECT * FROM reservations ORDER BY created_at DESC LIMIT 5;"
 ```
 
 ### Logs de l'application
@@ -205,7 +205,7 @@ docker-compose down -v
 docker volume ls
 
 # Supprimer un volume (⚠️ DANGEREUX)
-docker volume rm monsite_data
+docker volume rm laligneargentique_data
 
 # Nettoyer les volumes inutilisés
 docker volume prune

@@ -61,7 +61,7 @@ jobs:
           port: 22
           script: |
             # Navigation vers le répertoire du projet
-            cd /root/monsite
+            cd /root/laligneargentique
             
             # Sauvegarde de la base de données avant déploiement
             ./scripts/backup-database.sh

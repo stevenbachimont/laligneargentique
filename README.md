@@ -1,4 +1,4 @@
-# MonSite - Portfolio Photographique et Web
+# L'Aligné Argentique - Portfolio Photographique et Web
 
 Site web portfolio présentant des travaux photographiques et de développement web, avec un système de réservation pour des balades photo argentique.
 
@@ -40,7 +40,7 @@ Le site utilise un système de code couleur intuitif pour indiquer la disponibil
 1. **Cloner le projet**
 ```bash
 git clone <url-du-repo>
-cd monsite
+cd laligneargentique
 ```
 
 2. **Installer les dépendances**
@@ -141,7 +141,7 @@ Le projet inclut une configuration Docker complète :
 
 ```bash
 # Build de l'image
-docker build -t monsite .
+docker build -t laligneargentique .
 
 # Lancement avec docker-compose
 docker-compose up -d

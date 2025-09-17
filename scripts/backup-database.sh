@@ -16,15 +16,15 @@ mkdir -p "$BACKUP_DIR"
 echo "🔄 Début de la sauvegarde de la base de données..."
 
 # Vérifier si le conteneur est en cours d'exécution
-if ! docker ps | grep -q "monsites"; then
-    echo "❌ Le conteneur monsites n'est pas en cours d'exécution"
+if ! docker ps | grep -q "laligneargentique"; then
+    echo "❌ Le conteneur laligneargentique n'est pas en cours d'exécution"
     echo "💡 Démarrez d'abord le conteneur avec: docker-compose up -d"
     exit 1
 fi
 
 # Copier la base de données depuis le conteneur
 echo "📋 Copie de la base de données depuis le conteneur..."
-docker cp monsites:/app/data/balades.db "$BACKUP_DIR/$BACKUP_FILE"
+docker cp laligneargentique:/app/data/balades.db "$BACKUP_DIR/$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
     echo "✅ Sauvegarde réussie: $BACKUP_DIR/$BACKUP_FILE"

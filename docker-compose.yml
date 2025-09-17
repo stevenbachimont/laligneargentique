@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: monsites
+    container_name: laligneargentique
     restart: unless-stopped
     ports:
       - "0.0.0.0:3000:3000/tcp"
@@ -19,9 +19,9 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
     volumes:
       # Volume persistant pour la base de données SQLite
-      - monsite_data:/app/data
+      - laligneargentique_data:/app/data
       # Volume pour les logs (optionnel)
-      - monsite_logs:/app/logs
+      - laligneargentique_logs:/app/logs
     networks:
       - app-network
 
@@ -31,8 +31,8 @@ networks:
 
 volumes:
   # Volume persistant pour la base de données
-  monsite_data:
+  laligneargentique_data:
     driver: local
   # Volume pour les logs
-  monsite_logs:
+  laligneargentique_logs:
     driver: local
