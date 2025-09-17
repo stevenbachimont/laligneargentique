@@ -1,5 +1,7 @@
 <script>
   import '../app.css';
+  import { page } from '$app/stores';
+  import AnimatedTitle from '$lib/components/AnimatedTitle.svelte';
   
   let isMenuOpen = false;
   /** @type {string | null} */
@@ -27,9 +29,13 @@
 
 <div class="container">
   <header>
-    <div class="logo">
-      <a href="/">La Ligne Argentique</a>
-    </div>
+    {#if $page.route.id !== '/'}
+      <div class="logo">
+        <a href="/">
+          <AnimatedTitle size="small" showAnimation={false} />
+        </a>
+      </div>
+    {/if}
     <button class="menu-button" on:click={toggleMenu} aria-label="Menu">
       <span class="hamburger" class:open={isMenuOpen}></span>
     </button>
@@ -38,17 +44,13 @@
       <!-- Menu Photographie -->
       <div class="dropdown-container">
         <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
-          Photographie
+          Découvrir
         </a>
         <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
-          <a href="/photographie/argentique" on:click={() => isMenuOpen = false}>La Ligne Argentiques</a>
+          <a href="/photographie/argentique" on:click={() => isMenuOpen = false}>Réserver une balade</a>
           <a href="/photographie/galeriePhoto" on:click={() => isMenuOpen = false}>Galerie Photos</a>
         </div>
       </div>
-
-
-
-      <a href="/#about-section" on:click={() => isMenuOpen = false}>A propos</a>
       <a href="/contact" on:click={() => isMenuOpen = false}>Contact</a>
     </nav>
   </header>
@@ -66,7 +68,7 @@
           <div class="footer-column">
             <h4>Photographie</h4>
             <a href="/photographie">Galerie Photos</a>
-            <a href="/photographie/argentique">La Ligne Argentiques</a>
+            <a href="/photographie/argentique">La Ligne Argentique</a>
             <a href="/photographie/portfolioPhoto">Portfolio Photo</a>
           </div>
           <div class="footer-column">
@@ -149,40 +151,30 @@
 
   header {
     padding: 1rem;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(248, 249, 250, 0.9);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
     z-index: 100;
     display: flex;
     justify-content: flex-end;
+    border-bottom: 1px solid rgba(108, 117, 125, 0.1);
   }
 
   .logo {
     position: absolute;
-    font-weight: bold;
     left: 1rem;
     top: 1rem;
-    font-size: 1.5rem;
     margin-bottom: 1rem;
-    background: var(--color-accent-3);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
 
-  .logo:hover {
-    transition: all 0.5s ease;
-    position: absolute;
-    font-weight: bold;
-    left: 1rem;
-    top: 1rem;
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    background: var(--color-accent-2);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .logo a {
+    display: block;
+    transition: all 0.3s ease;
+  }
+
+  .logo:hover a {
+    transform: scale(1.05);
   }
 
   .menu-button {
@@ -251,7 +243,7 @@
 
   .nav-link {
     text-decoration: none;
-    color: var(--color-text);
+    color: #6c757d;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     transition: all 0.3s ease;
@@ -260,16 +252,17 @@
   }
 
   .nav-link:hover {
-    color: var(--color-accent-2);
+    color: #495057;
+    background-color: rgba(108, 117, 125, 0.1);
   }
 
   .dropdown {
     position: absolute;
     top: 100%;
     left: 0;
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(248, 249, 250, 0.95);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.2);
     border-radius: 8px;
     min-width: 200px;
     opacity: 0;
@@ -277,7 +270,7 @@
     transform: translateY(-10px);
     transition: all 0.3s ease;
     z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 
   .dropdown.active {
@@ -289,10 +282,10 @@
   .dropdown a {
     display: block;
     padding: 0.75rem 1rem;
-    color: var(--color-text);
+    color: #6c757d;
     text-decoration: none;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(108, 117, 125, 0.1);
   }
 
   .dropdown a:last-child {
@@ -300,24 +293,32 @@
   }
 
   .dropdown a:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--color-accent-2);
+    background: rgba(108, 117, 125, 0.1);
+    color: #495057;
+  }
+
+  nav a:not(.nav-link) {
+    text-decoration: none;
+    color: #6c757d;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
   }
 
   nav a:not(.nav-link):hover {
-    color: var(--color-accent-2);
+    color: #495057;
+    background-color: rgba(108, 117, 125, 0.1);
   }
 
   main {
     flex: 1;
-    padding: 2rem;
   }
 
   .footer {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    color: var(--color-text);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #495057;
     padding: 1rem 0 0.3rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(108, 117, 125, 0.2);
   }
 
   .footer-content {
@@ -333,8 +334,8 @@
     font-size: 0.9rem;
     font-weight: 600;
     margin: 0 0 0.5rem;
-    color: var(--color-accent-2);
-    border-bottom: 1px solid var(--color-accent-3);
+    color: #495057;
+    border-bottom: 1px solid rgba(108, 117, 125, 0.3);
     padding-bottom: 0.2rem;
   }
 
@@ -362,7 +363,7 @@
   }
 
   .footer-column a {
-    color: var(--color-text-secondary);
+    color: #6c757d;
     text-decoration: none;
     transition: all 0.3s ease;
     padding: 0.1rem 0;
@@ -371,7 +372,7 @@
   }
 
   .footer-column a:hover {
-    color: var(--color-accent-2);
+    color: #495057;
     transform: translateX(2px);
   }
 

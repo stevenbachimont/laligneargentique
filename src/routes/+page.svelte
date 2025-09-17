@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import AnimatedTitle from '$lib/components/AnimatedTitle.svelte';
+  
   let isVisible = false;
 
   onMount(() => {
@@ -8,45 +10,17 @@
 </script>
 
 <div class="hero" class:fade-in={isVisible}>
-  <h1>Photographie</h1>
-  <div class="cta-buttons">
-    <a
-      href="/photographie"
-      class="button"
-    >Découvrir</a>
-    <a
-      href="#about-section"
-      class="button"
-    >À propos</a>
-    <a
-      href="/photographie/argentique"
-      class="button"
-    >La Ligne Argentique</a>
+  <!-- Titre SVG décomposé -->
+  <div class="title-container">
+    <AnimatedTitle size="large" />
+  </div>
+  
+  <!-- Image SVG en arrière-plan -->
+  <div class="svg-container">
+    <img src="/background/onelinetlr.svg" alt="Dessin en une ligne" class="background-svg" />
   </div>
 </div>
 
-<section id="about-section" class="about-section">
-  <div class="about-content">
-    <div class="about-background"></div>
-    <div class="about-text">
-      <h2>À propos</h2>
-      <p>
-        Diplômé des arts du cirque, j'ai longtemps cherché ma voie après une blessure qui a bouleversé mon parcours. 
-        Cette quête m'a mené vers la musique pour le spectacle, les arts numériques, et l'enseignement des arts du cirque 
-        dans des milieux variés - psychiatrique, carcéral, scolaire et de loisir.
-      </p>
-      <p>
-        Aujourd'hui, je me passionne pour le développement web, trouvant mon équilibre dans l'élaboration de projets 
-        et leur architecture. En parallèle, je redécouvre la photographie argentique, m'occupant de tout moi-même : 
-        restauration d'appareils anciens de tous formats, prises de vues et développements.
-      </p>
-      <p>
-        Ce grand écart entre le web et la photographie m'aide à me développer personnellement, 
-        créant un équilibre unique entre technologie moderne et artisanat traditionnel.
-      </p>
-    </div>
-  </div>
-</section>
 
 <style>
   :global(html) { scroll-behavior: smooth; }
@@ -57,8 +31,8 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    color: white;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    color: #2c2c2c;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     padding: 0;
     position: relative;
     overflow: hidden;
@@ -80,114 +54,116 @@
     }
   }
 
-  h1 { font-size: 3.5rem; margin-bottom: 1rem; position: relative; z-index: 1; }
-  .cta-buttons { display: flex; gap: 1rem; margin-top: 2rem; background: none; border: none; color: none; font-size: 1.5rem; position: relative; z-index: 1; }
-  a.button { transition: transform 0.3s, color 0.3s; background: none; color: var(--color-accent-1); will-change: transform; }
-  a.button:hover { transform: scale(1.2); color: var(--color-accent-2); }
-  .about-section {
-     padding: 4rem 2rem; 
-     text-align: center; 
-     background: none; 
+  .title-container {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .title-svg {
+    max-width: 600px;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: all 0.3s ease;
+  }
+
+  .title-svg:hover {
+    transform: scale(1.02);
+  }
+
+  /* Animation lettre par lettre */
+  .letter {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    animation: letterAppear 0.6s ease-out forwards;
+  }
+
+  @keyframes letterAppear {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.8);
     }
-  .about-content {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start; /* Alignement en haut */
-    justify-content: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    overflow: visible;
-    border-radius: 20px;
-    gap: 2rem;
+    50% {
+      opacity: 0.8;
+      transform: translateY(-5px) scale(1.1);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
-  .about-background {
-    flex: 0 0 300px;
-    height: auto; /* Hauteur auto */
-    aspect-ratio: 3/4; /* Pour garder la proportion portrait */
-    background-image: url('/background/moi.jpg');
-    background-size: contain;
-    background-position: left center;
-    background-repeat: no-repeat;
-    background-color: #000;
-    border-radius: 20px;
-    opacity: 1;
-    filter: none;
-    z-index: 0;
-    min-height: 320px; /* Pour éviter qu'elle soit trop petite */
-    max-height: 100%;
-    margin-top: 3rem; /* Ajuste cette valeur selon le rendu souhaité */
+
+  /* Style pour les espaces */
+  .space {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    animation: letterAppear 0.6s ease-out forwards;
+    font-size: 1.2em;
   }
-  .about-text {
-    flex: 1 1 0;
-    position: relative;
-    z-index: 1;
-    background: none;
-    padding: 2rem;
-    border-radius: 15px;
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .about-text h2 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: var(--color-accent-1);
-  }
-  .about-text p {
-    margin-bottom: 1rem;
-    line-height: 1.6;
-  }
+
   @media (max-width: 768px) {
-    .about-text {
-      margin: 1rem;
-      padding: 1.5rem;
+    .title-container {
+      width: 100%;
+      padding: 0 1rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem !important;
     }
   }
+
+  @media (max-width: 480px) {
+    .title-container {
+      padding: 0 0.5rem;
+    }
+    
+    h1 {
+      font-size: 2rem !important;
+    }
+  }
+
+  
   .fade-in { animation: fadeIn 1s ease-in; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
-  h1, .cta-buttons {
-    position: relative;
+ 
+
+  .svg-container {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 1;
+    position: relative;
   }
 
-
-
-
-
-  /* Responsive : photo en dessous du texte */
-  @media (max-width: 900px) {
-    .about-content {
-      flex-direction: column-reverse;
-      align-items: center;
-      gap: 1rem;
-    }
-    .about-background {
-      width: 100%;
-      max-width: 400px;
-      height: 300px;
-      margin: 0 auto;
-      background-position: center;
-      aspect-ratio: 3/4;
-      min-height: 200px;
-    }
-    .about-text {
-      padding: 1.5rem;
-      max-width: 100%;
-    }
+  .background-svg {
+    max-width: 400px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.8;
+    transition: all 0.3s ease;
   }
+
+  .background-svg:hover {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
   @media (max-width: 768px) {
-    .about-section {
-      padding: 1rem 0.5rem; /* Moins de padding latéral */
-    }
-    .about-text {
-      width: 90vw;
-      max-width: none;
-      margin: 0;
-      padding: 1rem 1.2rem;
+    .background-svg {
+      max-width: 300px;
+      max-height: 200px;
     }
   }
+
+
+
+
+
 </style>
