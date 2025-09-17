@@ -1,11 +1,10 @@
-# L'Aligné Argentique - Portfolio Photographique et Web
+# La Ligne Argentique - Portfolio Photographique
 
-Site web portfolio présentant des travaux photographiques et de développement web, avec un système de réservation pour des balades photo argentique.
+Site web portfolio présentant des travaux photographiques avec un système de réservation pour des balades photo argentique.
 
 ## 🎯 Fonctionnalités
 
 - **Portfolio Photographique** : Séries Street, Portraits, Paysages et Quotidien
-- **Portfolio Web** : Projets de développement web
 - **Balades Argentique** : Système de réservation automatique avec gestion des places
 - **💳 Paiements Stripe** : Système de paiement sécurisé pour les réservations
 - **Formulaire de Contact** : Envoi d'emails automatique

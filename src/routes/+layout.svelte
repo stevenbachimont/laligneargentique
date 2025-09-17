@@ -28,22 +28,12 @@
 <div class="container">
   <header>
     <div class="logo">
-      <a href="/">Steven Bachimont</a>
+      <a href="/">La Ligne Argentique</a>
     </div>
     <button class="menu-button" on:click={toggleMenu} aria-label="Menu">
       <span class="hamburger" class:open={isMenuOpen}></span>
     </button>
     <nav class:open={isMenuOpen}>
-      <!-- Menu Web -->
-      <div class="dropdown-container">
-        <a href="/web" class="nav-link" on:mouseenter={() => toggleDropdown('web')} on:mouseleave={closeDropdown}>
-          Web
-        </a>
-        <div class="dropdown" class:active={activeDropdown === 'web'} on:mouseenter={() => toggleDropdown('web')} on:mouseleave={closeDropdown}>
-          <a href="/web/portfolioWeb" on:click={() => isMenuOpen = false}>Portfolio Web</a>
-          <a href="/web/outils" on:click={() => isMenuOpen = false}>Outils & Technologies</a>
-        </div>
-      </div>
 
       <!-- Menu Photographie -->
       <div class="dropdown-container">
@@ -52,7 +42,7 @@
         </a>
         <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
           <a href="/photographie/argentique" on:click={() => isMenuOpen = false}>La Ligne Argentiques</a>
-          <a href="/photographie/portfolioPhoto" on:click={() => isMenuOpen = false}>Galerie Photos</a>
+          <a href="/photographie/galeriePhoto" on:click={() => isMenuOpen = false}>Galerie Photos</a>
         </div>
       </div>
 
@@ -73,12 +63,6 @@
       <div class="footer-section">
         <h3>Plan du site</h3>
         <div class="footer-links">
-          <div class="footer-column">
-            <h4>Web</h4>
-            <a href="/web">Portfolio Web</a>
-            <a href="/web/portfolioWeb">Réalisations</a>
-            <a href="/web/outils">Outils & Technologies</a>
-          </div>
           <div class="footer-column">
             <h4>Photographie</h4>
             <a href="/photographie">Galerie Photos</a>
@@ -150,7 +134,7 @@
     <div class="footer-bottom">
       <div class="footer-bottom-content">
         <p>© 2025 - Steven Bachimont. Tous droits réservés.</p>
-        <p>Photographe & Développeur Web</p>
+        <p>Photographe</p>
       </div>
     </div>
   </footer>

@@ -1,4 +1,4 @@
-/* Styles partagés pour les blocs des pages web et photographie */
+/* Styles partagés pour les blocs des pages photographie */
 
 /* Conteneur principal des blocs */
 .two-blocks-container {
@@ -40,14 +40,6 @@
 }
 
 /* Couleurs des bordures gauches */
-.portfolio-block {
-  border-left: 4px solid #ffd700;
-}
-
-.tools-block {
-  border-left: 4px solid #4ecdc4;
-}
-
 .argentique-block {
   border-left: 4px solid #ff6b6b;
 }
