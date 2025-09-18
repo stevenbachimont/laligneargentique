@@ -42,7 +42,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            cd /root/monsite
+            cd /root/laligneargentique
             
             # Récupérer les derniers changements
             echo "📥 Récupération des derniers changements..."
