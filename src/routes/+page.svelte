@@ -9,15 +9,75 @@
   });
 </script>
 
+<svelte:head>
+  <title>La Ligne Argentique - Photographe Professionnel | Steven Bachimont</title>
+  <meta name="description" content="Photographe professionnel spécialisé en photographie argentique. Découvrez mes créations artistiques, réservez une balade photo unique et explorez ma galerie de portraits et paysages." />
+  <meta name="keywords" content="photographe, photographie argentique, Steven Bachimont, galerie photo, balade photo, portrait, paysage, art photographique, professionnel" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:title" content="La Ligne Argentique - Photographe Professionnel" />
+  <meta property="og:description" content="Photographe professionnel spécialisé en photographie argentique. Découvrez mes créations artistiques et réservez une balade photo unique." />
+  <meta property="og:url" content="https://laligneargentique.fr" />
+  <meta property="og:image" content="https://laligneargentique.fr/Logo/Logo.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  
+  <!-- Twitter -->
+  <meta name="twitter:title" content="La Ligne Argentique - Photographe Professionnel" />
+  <meta name="twitter:description" content="Photographe professionnel spécialisé en photographie argentique. Découvrez mes créations artistiques et réservez une balade photo unique." />
+  <meta name="twitter:image" content="https://laligneargentique.fr/Logo/Logo.png" />
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://laligneargentique.fr" />
+  
+  <!-- Données structurées JSON-LD -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Steven Bachimont",
+      "alternateName": "La Ligne Argentique",
+      "description": "Photographe professionnel spécialisé en photographie argentique",
+      "url": "https://laligneargentique.fr",
+      "image": "https://laligneargentique.fr/Logo/Logo.png",
+      "jobTitle": "Photographe",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "La Ligne Argentique"
+      },
+      "sameAs": [
+        "https://www.instagram.com/la_ligne_argentique/"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+33-6-12-34-56-78",
+        "contactType": "customer service",
+        "email": "contact@laligneargentique.fr"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "FR"
+      },
+      "knowsAbout": [
+        "Photographie argentique",
+        "Portrait photographique",
+        "Paysage photographique",
+        "Art photographique"
+      ]
+    }
+  </script>
+</svelte:head>
+
 <div class="hero" class:fade-in={isVisible}>
   <!-- Titre SVG décomposé -->
+   <h1>La Ligne Argentique</h1>
   <div class="title-container">
     <AnimatedTitle size="large" />
   </div>
   
   <!-- Image SVG en arrière-plan -->
   <div class="svg-container">
-    <img src="/background/onelinetlr.svg" alt="Dessin en une ligne" class="background-svg" />
+    <img src="/background/onelinetlr.svg" alt="Illustration artistique en une ligne continue représentant un appareil photo argentique" class="background-svg" loading="lazy" />
   </div>
 </div>
 
