@@ -57,10 +57,10 @@
                <img src="/utils/decouvrir.svg" alt="Découvrir mes services de photographie" class="nav-icon" loading="eager" />
              </a>
              <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} role="menu" tabindex="0">
-               <a href="/photographie/argentique" on:click={() => { closeMenu(); closeDropdown(); }}>
+               <a href="/decouvrir/ballades" on:click={() => { closeMenu(); closeDropdown(); }}>
                  <img src="/utils/reserver.svg" alt="Réserver une balade photo argentique" class="dropdown-icon" loading="eager" />
                </a>
-               <a href="/photographie/galeriePhoto" on:click={() => { closeMenu(); closeDropdown(); }}>
+               <a href="/decouvrir/galerie" on:click={() => { closeMenu(); closeDropdown(); }}>
                  <img src="/utils/galerie.svg" alt="Voir la galerie de photos" class="dropdown-icon" loading="eager" />
                </a>
              </div>
