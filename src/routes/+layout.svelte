@@ -53,20 +53,20 @@
          <div class="nav-links">
            <!-- Menu Photographie -->
            <div class="dropdown-container">
-             <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} on:click={closeMenu}>
-               <img src="/utils/decouvrir.svg" alt="Découvrir mes services de photographie" class="nav-icon" loading="eager" />
+             <a href="/decouvrir" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} on:click={closeMenu}>
+               Découvrir
              </a>
              <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} role="menu" tabindex="0">
                <a href="/decouvrir/ballades" on:click={() => { closeMenu(); closeDropdown(); }}>
-                 <img src="/utils/reserver.svg" alt="Réserver une balade photo argentique" class="dropdown-icon" loading="eager" />
+                 Réserver
                </a>
                <a href="/decouvrir/galerie" on:click={() => { closeMenu(); closeDropdown(); }}>
-                 <img src="/utils/galerie.svg" alt="Voir la galerie de photos" class="dropdown-icon" loading="eager" />
+                 Galerie
                </a>
              </div>
            </div>
-           <a href="/contact" on:click={closeMenu}>
-             <img src="/utils/contact.svg" alt="Me contacter" class="nav-icon" loading="eager" />
+           <a href="/contact" on:click={closeMenu} class="nav-link">
+             Contact
            </a>
          </div>
     </nav>
@@ -160,6 +160,14 @@
 </div>
 
 <style>
+  @font-face {
+    font-family: 'Virgil';
+    src: url('/fonts/Virgil.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
   .container {
     min-height: 100vh;
     display: flex;
@@ -350,6 +358,20 @@
     transition: all 0.3s ease;
     display: block;
     cursor: pointer;
+    font-family: 'Virgil', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
+  }
+
+  /* Texte blanc par défaut pour toutes les pages */
+  .nav-link,
+  nav a:not(.nav-link) {
+    color: #ffffff !important;
+  }
+
+  .dropdown a {
+    color: #ffffff !important;
   }
 
 
@@ -382,30 +404,25 @@
     color: #ffffff;
     text-decoration: none;
     transition: all 0.3s ease;
+    font-family: 'Virgil', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    letter-spacing: 0.005em;
   }
 
   .dropdown a:last-child {
     border-bottom: none;
   }
 
-  /* Styles pour les icônes SVG */
-  .nav-icon {
-    height: 2rem;
-    width: auto;
-    filter: brightness(0) invert(1);
-    transition: transform 0.2s ease;
+  /* Styles pour les liens de navigation */
+  .nav-link:hover {
+    transform: translateY(-2px);
+    color: #ffd700;
   }
 
-  .nav-icon:hover {
-    transform: scale(1.05);
-  }
-
-  .dropdown-icon {
-    height: 1.5rem;
-    width: auto;
-    filter: brightness(0) invert(1);
-    margin-right: 0.5rem;
-    vertical-align: middle;
+  .dropdown a:hover {
+    color: #ffd700;
+    transform: translateX(5px);
   }
 
 
@@ -415,6 +432,10 @@
     padding: 0.5rem 1rem;
     border-radius: 4px;
     transition: all 0.3s ease;
+    font-family: 'Virgil', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
   }
 
 
@@ -429,9 +450,24 @@
     margin-top: 0;
   }
 
-  /* Icônes noires sur la page d'accueil */
-  :global(body:has(.hero)) .nav-icon {
-    filter: brightness(0) invert(0) !important;
+  /* Texte noir sur la page d'accueil */
+  :global(body:has(.hero)) .nav-link,
+  :global(body:has(.hero)) nav a:not(.nav-link) {
+    color: #000000 !important;
+  }
+
+  :global(body:has(.hero)) .dropdown a {
+    color: #000000 !important;
+  }
+
+  /* Hover pour la page d'accueil (texte noir) */
+  :global(body:has(.hero)) .nav-link:hover,
+  :global(body:has(.hero)) nav a:not(.nav-link):hover {
+    color: #ff6b35 !important;
+  }
+
+  :global(body:has(.hero)) .dropdown a:hover {
+    color: #ff6b35 !important;
   }
 
   .footer {
@@ -705,12 +741,14 @@
 
     .nav-link {
       font-size: 1.8rem;
-      font-weight: 400;
+      font-weight: 600;
       padding: 1rem;
       width: 100%;
       text-align: center;
       color: #000000;
       display: block;
+      font-family: 'Virgil', sans-serif;
+      letter-spacing: 0.01em;
     }
 
     .dropdown {
@@ -728,21 +766,25 @@
 
     .dropdown a {
       font-size: 1.3rem;
-      font-weight: 400;
+      font-weight: 500;
       padding: 0.8rem 1rem;
       color: #000000;
       display: block;
       text-align: center;
+      font-family: 'Virgil', sans-serif;
+      letter-spacing: 0.005em;
     }
 
     nav a:not(.nav-link) {
       font-size: 1.8rem;
-      font-weight: 400;
+      font-weight: 600;
       padding: 1rem;
       width: 100%;
       text-align: center;
       color: #000000;
       display: block;
+      font-family: 'Virgil', sans-serif;
+      letter-spacing: 0.01em;
     }
 
     /* Footer responsive */

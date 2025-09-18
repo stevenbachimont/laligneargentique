@@ -114,22 +114,20 @@
 
 <div class="argentique-page">
   <div class="hero-section {isVisible ? 'fade-in' : ''}">
-    <h1>La ligne Argentique</h1>
-    <img src="/Logo/rose LLA.png" alt="logo" class="hero-logo">
-    <p class="hero-subtitle">Découvrez Nantes à travers l'objectif d'un appareil photo argentique ancien</p>
+    <h2>Une expérience photographique unique</h2>
+    <p class="presentation-text">
+      Je vous propose des balades photographiques guidées dans les rues de Nantes, 
+      où vous apprendrez les techniques de la photographie argentique tout en capturant 
+      l'essence unique de la ville. Chaque balade est une invitation à redécouvrir 
+      Nantes sous un angle différent, à travers le prisme de l'argentique.
+    </p>
   </div>
 
   <div class="content">
     <!-- Section Présentation -->
     <section class="presentation-section {isVisible ? 'fade-in-up' : ''}" style="animation-delay: 0.2s">
       <div class="container">
-        <h2>Une expérience photographique unique</h2>
-        <p class="presentation-text">
-          Je vous propose des balades photographiques guidées dans les rues de Nantes, 
-          où vous apprendrez les techniques de la photographie argentique tout en capturant 
-          l'essence unique de la ville. Chaque balade est une invitation à redécouvrir 
-          Nantes sous un angle différent, à travers le prisme de l'argentique.
-        </p>
+       
         
         <div class="features-grid">
           <div class="feature-card">
@@ -137,7 +135,7 @@
             <h3>Appareils fournis</h3>
             <p>Appareils photo argentiques restaurés par mes soins. Découvrez les différents modèles et leurs caractéristiques.</p>
             <img src="/background/appareils.jpg" alt="collection d'appareils" class="feature-image">
-            <a href="/photographie/argentique/flotte" class="btn-decouvrir-flotte">
+            <a href="/decouvrir/ballades/flotte" class="btn-decouvrir-flotte">
               Découvrir la flotte
             </a>
           </div>
@@ -376,10 +374,28 @@
 </div>
 
 <style>
+  @font-face {
+    font-family: 'Virgil';
+    src: url('/fonts/Virgil.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
   .argentique-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #000000, #1a1a1a);
     color: #fff;
+    font-family: 'Virgil', sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Appliquer Virgil à tous les éléments de texte */
+  .argentique-page * {
+    font-family: 'Virgil', sans-serif;
   }
 
   .hero-section {
@@ -394,33 +410,25 @@
     background-position: center;
     opacity: 0;
     transform: translateY(30px);
+    font-family: 'Virgil', sans-serif;
   }
 
-  .hero-section h1 {
-    font-size: 4rem;
-    font-weight: 300;
-    margin-bottom: 1rem;
-    letter-spacing: 0.2em;
-    background: linear-gradient(45deg, #ffd700, #ffed4e);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .hero-section h2 {
+    font-family: 'Virgil', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
 
-  .hero-logo {
-    border-radius: 50%;
-    background-color: #ffffff;
-    width: 200px;
-    height: 200px;
-    margin-bottom: 1rem;
+  .presentation-text {
+    font-family: 'Virgil', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.7;
   }
-
-  .hero-logo:hover {
-    transform: scale(1.1);
-    animation: spin 3s linear;
-    transition: all 1s ease;
-  }
-
+  
   @keyframes spin {
     from {
       transform: scale(1.1) rotate(360deg);
@@ -488,6 +496,10 @@
     text-align: center;
     margin-bottom: 2rem;
     color: #ffd700;
+    font-family: 'Virgil', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
   }
 
   .presentation-text {
@@ -526,11 +538,17 @@
     font-size: 1.3rem;
     margin-bottom: 1rem;
     color: #ffd700;
+    font-family: 'Virgil', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    line-height: 1.3;
   }
 
   .feature-card p {
     color: rgba(255,255,255,0.8);
     line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: 0.005em;
   }
 
   .feature-image {
@@ -569,6 +587,7 @@
     text-align: center;
     margin-bottom: 1rem;
     color: #ffd700;
+    font-family: 'Virgil', sans-serif;
   }
 
   .section-subtitle {
@@ -638,6 +657,7 @@
     font-weight: 600;
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
     border: 2px solid rgba(255, 215, 0, 0.2);
+    font-family: 'Virgil', sans-serif;
   }
 
   .annee-title.archivee {
@@ -720,6 +740,7 @@
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
     color: #ffd700;
+    font-family: 'Virgil', sans-serif;
   }
 
   .balade-lieu, .balade-heure {
@@ -883,6 +904,7 @@
     text-align: center;
     margin-bottom: 3rem;
     color: #ffd700;
+    font-family: 'Virgil', sans-serif;
   }
 
   .infos-grid {
@@ -903,6 +925,7 @@
     color: #ffd700;
     margin-bottom: 1rem;
     font-size: 1.2rem;
+    font-family: 'Virgil', sans-serif;
   }
 
   .info-card p {
