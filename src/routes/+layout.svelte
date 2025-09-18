@@ -35,9 +35,9 @@
   <header>
     <button class="menu-button" on:click={toggleMenu} aria-label="Menu">
       {#if isMenuOpen}
-        <img src="/utils/ouvert.svg" alt="Fermer le menu" class="menu-icon" />
+        <img src="/utils/ouvert.svg" alt="Fermer le menu" class="menu-icon" loading="eager" />
       {:else}
-        <img src="/utils/ferme.svg" alt="Ouvrir le menu" class="menu-icon" />
+        <img src="/utils/ferme.svg" alt="Ouvrir le menu" class="menu-icon" loading="eager" />
       {/if}
     </button>
     <nav class:open={isMenuOpen}>
@@ -54,19 +54,19 @@
            <!-- Menu Photographie -->
            <div class="dropdown-container">
              <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} on:click={closeMenu}>
-               <img src="/utils/decouvrir.svg" alt="Découvrir" class="nav-icon" />
+               <img src="/utils/decouvrir.svg" alt="Découvrir mes services de photographie" class="nav-icon" loading="eager" />
              </a>
              <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} role="menu" tabindex="0">
                <a href="/photographie/argentique" on:click={closeMenu}>
-                 <img src="/utils/reserver.svg" alt="Réserver une balade" class="dropdown-icon" />
+                 <img src="/utils/reserver.svg" alt="Réserver une balade photo argentique" class="dropdown-icon" loading="eager" />
                </a>
                <a href="/photographie/galeriePhoto" on:click={closeMenu}>
-                 <img src="/utils/galerie.svg" alt="Galerie Photos" class="dropdown-icon" />
+                 <img src="/utils/galerie.svg" alt="Voir la galerie de photos" class="dropdown-icon" loading="eager" />
                </a>
              </div>
            </div>
            <a href="/contact" on:click={closeMenu}>
-             <img src="/utils/contact.svg" alt="Contact" class="nav-icon" />
+             <img src="/utils/contact.svg" alt="Me contacter" class="nav-icon" loading="eager" />
            </a>
          </div>
     </nav>
@@ -281,7 +281,6 @@
     .nav-links > a:last-child {
       margin-top: -1rem !important;
     }
-
     .dropdown-container {
       display: inline-block !important;
       position: relative !important;

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import SEOHead from '$lib/components/SEOHead.svelte';
 
   let nom = '';
   let prenom = '';
@@ -21,6 +22,22 @@
   onMount(() => {
     setTimeout(() => { isVisible = true; }, 100);
   });
+
+  const contactJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact - La Ligne Argentique",
+    "description": "Contactez Steven Bachimont, photographe professionnel spécialisé en photographie argentique",
+    "url": "https://laligneargentique.fr/contact",
+    "mainEntity": {
+      "@type": "Person",
+      "name": "Steven Bachimont",
+      "alternateName": "La Ligne Argentique",
+      "jobTitle": "Photographe",
+      "email": "contact@laligneargentique.fr",
+      "telephone": "+33-6-12-34-56-78"
+    }
+  };
 
   function validateForm() {
     errors = {
@@ -138,6 +155,15 @@
     errors = { nom: '', prenom: '', email: '', message: '' };
   }
 </script>
+
+<SEOHead
+  title="Contact - La Ligne Argentique | Photographe Professionnel"
+  description="Contactez Steven Bachimont pour vos projets photographiques. Photographe professionnel spécialisé en photographie argentique, portraits et paysages. Réservez votre balade photo unique."
+  keywords="contact photographe, Steven Bachimont, photographie argentique, réservation balade photo, devis photographie, portfolio photo"
+  canonicalUrl="https://laligneargentique.fr/contact"
+  ogType="website"
+  jsonLd={contactJsonLd}
+/>
 
 <section class="contact-section {isVisible ? 'fade-in' : ''}">
   <div class="contact-header">
