@@ -43,7 +43,7 @@
     <nav class:open={isMenuOpen}>
       {#if $page.route.id !== '/'}
         <div class="logo">
-          <a href="/">
+          <a href="/" on:click={closeMenu}>
             <AnimatedTitle size="small" showAnimation={false} />
           </a>
         </div>
@@ -57,10 +57,10 @@
                <img src="/utils/decouvrir.svg" alt="Découvrir mes services de photographie" class="nav-icon" loading="eager" />
              </a>
              <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} role="menu" tabindex="0">
-               <a href="/photographie/argentique" on:click={closeMenu}>
+               <a href="/photographie/argentique" on:click={() => { closeMenu(); closeDropdown(); }}>
                  <img src="/utils/reserver.svg" alt="Réserver une balade photo argentique" class="dropdown-icon" loading="eager" />
                </a>
-               <a href="/photographie/galeriePhoto" on:click={closeMenu}>
+               <a href="/photographie/galeriePhoto" on:click={() => { closeMenu(); closeDropdown(); }}>
                  <img src="/utils/galerie.svg" alt="Voir la galerie de photos" class="dropdown-icon" loading="eager" />
                </a>
              </div>
@@ -203,6 +203,17 @@
       position: static;
       margin: 0;
       filter: brightness(0) invert(1);
+    }
+  }
+
+  /* Logo en haut à gauche sur mobile pour toutes les pages sauf home */
+  @media (max-width: 768px) {
+    .logo {
+      position: fixed !important;
+      top: 1rem !important;
+      left: 1rem !important;
+      z-index: 102 !important;
+      filter: brightness(0) invert(1) !important;
     }
   }
 
@@ -644,7 +655,7 @@
     }
 
     .logo {
-      filter: brightness(0) invert(1);
+      filter: brightness(0) invert(1) !important;
     }
 
     .menu-button {
