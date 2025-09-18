@@ -33,13 +33,6 @@
 
 <div class="container">
   <header>
-    {#if $page.route.id !== '/'}
-      <div class="logo">
-        <a href="/">
-          <AnimatedTitle size="small" showAnimation={false} />
-        </a>
-      </div>
-    {/if}
     <button class="menu-button" on:click={toggleMenu} aria-label="Menu">
       {#if isMenuOpen}
         <img src="/utils/ouvert.svg" alt="Fermer le menu" class="menu-icon" />
@@ -48,18 +41,34 @@
       {/if}
     </button>
     <nav class:open={isMenuOpen}>
-
-      <!-- Menu Photographie -->
-      <div class="dropdown-container">
-        <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} on:click={closeMenu}>
-          Découvrir
-        </a>
-        <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
-          <a href="/photographie/argentique" on:click={closeMenu}>Réserver une balade</a>
-          <a href="/photographie/galeriePhoto" on:click={closeMenu}>Galerie Photos</a>
+      {#if $page.route.id !== '/'}
+        <div class="logo">
+          <a href="/">
+            <AnimatedTitle size="small" showAnimation={false} />
+          </a>
         </div>
-      </div>
-      <a href="/contact" on:click={closeMenu}>Contact</a>
+      {/if}
+
+         <!-- Conteneur pour les liens de droite -->
+         <div class="nav-links">
+           <!-- Menu Photographie -->
+           <div class="dropdown-container">
+             <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} on:click={closeMenu}>
+               <img src="/utils/decouvrir.svg" alt="Découvrir" class="nav-icon" />
+             </a>
+             <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} role="menu" tabindex="0">
+               <a href="/photographie/argentique" on:click={closeMenu}>
+                 <img src="/utils/reserver.svg" alt="Réserver une balade" class="dropdown-icon" />
+               </a>
+               <a href="/photographie/galeriePhoto" on:click={closeMenu}>
+                 <img src="/utils/galerie.svg" alt="Galerie Photos" class="dropdown-icon" />
+               </a>
+             </div>
+           </div>
+           <a href="/contact" on:click={closeMenu}>
+             <img src="/utils/contact.svg" alt="Contact" class="nav-icon" />
+           </a>
+         </div>
     </nav>
   </header>
 
@@ -159,14 +168,25 @@
 
   header {
     padding: 1rem;
-    background-color: rgba(248, 249, 250, 0.9);
-    backdrop-filter: blur(10px);
-    position: sticky;
+    background-color: transparent;
+    backdrop-filter: none;
+    position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
     display: flex;
     justify-content: flex-end;
-    border-bottom: 1px solid rgba(108, 117, 125, 0.1);
+    border-bottom: none;
+  }
+
+  /* Header transparent sur desktop */
+  @media (min-width: 769px) {
+    header {
+      padding: 0;
+      height: 0;
+      overflow: visible;
+    }
   }
 
   .logo {
@@ -174,6 +194,16 @@
     left: 1rem;
     top: 1rem;
     margin-bottom: 1rem;
+    filter: brightness(0) invert(1);
+  }
+
+  /* Logo dans la navbar desktop */
+  @media (min-width: 769px) {
+    .logo {
+      position: static;
+      margin: 0;
+      filter: brightness(0) invert(1);
+    }
   }
 
   .logo a {
@@ -194,6 +224,13 @@
     z-index: 1001;
   }
 
+  /* Masquer le bouton hamburger sur desktop */
+  @media (min-width: 769px) {
+    .menu-button {
+      display: none;
+    }
+  }
+
   .menu-icon {
     width: 30px;
     height: 30px;
@@ -208,6 +245,88 @@
     align-items: center;
   }
 
+  /* Menu horizontal en haut de page pour desktop */
+  @media (min-width: 769px) {
+    nav {
+      display: flex !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      background: transparent !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 0.5rem 2rem !important;
+      z-index: 101 !important;
+      gap: 2rem !important;
+    }
+
+    .nav-links {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 2rem !important;
+      margin-left: auto !important;
+      margin-right: 2rem !important;
+    }
+
+    .nav-links > a {
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .nav-links > a:last-child {
+      margin-top: -1rem !important;
+    }
+
+    .dropdown-container {
+      display: inline-block !important;
+      position: relative !important;
+    }
+
+    .nav-link {
+      display: inline-block !important;
+      width: auto !important;
+      text-align: center !important;
+      padding: 0.5rem 1rem !important;
+      white-space: nowrap !important;
+    }
+
+    nav a:not(.nav-link) {
+      display: inline-block !important;
+      width: auto !important;
+      text-align: center !important;
+      padding: 0.5rem 1rem !important;
+      white-space: nowrap !important;
+    }
+
+    .dropdown {
+      position: absolute !important;
+      top: 100% !important;
+      left: 0 !important;
+      background: rgba(0, 0, 0, 0.9) !important;
+      backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 8px !important;
+      min-width: 200px !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateY(-10px) !important;
+      transition: all 0.3s ease !important;
+      z-index: 1000 !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .dropdown.active {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: translateY(0) !important;
+    }
+  }
+
   .dropdown-container {
     position: relative;
     display: inline-block;
@@ -215,7 +334,7 @@
 
   .nav-link {
     text-decoration: none;
-    color: #6c757d;
+    color: #ffffff;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     transition: all 0.3s ease;
@@ -228,9 +347,9 @@
     position: absolute;
     top: 100%;
     left: 0;
-    background: rgba(248, 249, 250, 0.95);
+    background: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(108, 117, 125, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     min-width: 200px;
     opacity: 0;
@@ -238,7 +357,7 @@
     transform: translateY(-10px);
     transition: all 0.3s ease;
     z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
 
   .dropdown.active {
@@ -250,7 +369,7 @@
   .dropdown a {
     display: block;
     padding: 0.75rem 1rem;
-    color: #6c757d;
+    color: #ffffff;
     text-decoration: none;
     transition: all 0.3s ease;
   }
@@ -259,10 +378,30 @@
     border-bottom: none;
   }
 
+  /* Styles pour les icônes SVG */
+  .nav-icon {
+    height: 2rem;
+    width: auto;
+    filter: brightness(0) invert(1);
+    transition: transform 0.2s ease;
+  }
+
+  .nav-icon:hover {
+    transform: scale(1.05);
+  }
+
+  .dropdown-icon {
+    height: 1.5rem;
+    width: auto;
+    filter: brightness(0) invert(1);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
 
   nav a:not(.nav-link) {
     text-decoration: none;
-    color: #6c757d;
+    color: #ffffff;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     transition: all 0.3s ease;
@@ -271,22 +410,65 @@
 
   main {
     flex: 1;
+    margin-top: 4rem;
+    padding-top: 0;
+  }
+
+  /* Page d'accueil sans margin-top */
+  :global(body:has(.hero)) main {
+    margin-top: 0;
+  }
+
+  /* Icônes noires sur la page d'accueil */
+  :global(body:has(.hero)) .nav-icon {
+    filter: brightness(0) invert(0) !important;
   }
 
   .footer {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     color: #495057;
-    padding: 1rem 0 0.3rem;
+    padding: 0;
     border-top: 1px solid rgba(108, 117, 125, 0.2);
+    width: 100%;
+    margin-top: auto;
   }
 
   .footer-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 2rem;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    padding: 0.25rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    color: #495057;
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: color 0.2s ease;
+  }
+
+  .footer-links a:hover {
+    color: #007bff;
+  }
+
+  .footer-info {
+    text-align: right;
+  }
+
+  .footer-info p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: #6c757d;
   }
 
   .footer-section h3 {
@@ -480,7 +662,7 @@
     }
 
     main {
-      margin-top: 0;
+      margin-top: 4rem;
       padding-top: 0;
     }
   }
