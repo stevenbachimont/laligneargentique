@@ -25,6 +25,10 @@
   function closeDropdown() {
     activeDropdown = null;
   }
+
+  function closeMenu() {
+    isMenuOpen = false;
+  }
 </script>
 
 <div class="container">
@@ -37,21 +41,25 @@
       </div>
     {/if}
     <button class="menu-button" on:click={toggleMenu} aria-label="Menu">
-      <span class="hamburger" class:open={isMenuOpen}></span>
+      {#if isMenuOpen}
+        <img src="/utils/ouvert.svg" alt="Fermer le menu" class="menu-icon" />
+      {:else}
+        <img src="/utils/ferme.svg" alt="Ouvrir le menu" class="menu-icon" />
+      {/if}
     </button>
     <nav class:open={isMenuOpen}>
 
       <!-- Menu Photographie -->
       <div class="dropdown-container">
-        <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
+        <a href="/photographie" class="nav-link" on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown} on:click={closeMenu}>
           Découvrir
         </a>
         <div class="dropdown" class:active={activeDropdown === 'photographie'} on:mouseenter={() => toggleDropdown('photographie')} on:mouseleave={closeDropdown}>
-          <a href="/photographie/argentique" on:click={() => isMenuOpen = false}>Réserver une balade</a>
-          <a href="/photographie/galeriePhoto" on:click={() => isMenuOpen = false}>Galerie Photos</a>
+          <a href="/photographie/argentique" on:click={closeMenu}>Réserver une balade</a>
+          <a href="/photographie/galeriePhoto" on:click={closeMenu}>Galerie Photos</a>
         </div>
       </div>
-      <a href="/contact" on:click={() => isMenuOpen = false}>Contact</a>
+      <a href="/contact" on:click={closeMenu}>Contact</a>
     </nav>
   </header>
 
@@ -183,49 +191,13 @@
     border: none;
     cursor: pointer;
     padding: 0.5rem;
-    z-index: 101;
+    z-index: 1001;
   }
 
-  .hamburger {
-    display: block;
-    width: 25px;
-    height: 2px;
-    background-color: var(--color-text);
-    position: relative;
+  .menu-icon {
+    width: 30px;
+    height: 30px;
     transition: all 0.3s ease;
-  }
-
-  .hamburger::before,
-  .hamburger::after {
-    content: '';
-    position: absolute;
-    width: 25px;
-    height: 2px;
-    background-color: var(--color-text);
-    transition: all 0.3s ease;
-    left: 0;
-  }
-
-  .hamburger::before {
-    top: -8px;
-  }
-
-  .hamburger::after {
-    bottom: -8px;
-  }
-
-  .hamburger.open {
-    background-color: transparent;
-  }
-
-  .hamburger.open::before {
-    transform: rotate(45deg);
-    top: 0;
-  }
-
-  .hamburger.open::after {
-    transform: rotate(-45deg);
-    bottom: 0;
   }
 
   nav {
@@ -251,10 +223,6 @@
     cursor: pointer;
   }
 
-  .nav-link:hover {
-    color: #495057;
-    background-color: rgba(108, 117, 125, 0.1);
-  }
 
   .dropdown {
     position: absolute;
@@ -285,17 +253,12 @@
     color: #6c757d;
     text-decoration: none;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(108, 117, 125, 0.1);
   }
 
   .dropdown a:last-child {
     border-bottom: none;
   }
 
-  .dropdown a:hover {
-    background: rgba(108, 117, 125, 0.1);
-    color: #495057;
-  }
 
   nav a:not(.nav-link) {
     text-decoration: none;
@@ -305,10 +268,6 @@
     transition: all 0.3s ease;
   }
 
-  nav a:not(.nav-link):hover {
-    color: #495057;
-    background-color: rgba(108, 117, 125, 0.1);
-  }
 
   main {
     flex: 1;
@@ -492,24 +451,55 @@
   }
 
   @media (max-width: 768px) {
+    header {
+      background-color: transparent;
+      backdrop-filter: none;
+      border-bottom: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      filter: brightness(0) invert(1);
+    }
+
     .menu-button {
       display: block;
     }
 
+    .menu-icon {
+      filter: brightness(0) invert(1);
+    }
+
+    /* Icône noire sur la page d'accueil */
+    :global(body:has(.hero)) .menu-icon {
+      filter: brightness(0) invert(0);
+    }
+
+    main {
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+
     nav {
       position: fixed;
       top: 0;
-      right: -100%;
-      width: 100vw;
+      right: 100%;
+      width: 90%;
       height: 100vh;
-      background: #000 !important;
-      background-color: #000 !important;
+      background: #c0c0c0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       flex-direction: column;
       justify-content: center;
+      align-items: center;
       transition: right 0.3s ease;
       padding: 2rem;
-      overflow-x: hidden;
-      box-sizing: border-box;
+      z-index: 1000;
     }
 
     nav.open {
@@ -518,14 +508,17 @@
 
     .dropdown-container {
       width: 100%;
+      margin-bottom: 1rem;
     }
 
     .nav-link {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: 400;
       padding: 1rem;
       width: 100%;
       text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #000000;
+      display: block;
     }
 
     .dropdown {
@@ -533,35 +526,34 @@
       opacity: 1;
       visibility: visible;
       transform: none;
-      background: rgba(255, 255, 255, 0.05);
+      background: transparent;
       border: none;
       border-radius: 0;
       box-shadow: none;
-      margin-left: 1rem;
-      margin-bottom: 1rem;
+      margin: 0;
+      padding: 0;
     }
 
     .dropdown a {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
+      font-weight: 400;
       padding: 0.8rem 1rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #000000;
+      display: block;
+      text-align: center;
     }
 
     nav a:not(.nav-link) {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: 400;
       padding: 1rem;
       width: 100%;
       text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #000000;
+      display: block;
     }
 
-    :global(body) {
-      overflow-x: hidden !important;
-    }
-  }
-
-  /* Footer responsive */
-  @media (max-width: 768px) {
+    /* Footer responsive */
     .footer {
       padding: 0.8rem 0 0.3rem;
     }
@@ -612,9 +604,8 @@
     .footer-bottom-content {
       padding: 0 1rem;
     }
-  }
 
-  @media (max-width: 480px) {
+    @media (max-width: 480px) {
     .footer-content {
       gap: 1.2rem;
     }
